@@ -1,0 +1,53 @@
+// /prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String   @db.VarChar(255)
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  
+  guides    Guide[]
+}
+
+model Guide {
+  id        Int      @id // Corrected: You will provide the ID, so it's not auto-incrementing.
+  title     String
+  category  String?
+  expansion String?
+  is_route  Boolean  @default(false)
+  
+  description            String? @db.Text
+  steps                  String? @db.Text // Corrected: Storing as Text (will hold JSON string)
+  addons                 String? @db.Text // Corrected: Storing as Text (will hold JSON string)
+  
+  thumbnail_url          String? @db.VarChar(1024)
+  map_image_path         String? @db.VarChar(1024)
+  video_thumbnail_path   String? @db.VarChar(1024)
+  youtube_video_id       String?
+  
+  time_to_complete       String?
+  recommended_class      String?
+  required_items         String? @db.Text
+  gold_pr_hour           String?
+  
+  tsm_import_string      String? @db.Text
+  gathermate2_string     String? @db.Text
+  
+  // Relationship to the User who created it
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
