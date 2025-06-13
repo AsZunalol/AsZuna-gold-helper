@@ -112,7 +112,7 @@ export default function Header() {
         <div className="user-menu-container">
           <div className="user-menu-trigger">
             {personIcon}
-            <span>{session ? session.user.name : "Account"}</span>
+            <span>{session ? session.user.name : "Login"}</span>
           </div>
 
           <div className="user-dropdown">
