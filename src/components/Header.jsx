@@ -7,18 +7,17 @@ import { useAuthModal } from "@/context/AuthModalContext";
 
 export default function Header() {
   const { data: session, status } = useSession();
-  const { openModal } = useAuthModal(); // Get the function to open the modal
+  const { openModal } = useAuthModal();
   const pathname = usePathname();
 
   const isActive = (path) => {
-    // This correctly highlights "All Guides" even on a single guide page
     if (path === "/guides" && pathname.startsWith("/guide")) {
       return true;
     }
     return pathname === path;
   };
 
-  // Icons for the user menu
+  // --- All your SVG icons can remain as they are ---
   const personIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -119,7 +118,6 @@ export default function Header() {
             {status === "loading" ? (
               <p>Loading...</p>
             ) : session ? (
-              // If user is logged in
               <>
                 <Link href="/profile">
                   {profileIcon}

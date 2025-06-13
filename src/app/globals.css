@@ -1,6 +1,6 @@
 /* ===================================================================================
 //
-//  AsZuna's Gold Helper - Main Stylesheet (Definitive Final Version)
+//  AsZuna's Gold Helper - Main Stylesheet (Corrected for Particle Background)
 //
 // ===================================================================================
 */
@@ -35,22 +35,32 @@
 body {
   font-family: var(--font-body);
   margin: 0;
-  background-color: transparent; /* This makes the body see-through */
+  background-color: var(
+    --color-background
+  ); /* The main background color goes here */
   color: var(--color-text-main);
   line-height: 1.7;
 }
 
-main {
-  padding-top: -80px; /* Space for fixed header */
+/* --- Particle Canvas Styling (The Fix) --- */
+#tsparticles {
+  position: fixed; /* Keep it fixed to the viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Place it above the body background but below all other content */
 }
 
-/* This wrapper holds all scrollable content */
+/* --- Main Content Wrapper --- */
 .content-wrapper {
-  position: relative;
-  z-index: 1; /* This ensures it's above the particles */
-  background-color: var(
-    --color-background
-  ); /* Apply the background color here */
+  position: relative; /* This is crucial for stacking */
+  z-index: 1; /* This ensures all content is above the particles */
+  background-color: transparent; /* The wrapper itself should be see-through */
+}
+
+main {
+  padding-top: 80px; /* Restore padding for the fixed header */
 }
 
 /* --- General Content Styles --- */
@@ -82,11 +92,11 @@ a:hover {
 
 /* --- Header & Footer --- */
 header {
-  position: fixed; /* Changed back to fixed for proper layering */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000; /* A high z-index keeps it on top */
+  z-index: 1000;
   background-color: rgba(22, 27, 34, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -100,12 +110,9 @@ header {
 }
 
 nav {
-  /* These three lines are the fix for perfect centering */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-
-  /* These styles remain the same */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -140,8 +147,6 @@ footer {
   padding: 3rem 2rem;
   margin-top: 4rem;
   color: var(--color-text-secondary);
-
-  /* These styles match your header for the glass effect */
   background-color: rgba(22, 27, 34, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -190,11 +195,10 @@ footer {
   color: var(--color-primary);
 }
 
-/* This is the corrected block for the social icons */
 .footer-socials ul {
   display: flex;
   align-items: center;
-  gap: 1.25rem; /* The space between each icon */
+  gap: 1.25rem;
 }
 
 .footer-socials a {
@@ -202,21 +206,18 @@ footer {
   transition: transform 0.2s ease;
 }
 
-/* This targets the Image component inside the link */
 .footer-socials a img {
-  /* This filter forces the icon (assumed black) to become pure white */
   filter: brightness(0) invert(1);
-  opacity: 0.7; /* Start slightly transparent for a nice effect */
+  opacity: 0.7;
   transition: all 0.2s ease;
 }
 
 .footer-socials a:hover img {
-  opacity: 1; /* Become fully opaque on hover */
-  transform: translateY(-2px) scale(1.1); /* Lift and grow slightly */
-
-  /* This adds a cool glow effect in your primary color on hover */
+  opacity: 1;
+  transform: translateY(-2px) scale(1.1);
   filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--color-primary));
 }
+
 /* --- Homepage Redesign --- */
 .hero {
   position: relative;
@@ -225,10 +226,11 @@ footer {
   justify-content: center;
   min-height: 90vh;
   padding: 2rem;
-  margin-top: 30px; /* Pulls the section up behind the header */
+  margin-top: -80px; /* This pulls the hero up into the padded space */
   color: white;
   text-align: center;
   overflow: hidden;
+  background-color: transparent; /* The hero section itself should be see-through */
 }
 
 /* This ::before pseudo-element holds your background image */
@@ -241,17 +243,8 @@ footer {
   height: 100%;
   background-image: url("/images/hero-background.jpg");
   background-size: cover;
-  background-position: center;
-  z-index: 1; /* Sits at the very back of the hero */
-}
-
-#tsparticles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1; /* This places it behind the content-wrapper */
+  background-position: center 40%; /* This is the line we'll change */
+  z-index: -2;
 }
 
 /* This ::after pseudo-element creates the smooth fade */
@@ -262,20 +255,17 @@ footer {
   left: 0;
   width: 100%;
   height: 100%;
-  /* This gradient darkens the image/particles AND fades it out at the bottom */
   background: linear-gradient(
     to bottom,
     rgba(13, 17, 23, 0.7) 40%,
-    /* This is the "dimming" effect */ var(--color-background) 95%
-      /* This creates the smooth fade */
+    var(--color-background) 95%
   );
-  z-index: 3; /* Sits on top of the particles */
+  z-index: -1; /* Sits on top of the image */
 }
 
-/* This ensures your text and button sit on the very top layer */
 .hero-content {
   position: relative;
-  z-index: 4; /* Highest z-index */
+  z-index: 2; /* Text and buttons on top */
   max-width: 800px;
 }
 
@@ -350,14 +340,15 @@ footer {
 }
 
 .feature-section {
-  padding: 9rem 2rem;
+  padding: 4rem 2rem; /* Adjusted padding */
   position: relative;
-  z-index: 2; /* Ensures it sits on top of the hero background */
-  text-align: center; /* This will center the CTA button */
-
-  /* This new, larger negative margin pulls the button up higher */
-  margin-top: -7rem;
+  z-index: 2;
+  text-align: center;
+  background-color: var(
+    --color-background
+  ); /* Ensure sections below hero have the bg color */
 }
+
 .section-title {
   text-align: center;
   margin-bottom: 3rem;
@@ -401,7 +392,7 @@ footer {
   margin: 0;
 }
 
-/* --- All Guides & Routes Pages --- */
+/* --- Guides Grid --- */
 .guides-grid-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -457,7 +448,7 @@ footer {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-/* --- All other component styles --- */
+/* --- Admin Form --- */
 .form-container {
   max-width: 500px;
   margin: 5rem auto 0 auto;
@@ -482,9 +473,8 @@ footer {
 }
 
 /* --- USER DROPDOWN MENU STYLES --- */
-
 .user-menu-container {
-  position: relative; /* This is the anchor for the dropdown */
+  position: relative;
 }
 
 .user-menu-trigger {
@@ -508,7 +498,7 @@ footer {
 
 .user-dropdown {
   position: absolute;
-  top: 110%; /* Position it just below the trigger */
+  top: 110%;
   right: 0;
   background-color: var(--color-surface);
   border-radius: 8px;
@@ -517,15 +507,12 @@ footer {
   width: 200px;
   padding: 0.5rem;
   z-index: 1100;
-
-  /* Hide the dropdown by default */
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
 
-/* Show the dropdown on hover */
 .user-menu-container:hover .user-dropdown {
   opacity: 1;
   visibility: visible;
@@ -553,7 +540,7 @@ footer {
   margin: 0.5rem 0;
 }
 
-/* --- Auth Modal Styles --- */
+/* --- Auth Modal Styles (Modernized) --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -561,14 +548,14 @@ footer {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px); /* Add a blur effect to the background */
+  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  opacity: 0; /* Start hidden for transition */
-  animation: fadeIn 0.3s ease forwards; /* Fade in animation */
+  opacity: 0;
+  animation: fadeIn 0.3s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -587,8 +574,8 @@ footer {
   max-width: 450px;
   width: 90%;
   z-index: 2001;
-  transform: scale(0.95); /* Start slightly smaller for transition */
-  animation: scaleIn 0.3s ease forwards; /* Scale in animation */
+  transform: scale(0.95);
+  animation: scaleIn 0.3s ease forwards;
 }
 
 @keyframes scaleIn {
@@ -654,7 +641,7 @@ footer {
 }
 
 .form-button {
-  position: relative; /* Needed for the glow effect */
+  position: relative;
   width: 100%;
   padding: 0.85rem;
   background: linear-gradient(180deg, #33ffbb, var(--color-primary));
