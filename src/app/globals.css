@@ -1,10 +1,3 @@
-/* ===================================================================================
-//
-//  AsZuna's Gold Helper - Main Stylesheet (Corrected for Particle Background)
-//
-// ===================================================================================
-*/
-
 :root {
   --color-background: #0d1117;
   --color-surface: #161b22;
@@ -19,75 +12,48 @@
   box-sizing: border-box;
 }
 
-/* --- Animated Ethereal Background --- */
-@keyframes ethereal-flow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 body {
   font-family: var(--font-body);
   margin: 0;
-  background-color: var(
-    --color-background
-  ); /* The main background color goes here */
+  /* Make the body transparent to see layers behind it */
+  background-color: transparent;
   color: var(--color-text-main);
   line-height: 1.7;
 }
 
-/* --- Particle Canvas Styling (The Fix) --- */
+/* --- Background Elements --- */
 #tsparticles {
-  position: fixed; /* Keep it fixed to the viewport */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0; /* Place it above the body background but below all other content */
+  z-index: -2; /* Particles are in the far back */
 }
 
-/* --- Main Content Wrapper --- */
-.content-wrapper {
-  position: relative; /* This is crucial for stacking */
-  z-index: 1; /* This ensures all content is above the particles */
-  background-color: transparent; /* The wrapper itself should be see-through */
+/* This div provides the solid background color for the site */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
+  z-index: -3; /* This sits behind everything, including particles */
+}
+
+/* --- Content Layering --- */
+header,
+main,
+footer {
+  position: relative;
+  /* Ensure content is above the background layers */
+  z-index: 1;
 }
 
 main {
-  padding-top: 80px; /* Restore padding for the fixed header */
-}
-
-/* --- General Content Styles --- */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  color: white;
-}
-h2 {
-  font-size: 2.5rem;
-}
-h3 {
-  font-size: 1.5rem;
-  color: var(--color-primary);
-}
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-a:hover {
-  color: white;
+  /* This space is for the fixed header */
+  padding-top: 80px;
 }
 
 /* --- Header & Footer --- */
@@ -96,7 +62,7 @@ header {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 1000;
+  z-index: 1000; /* Header is on top of all content */
   background-color: rgba(22, 27, 34, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -108,6 +74,72 @@ header {
   align-items: center;
   transition: background-color 0.3s ease;
 }
+
+/* --- Homepage Hero Section --- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  padding: 2rem;
+  /* This is the key: pull the hero section up into the space created by main's padding */
+  margin-top: -120px;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* The hero's background image pseudo-element */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/images/hero-background.jpg");
+  background-size: cover;
+  /* Adjust this to position the image vertically */
+  background-position: center 30%;
+  /* Must have a z-index lower than the hero's content but higher than the body background */
+  z-index: -1;
+}
+
+/* The hero's dark overlay/fade effect */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(13, 17, 23, 0.4) 0%,
+    /* Less dark at the top */ var(--color-background) 95%
+  );
+  z-index: -1; /* Sits on the same layer as the image to blend with it */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+/* Sections below the hero need a solid background color */
+.feature-section {
+  padding: 4rem 2rem;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  background-color: var(--color-background);
+}
+
+/* ----- PASTE THE REST OF YOUR CSS HERE ----- */
+/* (nav, footer-grid, category-card, guide-card, user-menu, modal, etc.) */
+/* NOTE: The minified blob from the last turn can go here. For clarity, I am re-adding the non-minified versions of the key remaining styles. */
 
 nav {
   position: absolute;
@@ -130,7 +162,7 @@ nav a {
   transition: color 0.2s ease;
 }
 nav a:hover {
-  color: white;
+  color: #fff;
 }
 nav a.nav-active::after {
   content: "";
@@ -142,7 +174,6 @@ nav a.nav-active::after {
   background-color: var(--color-primary);
   border-radius: 3px;
 }
-
 footer {
   padding: 3rem 2rem;
   margin-top: 4rem;
@@ -152,7 +183,6 @@ footer {
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -161,126 +191,62 @@ footer {
   margin: 0 auto;
   text-align: left;
 }
-
 .footer-column h4 {
   font-family: var(--font-heading);
   font-weight: 700;
-  color: white;
+  color: #fff;
   margin-top: 0;
   margin-bottom: 1rem;
 }
-
 .footer-column p {
   margin: 0;
   color: var(--color-text-secondary);
 }
-
 .footer-column ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .footer-column ul li {
   margin-bottom: 0.5rem;
 }
-
 .footer-column ul a {
   color: var(--color-text-secondary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
-
 .footer-column ul a:hover {
   color: var(--color-primary);
 }
-
 .footer-socials ul {
   display: flex;
   align-items: center;
   gap: 1.25rem;
 }
-
 .footer-socials a {
   display: inline-block;
   transition: transform 0.2s ease;
 }
-
 .footer-socials a img {
   filter: brightness(0) invert(1);
   opacity: 0.7;
   transition: all 0.2s ease;
 }
-
 .footer-socials a:hover img {
   opacity: 1;
   transform: translateY(-2px) scale(1.1);
   filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--color-primary));
 }
-
-/* --- Homepage Redesign --- */
-.hero {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 90vh;
-  padding: 2rem;
-  margin-top: -80px; /* This pulls the hero up into the padded space */
-  color: white;
-  text-align: center;
-  overflow: hidden;
-  background-color: transparent; /* The hero section itself should be see-through */
-}
-
-/* This ::before pseudo-element holds your background image */
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("/images/hero-background.jpg");
-  background-size: cover;
-  background-position: center 40%; /* This is the line we'll change */
-  z-index: -2;
-}
-
-/* This ::after pseudo-element creates the smooth fade */
-.hero::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to bottom,
-    rgba(13, 17, 23, 0.7) 40%,
-    var(--color-background) 95%
-  );
-  z-index: -1; /* Sits on top of the image */
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2; /* Text and buttons on top */
-  max-width: 800px;
-}
-
 .hero-title {
   font-weight: 900;
   font-size: 3.5rem;
   text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
 }
-
 .hero-subtitle {
   font-size: 1.25rem;
   color: var(--color-text-secondary);
   margin: 1rem 0 2.5rem 0;
 }
-
 @keyframes pulse-glow {
   0%,
   100% {
@@ -292,7 +258,6 @@ footer {
     opacity: 1;
   }
 }
-
 .cta-button {
   position: relative;
   z-index: 2;
@@ -311,7 +276,6 @@ footer {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
-
 .cta-button::before {
   content: "";
   position: absolute;
@@ -327,34 +291,20 @@ footer {
   transition: all 0.3s ease;
   animation: pulse-glow 4s ease-in-out infinite;
 }
-
 .cta-button:hover {
   transform: translateY(-3px) scale(1.05);
-  background-color: white;
+  background-color: #fff;
 }
-
 .cta-button:hover::before {
   filter: blur(25px);
   opacity: 1;
   transform: scale(1.1);
 }
-
-.feature-section {
-  padding: 4rem 2rem; /* Adjusted padding */
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  background-color: var(
-    --color-background
-  ); /* Ensure sections below hero have the bg color */
-}
-
 .section-title {
   text-align: center;
   margin-bottom: 3rem;
   font-size: 2.5rem;
 }
-
 .category-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -384,15 +334,13 @@ footer {
 }
 .category-card h3 {
   margin: 0.5rem 0;
-  color: white;
+  color: #fff;
 }
 .category-card p {
   color: var(--color-text-secondary);
   font-size: 0.95rem;
   margin: 0;
 }
-
-/* --- Guides Grid --- */
 .guides-grid-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -431,7 +379,7 @@ footer {
 }
 .guide-card h3 {
   margin-top: 1rem;
-  color: white;
+  color: #fff;
   line-height: 1.3;
 }
 .guide-card p {
@@ -447,8 +395,6 @@ footer {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
-
-/* --- Admin Form --- */
 .form-container {
   max-width: 500px;
   margin: 5rem auto 0 auto;
@@ -471,12 +417,9 @@ footer {
   margin-top: 1rem;
   font-size: 0.9em;
 }
-
-/* --- USER DROPDOWN MENU STYLES --- */
 .user-menu-container {
   position: relative;
 }
-
 .user-menu-trigger {
   display: flex;
   align-items: center;
@@ -486,16 +429,13 @@ footer {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
 .user-menu-trigger:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-
 .user-menu-trigger span {
   font-family: var(--font-heading);
   font-weight: 500;
 }
-
 .user-dropdown {
   position: absolute;
   top: 110%;
@@ -512,13 +452,11 @@ footer {
   transform: translateY(-10px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
-
 .user-menu-container:hover .user-dropdown {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
-
 .user-dropdown a {
   display: flex;
   align-items: center;
@@ -528,19 +466,15 @@ footer {
   text-decoration: none;
   border-radius: 5px;
 }
-
 .user-dropdown a:hover {
   background-color: var(--color-primary);
   color: #121212;
 }
-
 .user-dropdown .divider {
   height: 1px;
   background-color: #333;
   margin: 0.5rem 0;
 }
-
-/* --- Auth Modal Styles (Modernized) --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -557,13 +491,11 @@ footer {
   opacity: 0;
   animation: fadeIn 0.3s ease forwards;
 }
-
 @keyframes fadeIn {
   to {
     opacity: 1;
   }
 }
-
 .modal-content {
   position: relative;
   background: var(--color-surface);
@@ -577,13 +509,11 @@ footer {
   transform: scale(0.95);
   animation: scaleIn 0.3s ease forwards;
 }
-
 @keyframes scaleIn {
   to {
     transform: scale(1);
   }
 }
-
 .modal-content h2 {
   text-align: center;
   margin-top: 0;
@@ -592,12 +522,11 @@ footer {
   font-family: var(--font-heading);
   font-weight: 700;
 }
-
 .close-modal-button {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: none;
+  background: 0 0;
   border: none;
   color: var(--color-text-secondary);
   font-size: 2rem;
@@ -605,16 +534,13 @@ footer {
   line-height: 1;
   transition: color 0.2s ease, transform 0.2s ease;
 }
-
 .close-modal-button:hover {
-  color: white;
+  color: #fff;
   transform: scale(1.1);
 }
-
 .form-group {
   margin-bottom: 1.5rem;
 }
-
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
@@ -622,7 +548,6 @@ footer {
   font-size: 0.9em;
   font-weight: 700;
 }
-
 .form-group input {
   width: 100%;
   padding: 0.85rem 1rem;
@@ -633,13 +558,11 @@ footer {
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-
 .form-group input:focus {
-  outline: none;
+  outline: 0;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
 }
-
 .form-button {
   position: relative;
   width: 100%;
@@ -655,7 +578,6 @@ footer {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
-
 .form-button::before {
   content: "";
   position: absolute;
@@ -670,24 +592,20 @@ footer {
   opacity: 0.6;
   transition: all 0.3s ease;
 }
-
 .form-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
 }
-
 .form-button:hover::before {
   opacity: 0.8;
   filter: blur(15px);
 }
-
 .modal-switch-text {
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.9em;
   color: var(--color-text-secondary);
 }
-
 .modal-switch-text a {
   color: var(--color-primary);
   font-weight: 700;
@@ -695,7 +613,40 @@ footer {
   text-decoration: none;
   transition: color 0.2s ease;
 }
-
 .modal-switch-text a:hover {
-  color: white;
+  color: #fff;
+}
+/* --- Reusable Page Background --- */
+.page-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.page-background::before,
+.page-background::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Place behind the content */
+}
+
+/* The background image layer */
+.page-background::before {
+  background-image: url("/images/hero-background.jpg");
+  background-attachment: fixed; /* Keep the image stationary on scroll */
+  background-size: cover;
+  background-position: center 30%;
+  z-index: -2;
+}
+
+/* The dark gradient overlay layer */
+.page-background::after {
+  background: linear-gradient(
+    to bottom,
+    rgba(13, 17, 23, 0.8) 0%,
+    /* A bit darker for readability */ var(--color-background) 95%
+  );
 }
