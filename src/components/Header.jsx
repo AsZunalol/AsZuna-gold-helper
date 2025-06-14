@@ -11,13 +11,14 @@ export default function Header() {
   const pathname = usePathname();
 
   const isActive = (path) => {
+    // This logic makes sure "All Guides" stays active even on a single guide page
     if (path === "/guides" && pathname.startsWith("/guide")) {
       return true;
     }
     return pathname === path;
   };
 
-  // --- All your SVG icons can remain as they are ---
+  // SVG icons
   const personIcon = (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +82,7 @@ export default function Header() {
 
   return (
     <header>
-      <div className="header-left">{/* Your Logo can go here */}</div>
+      <div className="header-left">{/* Logo can go here */}</div>
 
       <nav>
         <Link href="/" className={isActive("/") ? "nav-active" : ""}>
@@ -103,8 +104,20 @@ export default function Header() {
 
       <div className="header-right">
         {session?.user.role === "ADMIN" && (
-          <Link href="/admin" className="nav-button">
-            Create Content
+          <Link
+            href="/admin/create-guide"
+            className="nav-button"
+            style={{
+              marginRight: "1rem",
+              padding: "0.5rem 1rem",
+              backgroundColor: "var(--color-primary)",
+              color: "#121212",
+              borderRadius: "5px",
+              fontWeight: "700",
+              textDecoration: "none",
+            }}
+          >
+            Create Guide
           </Link>
         )}
 
@@ -116,7 +129,7 @@ export default function Header() {
 
           <div className="user-dropdown">
             {status === "loading" ? (
-              <p>Loading...</p>
+              <p style={{ padding: "0.75rem 1rem" }}>Loading...</p>
             ) : session ? (
               <>
                 <Link href="/profile">
@@ -136,7 +149,6 @@ export default function Header() {
                 </a>
               </>
             ) : (
-              // If user is logged out
               <>
                 <a
                   href="#"
