@@ -5,12 +5,11 @@
 //  TABLE OF CONTENTS
 //  1.  Root & Global Styles
 //  2.  Layout (Header, Footer, Main)
-//  3.  Reusable Components (Buttons, Cards)
-//  4.  Page-Specific Styles (Homepage, Guides)
-//  5.  Admin & Form Styles
-//  6.  UI Components (Modals, Dropdowns)
-//  7.  Tiptap Editor & Step Manager
-//  8.  Animations & Utilities
+//  3.  Page-Specific Styles (Homepage, Admin)
+//  4.  Reusable Components (Buttons, Cards)
+//  5.  UI Components (Modals, Dropdowns, Pills, etc.)
+//  6.  Tiptap Editor & Content Management
+//  7.  Animations & Utilities
 //
 // =================================================================================== */
 
@@ -64,7 +63,6 @@ a {
   text-decoration: none;
   transition: color 0.2s ease;
 }
-
 a:hover {
   color: white;
 }
@@ -96,7 +94,7 @@ header {
 }
 
 main {
-  padding-top: 80px; /* Space for fixed header */
+  padding-top: 80px;
 }
 
 nav {
@@ -106,7 +104,6 @@ nav {
   display: flex;
   gap: 1rem;
 }
-
 nav a {
   display: flex;
   align-items: center;
@@ -115,7 +112,6 @@ nav a {
   color: var(--color-text-secondary);
   position: relative;
 }
-
 nav a.nav-active::after {
   content: "";
   position: absolute;
@@ -134,7 +130,6 @@ footer {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-bottom: none;
 }
-
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -142,33 +137,27 @@ footer {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 .footer-column h4 {
   color: white;
   margin: 0 0 1rem;
 }
-
 .footer-column ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .footer-column ul li {
   margin-bottom: 0.5rem;
 }
-
 .footer-socials ul {
   display: flex;
   gap: 1.25rem;
 }
-
 .footer-socials a img {
   filter: brightness(0) invert(1);
   opacity: 0.7;
   transition: all 0.2s ease;
 }
-
 .footer-socials a:hover img {
   opacity: 1;
   transform: translateY(-2px) scale(1.1);
@@ -176,10 +165,131 @@ footer {
 }
 
 /* ==========================================================================
-   3. REUSABLE COMPONENTS (BUTTONS, CARDS)
+   3. PAGE-SPECIFIC STYLES (HOMEPAGE, ADMIN)
    ========================================================================== */
 
-/* Main Call-to-Action Button */
+/* --- Homepage --- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90vh;
+  padding: 2rem;
+  margin-top: -80px;
+  color: white;
+  text-align: center;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/images/hero-background.jpg") center 40% / cover;
+  z-index: -2;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(13, 17, 23, 0.7) 40%,
+    var(--color-background) 95%
+  );
+  z-index: -1;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+.hero-title {
+  font-weight: 900;
+  font-size: 3.5rem;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+}
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+  margin: 1rem 0 2.5rem 0;
+}
+.feature-section {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.section-title {
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+}
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.guides-grid-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* --- Admin Pages --- */
+.page-container {
+  padding: 2rem;
+}
+.glass-panel {
+  background-color: rgba(22, 27, 34, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+.admin-page-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+@media (min-width: 1024px) {
+  .admin-page-layout {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+.main-content-col,
+.sidebar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.sidebar-card {
+  background-color: var(--color-surface);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+.sidebar-card h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.75rem;
+}
+
+/* ==========================================================================
+   4. REUSABLE COMPONENTS (BUTTONS, CARDS)
+   ========================================================================== */
+
+/* --- Buttons --- */
 .cta-button {
   position: relative;
   z-index: 1;
@@ -197,7 +307,6 @@ footer {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
-
 .cta-button::before {
   content: "";
   position: absolute;
@@ -210,219 +319,15 @@ footer {
   transition: all 0.3s ease;
   animation: pulse-glow 4s ease-in-out infinite;
 }
-
 .cta-button:hover {
   transform: translateY(-3px) scale(1.05);
   background-color: white;
 }
-
 .cta-button:hover::before {
   filter: blur(25px);
   opacity: 1;
   transform: scale(1.1);
 }
-
-/* Category Card (Homepage) */
-.category-card {
-  background-color: var(--color-surface);
-  border: 1px solid #282828;
-  border-radius: 8px;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.category-card:hover {
-  transform: translateY(-5px);
-  background-color: #252525;
-  border-color: var(--color-primary);
-}
-
-.category-card svg {
-  width: 48px;
-  height: 48px;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
-}
-
-/* Guide Card (Guides Grid) */
-.guide-card {
-  background-color: var(--color-surface);
-  border: 1px solid #333;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.guide-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-}
-
-.guide-card-image-container {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  background-color: #0a0a0a;
-}
-
-.guide-card-content {
-  padding: 1.5rem;
-  flex-grow: 1;
-}
-
-.guide-card .category-tag {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 10;
-  font-size: 0.75em;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-}
-
-/* ==========================================================================
-   4. PAGE-SPECIFIC STYLES (HOMEPAGE, GUIDES)
-   ========================================================================== */
-
-/* --- Homepage --- */
-.hero {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 90vh;
-  padding: 2rem;
-  margin-top: -80px;
-  color: white;
-  text-align: center;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url("/images/hero-background.jpg") center 40% / cover;
-  z-index: -2;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(13, 17, 23, 0.7) 40%,
-    var(--color-background) 95%
-  );
-  z-index: -1;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-}
-
-.hero-title {
-  font-weight: 900;
-  font-size: 3.5rem;
-  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
-}
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--color-text-secondary);
-  margin: 1rem 0 2.5rem 0;
-}
-
-.feature-section {
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.section-title {
-  margin-bottom: 3rem;
-  font-size: 2.5rem;
-}
-
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* --- Guides Grid --- */
-.guides-grid-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.guides-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-/* ==========================================================================
-   5. ADMIN & FORM STYLES
-   ========================================================================== */
-
-.form-container {
-  max-width: 500px;
-  margin: 5rem auto 0;
-  padding: 2.5rem 3rem;
-  background-color: var(--color-surface);
-  border-radius: 8px;
-  border: 1px solid #282828;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.form-container h2 {
-  text-align: center;
-  margin: 0 0 2rem;
-  color: var(--color-primary);
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--color-text-secondary);
-  font-size: 0.9em;
-  font-weight: 700;
-}
-
-.form-group input,
-.select-field,
-.tag-input-field {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background-color: var(--color-background);
-  border: 1px solid #333;
-  border-radius: 5px;
-  color: var(--color-text-main);
-  font-size: 1rem;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input:focus,
-.select-field:focus,
-.tag-input-field:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
-}
-
 .form-button {
   position: relative;
   width: 100%;
@@ -435,32 +340,139 @@ footer {
   font-weight: 700;
   font-size: 1.1rem;
   cursor: pointer;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
-
-.form-button::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: var(--color-primary);
-  border-radius: 5px;
-  filter: blur(10px);
-  z-index: -1;
-  opacity: 0.6;
-  transition: all 0.3s ease;
-}
-
 .form-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
 }
-
-.form-button:hover::before {
-  opacity: 0.8;
-  filter: blur(15px);
+.form-button.secondary {
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  border-color: #333;
+}
+.form-button.secondary:hover {
+  background: #333;
+}
+.add-step-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px dashed var(--color-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background-color 0.2s, color 0.2s;
+}
+.add-step-button:hover {
+  background-color: var(--color-primary);
+  color: var(--color-background);
 }
 
+/* --- Cards --- */
+.category-card {
+  background-color: var(--color-surface);
+  border: 1px solid #282828;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+.category-card:hover {
+  transform: translateY(-5px);
+  background-color: #252525;
+  border-color: var(--color-primary);
+}
+.category-card svg {
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary);
+  margin-bottom: 1rem;
+}
+.guide-card {
+  background-color: var(--color-surface);
+  border: 1px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+.guide-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+.guide-card-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background-color: #0a0a0a;
+}
+.guide-card-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+.guide-card .category-tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  font-size: 0.75em;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   5. UI COMPONENTS (MODALS, DROPDOWNS, PILLS, ETC.)
+   ========================================================================== */
+
+/* --- Forms --- */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.sidebar-card .form-group {
+  margin-bottom: 1rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-secondary);
+  font-size: 0.9em;
+  font-weight: 700;
+}
+.form-group input:not([type="checkbox"]),
+.select-field,
+.tag-input-field,
+.modal-input,
+.modal-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-background);
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-group input:focus,
+.select-field:focus,
+.tag-input-field:focus,
+.modal-input:focus,
+.modal-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
+}
+.modal-textarea {
+  font-family: monospace;
+  resize: vertical;
+}
 .error-message {
   color: #ff6b6b;
   text-align: center;
@@ -469,11 +481,7 @@ footer {
   font-size: 0.9em;
 }
 
-/* ==========================================================================
-   6. UI COMPONENTS (MODALS, DROPDOWNS)
-   ========================================================================== */
-
-/* --- Auth Modal --- */
+/* --- Modals --- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -484,10 +492,8 @@ footer {
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  opacity: 0;
   animation: fadeIn 0.3s ease forwards;
 }
-
 .modal-content {
   position: relative;
   background: var(--color-surface);
@@ -498,10 +504,8 @@ footer {
   max-width: 450px;
   width: 90%;
   z-index: 2001;
-  transform: scale(0.95);
   animation: scaleIn 0.3s ease forwards;
 }
-
 .close-modal-button {
   position: absolute;
   top: 1rem;
@@ -518,7 +522,6 @@ footer {
   color: white;
   transform: scale(1.1);
 }
-
 .modal-switch-text {
   text-align: center;
   margin-top: 1.5rem;
@@ -533,7 +536,6 @@ footer {
 .user-menu-container {
   position: relative;
 }
-
 .user-menu-trigger {
   display: flex;
   align-items: center;
@@ -550,7 +552,6 @@ footer {
   font-family: var(--font-heading);
   font-weight: 500;
 }
-
 .user-dropdown {
   position: absolute;
   top: 110%;
@@ -567,13 +568,11 @@ footer {
   transform: translateY(-10px);
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
-
 .user-menu-container:hover .user-dropdown {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
-
 .user-dropdown a {
   display: flex;
   align-items: center;
@@ -582,26 +581,23 @@ footer {
   color: var(--color-text-secondary);
   border-radius: 5px;
 }
-
 .user-dropdown a:hover {
   background-color: var(--color-primary);
   color: #121212;
 }
-
 .user-dropdown .divider {
   height: 1px;
   background-color: #333;
   margin: 0.5rem 0;
 }
 
-/* --- Tag & Class Pills --- */
+/* --- Tag, Class & Image Pills/Managers --- */
 .tag-input-container,
 .multi-select-container {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
-
 .tags-display,
 .pills-display {
   display: flex;
@@ -615,7 +611,6 @@ footer {
   border-radius: 5px;
   background-color: var(--color-background);
 }
-
 .tag-pill,
 .class-pill {
   display: flex;
@@ -634,7 +629,6 @@ footer {
   color: #121212;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
-
 .remove-tag-button,
 .remove-pill-button {
   background: none;
@@ -657,7 +651,6 @@ footer {
   opacity: 1;
 }
 
-/* --- Tag Suggestions Dropdown --- */
 .suggestions-dropdown {
   position: absolute;
   width: 100%;
@@ -669,30 +662,28 @@ footer {
   max-height: 200px;
   overflow-y: auto;
 }
-
 .suggestion-item {
   padding: 0.75rem 1rem;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
-
 .suggestion-item:hover {
   background-color: var(--color-primary);
   color: var(--color-background);
 }
 
 /* ==========================================================================
-   7. TIPTAP EDITOR & STEP MANAGER
+   6. TIPTAP EDITOR & CONTENT MANAGEMENT
    ========================================================================== */
 
-/* --- Main Description Editor (Tiptap) --- */
+/* --- Tiptap Editor Styles --- */
 .rich-text-editor-container {
   border: 1px solid #444;
   border-radius: 5px;
 }
-
-.editor-toolbar {
+.editor-toolbar,
+.step-editor-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -700,8 +691,14 @@ footer {
   background-color: var(--color-surface);
   border-bottom: 1px solid #444;
 }
-
-.editor-toolbar button {
+.step-editor-toolbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0 0 5px 5px;
+}
+.editor-toolbar-button {
   background: transparent;
   color: var(--color-text-secondary);
   border: none;
@@ -709,13 +706,16 @@ footer {
   padding: 0.5rem;
   margin: 0 0.1rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
 }
-.editor-toolbar button:hover {
+.editor-toolbar-button:hover {
   background-color: #333;
   color: white;
 }
-.editor-toolbar button.is-active {
+.editor-toolbar-button.is-active {
   background-color: var(--color-primary);
   color: var(--color-background);
 }
@@ -726,28 +726,35 @@ footer {
   outline: none;
   background-color: var(--color-background);
   color: var(--color-text-main);
+  line-height: 1.7;
 }
 .prose-mirror-editor a {
   color: var(--color-primary);
   text-decoration: underline;
 }
-.prose-mirror-editor p {
-  line-height: 1.7;
+.prose-mirror-editor h1,
+.prose-mirror-editor h2,
+.prose-mirror-editor h3 {
+  color: var(--color-primary);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.prose-mirror-editor ul,
+.prose-mirror-editor ol {
+  padding-left: 2rem;
 }
 
-/* --- Step Manager --- */
+/* --- Step Manager & Step Editor --- */
 .step-manager {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .steps-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .step-item {
   display: flex;
   align-items: flex-start;
@@ -757,20 +764,17 @@ footer {
   border: 1px solid #333;
   border-radius: 8px;
 }
-
 .step-drag-handle {
   color: var(--color-text-secondary);
   cursor: grab;
   margin-top: 0.5rem;
 }
-
 .step-number {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-primary);
   margin-top: 0.25rem;
 }
-
 .step-action-button {
   background: transparent;
   border: none;
@@ -780,35 +784,10 @@ footer {
   border-radius: 5px;
   transition: background-color 0.2s, color 0.2s;
 }
-
 .step-action-button:hover {
   background-color: #ff3b3020;
   color: #ff453a;
 }
-
-.add-step-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  background-color: transparent;
-  color: var(--color-primary);
-  border: 1px dashed var(--color-primary);
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.add-step-button:hover {
-  background-color: var(--color-primary);
-  color: var(--color-background);
-}
-
-/* --- Step Editor (Tiptap in a Step) --- */
 .step-editor-wrapper {
   position: relative;
   width: 100%;
@@ -816,10 +795,8 @@ footer {
   border-radius: 5px;
   border: 1px solid #444;
 }
-
 .step-prose-mirror-editor {
-  padding: 0.75rem;
-  padding-bottom: 2.5rem;
+  padding: 0.75rem 0.75rem 2.5rem;
   min-height: 80px;
   outline: none;
   font-size: 1rem;
@@ -830,62 +807,13 @@ footer {
   text-decoration: underline;
 }
 
-.step-editor-toolbar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  background-color: var(--color-surface);
-  border-top: 1px solid #444;
-  border-radius: 0 0 5px 5px;
-}
-
-/* ==========================================================================
-   8. ANIMATIONS & UTILITIES
-   ========================================================================== */
-
-#tsparticles {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleIn {
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-}
-
-/* --- List Manager (for Addons/Items) --- */
-.list-manager {
+/* --- List & String Managers --- */
+.list-manager,
+.string-import-manager {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .managed-list {
   display: flex;
   flex-direction: column;
@@ -896,14 +824,12 @@ footer {
   border-radius: 8px;
   min-height: 80px;
 }
-
 .empty-list-text {
   color: var(--color-text-secondary);
   font-style: italic;
   margin: auto;
   padding: 1rem;
 }
-
 .managed-list-item {
   display: flex;
   align-items: center;
@@ -913,19 +839,16 @@ footer {
   background-color: var(--color-surface);
   border-radius: 5px;
 }
-
 .item-content {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   overflow: hidden;
 }
-
 .item-name {
   font-weight: bold;
   color: var(--color-text-main);
 }
-
 .item-link {
   display: flex;
   align-items: center;
@@ -939,41 +862,6 @@ footer {
 .item-link:hover {
   color: var(--color-primary);
 }
-
-/* --- Modal Specific Inputs & Buttons --- */
-.modal-input {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background-color: var(--color-background);
-  border: 1px solid #333;
-  border-radius: 5px;
-  color: var(--color-text-main);
-  font-size: 1rem;
-}
-.modal-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-.form-button.secondary {
-  background: var(--color-surface);
-  color: var(--color-text-main);
-  border-color: #333;
-}
-.form-button.secondary:hover {
-  background: #333;
-}
-.form-button.secondary::before {
-  display: none;
-}
-
-/* --- String Import Manager --- */
-.string-import-manager {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .import-status-box {
   display: flex;
   justify-content: space-between;
@@ -983,44 +871,24 @@ footer {
   border: 1px solid #333;
   border-radius: 8px;
 }
-
 .status-indicator {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   color: var(--color-text-secondary);
 }
-
 .import-status-box .form-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* --- Modal Textarea --- */
-.modal-textarea {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background-color: var(--color-background);
-  border: 1px solid #333;
-  border-radius: 5px;
-  color: var(--color-text-main);
-  font-size: 1rem;
-  font-family: monospace;
-  resize: vertical;
-}
-.modal-textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
-/* --- Image Upload Component --- */
+/* --- Image Uploaders --- */
 .image-upload-container {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .image-upload-box {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -1033,11 +901,13 @@ footer {
   overflow: hidden;
   position: relative;
 }
-
+.thumbnail-uploader {
+  max-width: 320px;
+  margin: 0 auto;
+}
 .upload-label {
-  width: 100%;
-  height: 100%;
   display: flex;
+  flex-grow: 1;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -1046,7 +916,6 @@ footer {
 .upload-label:hover {
   background-color: var(--color-surface);
 }
-
 .upload-content {
   display: flex;
   flex-direction: column;
@@ -1054,7 +923,6 @@ footer {
   gap: 0.75rem;
   color: var(--color-text-secondary);
 }
-
 .image-preview {
   width: 100%;
   height: 100%;
@@ -1064,7 +932,6 @@ footer {
   height: 100%;
   object-fit: cover;
 }
-
 .remove-image-button {
   position: absolute;
   top: 0.5rem;
@@ -1076,4 +943,171 @@ footer {
   cursor: pointer;
   display: flex;
   padding: 0.25rem;
+}
+
+.image-slider-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background);
+  border: 1px solid #333;
+  border-radius: 8px;
+  min-height: 120px;
+}
+.image-grid-item,
+.upload-new-item {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.image-grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.upload-new-item {
+  border: 2px dashed #333;
+}
+
+/* ==========================================================================
+   7. ANIMATIONS & UTILITIES
+   ========================================================================== */
+
+#tsparticles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scaleIn {
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes pulse-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* --- Item Search Component --- */
+.item-search-container {
+  position: relative;
+}
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.search-input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.5rem;
+  background-color: var(--color-background);
+  border: 1px solid #333;
+  border-radius: 5px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+.spinner {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.search-results-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0 0;
+  position: absolute;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border: 1px solid #444;
+  border-radius: 5px;
+  z-index: 100;
+}
+.search-results-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.search-results-list li:hover {
+  background-color: var(--color-primary);
+  color: #121212;
+}
+
+.item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  border: 1px solid #444;
+}
+.item-icon-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.item-price {
+  font-size: 0.8em;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.item-price-container {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+.item-price-container div {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-text-secondary);
+}
+.item-price-container div:first-child {
+  color: var(--color-primary);
 }

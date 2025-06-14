@@ -35,12 +35,14 @@ export const authOptions = {
           throw new Error("Incorrect password");
         }
 
-        // Return user object if everything is valid
+        // Return the full user object, now including region and realm
         return {
           id: user.id,
           email: user.email,
           name: user.username,
           role: user.role,
+          region: user.region, // <-- ADD THIS
+          realm: user.realm, // <-- AND THIS
         };
       },
     }),
@@ -49,25 +51,30 @@ export const authOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    // These callbacks add the user's ID and role to the session token
+    // This callback adds our custom data to the JWT
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.region = user.region; // <-- ADD THIS
+        token.realm = user.realm; // <-- AND THIS
       }
       return token;
     },
+    // This callback adds our custom data to the session object
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.region = token.region; // <-- ADD THIS
+        session.user.realm = token.realm; // <-- AND THIS
       }
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: "/login", // Redirect users to our custom login page
+    signIn: "/login",
   },
 };
 
