@@ -1,3 +1,5 @@
+// aszunalol/aszuna-gold-helper/AsZuna-gold-helper-e7b64661f52d01644dc7d7dea50098deeb640633/src/components/Header.jsx
+
 "use client";
 
 import Link from "next/link";
@@ -79,6 +81,18 @@ export default function Header() {
       <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
     </svg>
   );
+  const createGuideIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      height="20px"
+      viewBox="0 0 24 24"
+      width="20px"
+      fill="currentColor"
+    >
+      <path d="M0 0h24v24H0z" fill="none" />
+      <path d="M3 17.25V21h3.75L18 9.75 14.25 6l-10.5 10.5zm16.48-9.04c.32-.32.32-.85 0-1.17l-2.58-2.58c-.32-.32-.85-.32-1.17 0L15.25 4.5l3.75 3.75 1.48-1.48z" />
+    </svg>
+  );
 
   return (
     <header>
@@ -104,21 +118,34 @@ export default function Header() {
 
       <div className="header-right">
         {session?.user.role === "ADMIN" && (
-          <Link
-            href="/admin/create-guide"
-            className="nav-button"
-            style={{
-              marginRight: "1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "var(--color-primary)",
-              color: "#121212",
-              borderRadius: "5px",
-              fontWeight: "700",
-              textDecoration: "none",
-            }}
-          >
-            Create Guide
-          </Link>
+          // Changed class to admin-dropdown-container only
+          <div className="admin-dropdown-container">
+            <div className="admin-menu-trigger user-menu-trigger">
+              <span>Admin</span>
+            </div>
+            <div className="user-dropdown">
+              {" "}
+              {/* This dropdown still uses user-dropdown class */}
+              <Link href="/admin/create-guide">
+                {createGuideIcon}
+                <span>Create Guide</span>
+              </Link>
+              <div className="divider"></div>
+              <Link href="/admin/dashboard">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="20px"
+                  viewBox="0 0 24 24"
+                  width="20px"
+                  fill="currentColor"
+                >
+                  <path d="M0 0h24v24H0z" fill="none" />
+                  <path d="M19 5v2h-4V5h4zm-9 12h4v-2h-4v2zm-6 0h4v-2H4v2zm0-4h4v-2H4v2zm0-4h4V7H4v2zm9 8h4v-2h-4v2zm-3-4h4v-2h-4v2zm3-4h4V7h-4v2zm4 0v-2h-4V7h4zM4 19h18V3H4v16zM6 5h2v2H6V5zm0 4h2v2H6V9zm0 4h2v2H6v4h14V5h-2v2h-4v2h-4v2h-4v2z" />
+                </svg>
+                <span>Admin Dashboard</span>
+              </Link>
+            </div>
+          </div>
         )}
 
         <div className="user-menu-container">

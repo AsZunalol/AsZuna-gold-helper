@@ -23,7 +23,7 @@ model User {
 }
 
 model Guide {
-  id        Int      @id // Corrected: You will provide the ID, so it's not auto-incrementing.
+  id                   Int      @id @default(autoincrement())
   title     String
   category  String?
   expansion String?
