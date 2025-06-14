@@ -92,7 +92,6 @@ export default async function Homepage() {
   return (
     <main>
       <section className="hero">
-        <ParticlesComponent />
         <div className="hero-content">
           <h1 className="hero-title">Master the Markets of Azeroth</h1>
           <p className="hero-subtitle">
