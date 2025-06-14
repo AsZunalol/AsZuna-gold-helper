@@ -28,7 +28,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -2; /* Particles are in the far back */
+  z-index: 0; /* Changed from -2 to 0. This places particles above the hero background but still behind the main content. */
 }
 
 /* This div provides the solid background color for the site */
@@ -39,7 +39,7 @@ body {
   width: 100%;
   height: 100%;
   background-color: var(--color-background);
-  z-index: -3; /* This sits behind everything, including particles */
+  z-index: -3; /* Keep this behind everything */
 }
 
 /* --- Content Layering --- */
@@ -102,7 +102,7 @@ header {
   background-size: cover;
   /* Adjust this to position the image vertically */
   background-position: center 30%;
-  /* Must have a z-index lower than the hero's content but higher than the body background */
+  /* Keep this at -1, so particles (z-index 0) are on top of it */
   z-index: -1;
 }
 
@@ -119,12 +119,13 @@ header {
     rgba(13, 17, 23, 0.4) 0%,
     /* Less dark at the top */ var(--color-background) 95%
   );
-  z-index: -1; /* Sits on the same layer as the image to blend with it */
+  /* Keep this at -1, so particles (z-index 0) are on top of it */
+  z-index: -1;
 }
 
 .hero-content {
   position: relative;
-  z-index: 2;
+  z-index: 2; /* This is correctly positioned on top of everything */
   max-width: 800px;
 }
 

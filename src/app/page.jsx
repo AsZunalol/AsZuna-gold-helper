@@ -1,476 +1,142 @@
-"use client";
+import Link from "next/link";
+import { PrismaClient } from "@prisma/client";
+import HomepageSlideshow from "@/components/HomepageSlideshow";
+import ParticlesComponent from "@/components/ParticlesComponent";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import styles from "./Admin.module.css";
+const prisma = new PrismaClient();
 
-// Define your predefined list of tags here.
-// You can expand this list as needed.
-const PREDEFINED_TAGS = [
-  "Solo",
-  "Group",
-  "Dungeon",
-  "Open World",
-  "Profession",
-  "Flipping",
-  "Faction",
-  "Alliance",
-  "Neutral",
-  "Horde",
-  "Transmog",
-  "PVE",
-  "PVP",
-  "Crafting",
-  "Gathering",
-  "Consumables",
-  "Mounts",
-  "Pets",
-  "Seasonal Event",
-  "Beginner-Friendly",
-  "High Capital",
-  "Low Effort",
-  "High Profit",
-  "Herbalism",
-  "Mining",
-  "Skinning",
-  "Blacksmithing",
-  "Alchemy",
-  "Enchanting",
-  "Jewelcrafting",
-  "Inscription",
-  "Leatherworking",
-  "Tailoring",
-  "Engineering",
-  "Cooking",
-  "Fishing",
-].sort(); // Optional: Keep them sorted alphabetically
-
-export default function AdminPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  // Form state
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Raw Gold");
-  const [expansion, setExpansion] = useState("Dragonflight");
-  const [description, setDescription] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
-  const [youtubeVideoId, setYoutubeVideoId] = useState("");
-  const [steps, setSteps] = useState([{ id: 1, content: "" }]);
-  const [tags, setTags] = useState([]); // Array to hold selected tags
-  const [newTagInput, setNewTagInput] = useState(""); // Input for current tag being typed
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]); // Suggestions based on input
-  const [showSuggestions, setShowSuggestions] = useState(false); // Control suggestions visibility
-  const [goldPrHour, setGoldPrHour] = useState(""); // State for gold per hour
-  const [addons, setAddons] = useState(""); // New state for addons
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
-  // --- Handlers for managing steps (unchanged) ---
-  const handleAddStep = () => {
-    setSteps([...steps, { id: Date.now(), content: "" }]);
-  };
-
-  const handleRemoveStep = (id) => {
-    setSteps(steps.filter((step) => step.id !== id));
-  };
-
-  const handleStepChange = (id, value) => {
-    const newSteps = steps.map((step) =>
-      step.id === id ? { ...step, content: value } : step
-    );
-    setSteps(newSteps);
-  };
-
-  const handleMoveStep = (index, direction) => {
-    const newSteps = [...steps];
-    const newIndex = index + direction;
-
-    if (newIndex < 0 || newIndex >= newSteps.length) return;
-
-    [newSteps[index], newSteps[newIndex]] = [
-      newSteps[newIndex],
-      newSteps[index],
-    ];
-
-    setSteps(newSteps);
-  };
-
-  // --- Handlers for managing tags (unchanged) ---
-
-  // Filters suggestions as user types, or shows all when input is empty
-  const handleTagInputChange = (e) => {
-    const value = e.target.value;
-    setNewTagInput(value);
-
-    if (value.length > 0) {
-      const lowerCaseValue = value.toLowerCase();
-      // Filter predefined tags: must include typed value and not be already selected
-      const suggestions = PREDEFINED_TAGS.filter(
-        (tag) =>
-          tag.toLowerCase().includes(lowerCaseValue) && !tags.includes(tag)
-      );
-      setFilteredSuggestions(suggestions);
-      setShowSuggestions(true);
-    } else {
-      // When input is empty, show all predefined tags not already selected
-      const allAvailableTags = PREDEFINED_TAGS.filter(
-        (tag) => !tags.includes(tag)
-      );
-      setFilteredSuggestions(allAvailableTags);
-      setShowSuggestions(true); // Always show when focused and empty, for inspiration
-    }
-  };
-
-  // Handles adding tag when Enter is pressed
-  const handleTagInputKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Prevent form submission or newline
-      const trimmedTag = newTagInput.trim();
-      const normalizedTrimmedTag = trimmedTag.toLowerCase();
-
-      // Find an exact match (case-insensitive) in predefined tags
-      const matchedPredefinedTag = PREDEFINED_TAGS.find(
-        (tag) => tag.toLowerCase() === normalizedTrimmedTag
-      );
-
-      if (matchedPredefinedTag && !tags.includes(matchedPredefinedTag)) {
-        setTags([...tags, matchedPredefinedTag]);
-        setNewTagInput("");
-        setFilteredSuggestions([]);
-        setShowSuggestions(false);
-      } else {
-        // Optionally, provide feedback if tag is not found or already added
-        // setError("Tag not recognized or already added.");
-      }
-    } else if (e.key === "Backspace" && newTagInput === "" && tags.length > 0) {
-      // Allows removing last tag by pressing backspace if input is empty
-      setTags(tags.slice(0, tags.length - 1));
-    }
-  };
-
-  // Handles adding tag when a suggestion is clicked
-  const handleSelectSuggestion = (suggestion) => {
-    if (!tags.includes(suggestion)) {
-      setTags([...tags, suggestion]);
-    }
-    setNewTagInput("");
-    setFilteredSuggestions([]);
-    setShowSuggestions(false);
-  };
-
-  // Handles removing a tag pill
-  const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError("");
-    setSuccessMessage("");
-
-    const stepsJson = JSON.stringify(steps.map((step) => step.content));
-    const tagsString = tags.join(", "); // Convert array of tags to a comma-separated string for saving
-
-    try {
-      const response = await fetch("/api/guides", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          category,
-          expansion,
-          description,
-          thumbnail_url: thumbnailUrl,
-          youtube_video_id: youtubeVideoId,
-          steps: stepsJson,
-          tags: tagsString,
-          gold_pr_hour: goldPrHour,
-          addons, // Include addons here
-        }),
-      });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || "Something went wrong");
-
-      setSuccessMessage("Guide created successfully!");
-      setTitle("");
-      setCategory("Raw Gold");
-      setExpansion("Dragonflight");
-      setDescription("");
-      setThumbnailUrl("");
-      setYoutubeVideoId("");
-      setSteps([{ id: 1, content: "" }]);
-      setTags([]);
-      setNewTagInput("");
-      setFilteredSuggestions([]);
-      setShowSuggestions(false);
-      setGoldPrHour("");
-      setAddons(""); // Clear addons input
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  if (status === "loading") {
-    return (
-      <div className="page-background">
-        <div className={styles.container}>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+async function getLatestGuides() {
+  try {
+    const guides = await prisma.guide.findMany({
+      where: { is_route: false },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+    return guides;
+  } catch (error) {
+    console.error("Failed to fetch latest guides:", error);
+    return [];
   }
+}
 
-  if (status === "unauthenticated" || session?.user.role !== "ADMIN") {
-    return (
-      <div className="page-background">
-        <div className={styles.container}>
-          <h1>Access Denied</h1>
-          <p>You do not have permission to view this page.</p>
-        </div>
-      </div>
-    );
-  }
+const categories = [
+  {
+    name: "Raw Gold",
+    href: "/guides?category=Raw+Gold",
+    description: "Consistent gold from farming mobs and materials.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        width="48px"
+        height="48px"
+      >
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm-2 4h8v2H8v-2zm8-8H8v2h8V7z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Gathering",
+    href: "/routes",
+    description: "Reliable income from Mining, Herbalism, and Skinning.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        width="48px"
+        height="48px"
+      >
+        <path d="M17.65 3.35C16.41 2.11 14.33 2.47 13.5 3.5L3.5 13.5c-1.39 1.39-1.39 3.65 0 5.04l5.04 5.04c1.39 1.39 3.65 1.39 5.04 0l10-10c1.03-.98.67-3.06-.58-4.31l-3.35-3.35zM8.46 17.54l-4-4c-.78-.78-.78-2.05 0-2.83l4-4c.78-.78 2.05-.78 2.83 0l4 4c.78.78.78 2.05 0 2.83l-4 4c-.78.78-2.05-.78-2.83 0z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Professions",
+    href: "/guides?category=Profession",
+    description: "Master crafting and generate massive profits.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        width="48px"
+        height="48px"
+      >
+        <path d="M22 2v2h-2V2h-2v2h-2V2h-2v2h-2V2h-2v2h-2V2H8v2H6V2H4v2H2v18h20V2h-2zM8 18H4v-8h4v8zm6 0h-4v-8h4v8zm6 0h-4v-8h4v8z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Flipping",
+    href: "/guides?category=Flipping",
+    description: "Buy low, sell high. Dominate the Auction House.",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        width="48px"
+        height="48px"
+      >
+        <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+      </svg>
+    ),
+  },
+];
 
-  // --- SVG Icons for Controls (unchanged) ---
-  const MoveUpIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="24"
-      viewBox="0 -960 960 960"
-      width="24"
-    >
-      <path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" />
-    </svg>
-  );
-  const MoveDownIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="24"
-      viewBox="0 -960 960 960"
-      width="24"
-    >
-      <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z" />
-    </svg>
-  );
-  const RemoveIcon = () => (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      height="24"
-      viewBox="0 -960 960 960"
-      width="24"
-    >
-      <path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
-    </svg>
-  );
+export default async function Homepage() {
+  const latestGuides = await getLatestGuides();
 
   return (
-    <div className="page-background">
-      <div className={styles.container}>
-        <h1>Create New Guide</h1>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {error && <p className={styles.errorMessage}>{error}</p>}
-          {successMessage && (
-            <p className={styles.successMessage}>{successMessage}</p>
-          )}
-
-          <div className={styles.formGroup}>
-            <label htmlFor="title">Guide Title</label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="category">Category</label>
-            <select
-              id="category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+    <main>
+      <section className="hero">
+        <ParticlesComponent />
+        <div className="hero-content">
+          <h1 className="hero-title">Master the Markets of Azeroth</h1>
+          <p className="hero-subtitle">
+            Your ultimate hub for the latest World of Warcraft gold-making
+            strategies. From simple farms to complex market flipping.
+          </p>
+          <Link href="/guides" className="cta-button">
+            <span>Browse All Guides</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="24px"
+              viewBox="0 0 24 24"
+              width="24px"
+              fill="currentColor"
             >
-              <option value="Raw Gold">Raw Gold</option>
-              <option value="Gathering">Gathering</option>
-              <option value="Profession">Professions</option>
-              <option value="Flipping">Flipping</option>
-            </select>
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="description">Short Description</label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows="3"
-            ></textarea>
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="thumbnailUrl">Thumbnail Image URL</label>
-            <input
-              type="text"
-              id="thumbnailUrl"
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-              placeholder="e.g., https://i.imgur.com/your-image.jpg"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="youtubeVideoId">YouTube Video ID (Optional)</label>
-            <input
-              type="text"
-              id="youtubeVideoId"
-              value={youtubeVideoId}
-              onChange={(e) => setYoutubeVideoId(e.target.value)}
-              placeholder="e.g., dQw4w9WgXcQ"
-            />
-          </div>
+              <path d="M0 0h24v24H0V0z" fill="none" />
+              <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z" />
+            </svg>
+          </Link>
+        </div>
+      </section>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="goldPrHour">Estimated Gold per Hour</label>
-            <input
-              type="text" // Or "number" if you want to restrict input, but "text" allows "10k" etc.
-              id="goldPrHour"
-              value={goldPrHour}
-              onChange={(e) => setGoldPrHour(e.target.value)}
-              placeholder="e.g., 50,000g"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="addons">Required/Suggested Addons</label>
-            <textarea
-              id="addons"
-              value={addons}
-              onChange={(e) => setAddons(e.target.value)}
-              rows="3"
-              placeholder="List any required or suggested addons here, e.g., WeakAuras, Auctionator."
-            ></textarea>
-          </div>
-
-          <div className={styles.formGroup} style={{ position: "relative" }}>
-            <label htmlFor="tagInput">Tags</label>
-            <div className={styles.tagsInputWrapper}>
-              {tags.map((tag, index) => (
-                <span key={index} className={styles.tagPill}>
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className={styles.tagRemoveButton}
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                id="tagInput"
-                value={newTagInput}
-                onChange={handleTagInputChange}
-                onKeyDown={handleTagInputKeyDown}
-                onFocus={() => {
-                  setShowSuggestions(true);
-                  // On focus, if input is empty, show all available tags
-                  if (newTagInput === "") {
-                    const allAvailableTags = PREDEFINED_TAGS.filter(
-                      (tag) => !tags.includes(tag)
-                    );
-                    setFilteredSuggestions(allAvailableTags);
-                  }
-                }}
-                // Use onMouseDown for suggestions to prevent onBlur from hiding the list immediately
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-                placeholder={
-                  tags.length === 0
-                    ? "Type tag and press Enter or select from suggestions"
-                    : ""
-                }
-              />
-            </div>
-            {showSuggestions && filteredSuggestions.length > 0 && (
-              <ul className={styles.suggestionsList}>
-                {filteredSuggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    onMouseDown={() => handleSelectSuggestion(suggestion)}
-                  >
-                    {suggestion}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Guide Steps</label>
-            <div className={styles.stepsList}>
-              {steps.map((step, index) => (
-                <div key={step.id} className={styles.stepCard}>
-                  <div className={styles.stepNumber}>{index + 1}</div>
-                  <div className={styles.stepContent}>
-                    <textarea
-                      value={step.content}
-                      onChange={(e) =>
-                        handleStepChange(step.id, e.target.value)
-                      }
-                      rows="4"
-                      placeholder="Describe this step..."
-                      required
-                    ></textarea>
-                  </div>
-                  <div className={styles.stepControls}>
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStep(index, -1)}
-                      disabled={index === 0}
-                    >
-                      <MoveUpIcon />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStep(index, 1)}
-                      disabled={index === steps.length - 1}
-                    >
-                      <MoveDownIcon />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStep(step.id)}
-                      disabled={steps.length <= 1}
-                    >
-                      <RemoveIcon />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={handleAddStep}
-              className={styles.addStepButton}
+      <section className="feature-section">
+        <h2 className="section-title">Explore by Category</h2>
+        <div className="category-grid">
+          {categories.map((category) => (
+            <Link
+              href={category.href}
+              key={category.name}
+              className="category-card"
             >
-              + Add Step
-            </button>
-          </div>
+              {category.icon}
+              <h3>{category.name}</h3>
+              <p>{category.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={styles.submitButton}
-          >
-            {isSubmitting ? "Creating..." : "Create Guide"}
-          </button>
-        </form>
-      </div>
-    </div>
+      <section className="feature-section">
+        <h2 className="section-title">Latest Guides</h2>
+        <HomepageSlideshow guides={latestGuides} />
+      </section>
+    </main>
   );
 }
+// NOTE: The extra '}' that was here before has been removed.
