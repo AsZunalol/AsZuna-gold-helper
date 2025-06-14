@@ -42,7 +42,8 @@ model Guide {
   gold_pr_hour           String?
   
   tsm_import_string      String? @db.Text
-  gathermate2_string     String? @db.Text
+  route_string           String? @db.Text
+  tags                   String? @db.Text
   
   // Relationship to the User who created it
   author    User     @relation(fields: [authorId], references: [id])

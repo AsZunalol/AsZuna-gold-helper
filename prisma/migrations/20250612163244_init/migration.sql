@@ -13,6 +13,7 @@ CREATE TABLE `User` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+-- CreateTable
 CREATE TABLE `Guide` (
     `id` INTEGER NOT NULL,
     `title` VARCHAR(191) NOT NULL,
@@ -32,12 +33,15 @@ CREATE TABLE `Guide` (
     `gold_pr_hour` VARCHAR(191) NULL,
     `tsm_import_string` TEXT NULL,
     `gathermate2_string` TEXT NULL,
+    `tags` TEXT NULL, -- Add this line for tags
     `authorId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
 
 -- AddForeignKey
 ALTER TABLE `Guide` ADD CONSTRAINT `Guide_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
