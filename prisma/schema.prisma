@@ -48,6 +48,8 @@ model Guide {
   route_string           String? @db.Text
   tags                   String? @db.Text
   
+  items_of_note       Json?
+
   // Relationship to the User who created it
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int

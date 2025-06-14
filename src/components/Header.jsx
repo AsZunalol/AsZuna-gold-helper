@@ -93,6 +93,19 @@ export default function Header() {
       <path d="M3 17.25V21h3.75L18 9.75 14.25 6l-10.5 10.5zm16.48-9.04c.32-.32.32-.85 0-1.17l-2.58-2.58c-.32-.32-.85-.32-1.17 0L15.25 4.5l3.75 3.75 1.48-1.48z" />
     </svg>
   );
+  const manageGuideIcon = // New icon for "Manage Guides"
+    (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="20px"
+        viewBox="0 0 24 24"
+        width="20px"
+        fill="currentColor"
+      >
+        <path d="M0 0h24v24H0z" fill="none" />
+        <path d="M3 17.25V21h3.75L18 9.75 14.25 6 3 17.25zm16.48-9.04c.32-.32.32-.85 0-1.17l-2.58-2.58c-.32-.32-.85-.32-1.17 0L15.25 4.5l3.75 3.75 1.48-1.48zM20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H4V4h16v16z" />
+      </svg>
+    );
 
   return (
     <header>
@@ -129,6 +142,13 @@ export default function Header() {
               <Link href="/admin/create-guide">
                 {createGuideIcon}
                 <span>Create Guide</span>
+              </Link>
+              {/* Added Manage Guides link */}
+              <Link href="/admin/guides-list">
+                {" "}
+                {/* You would create this page to list guides */}
+                {manageGuideIcon}
+                <span>Manage Guides</span>
               </Link>
               <div className="divider"></div>
               <Link href="/admin/dashboard">
