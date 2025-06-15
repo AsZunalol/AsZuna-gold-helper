@@ -119,7 +119,7 @@ export default function Header() {
           href="/guides"
           className={isActive("/guides") ? "nav-active" : ""}
         >
-          All Guides
+          Guides
         </Link>
         <Link
           href="/routes"

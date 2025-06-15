@@ -3,74 +3,47 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ItemPrices from "@/components/ItemPrices";
+import GuideCategory from "@/components/GuideCategory";
+import MapImageModal from "@/components/MapImageModal";
 import "./guide.css";
+import "../../../components/map-image-modal.css";
+
 import { WOW_EXPANSIONS, WOW_CLASSES } from "@/lib/constants";
 
-async function getGuideById(id) {
-  try {
-    const guide = await prisma.guide.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        author: {
-          select: {
-            username: true,
-            email: true,
-            id: true,
-          },
-        },
-      },
-    });
-    return guide;
-  } catch (error) {
-    console.error(`Failed to fetch guide with ID ${id}:`, error);
-    return null;
-  }
-}
-
-export async function generateMetadata({ params }) {
-  const guide = await getGuideById((await params).id);
-
-  if (!guide) {
-    return {
-      title: "Guide Not Found",
-      description: "The requested gold guide does not exist.",
-    };
-  }
-
-  return {
-    title: `${guide.title} - AsZuna's Gold Helper`,
-    description:
-      guide.description?.substring(0, 150) ||
-      "Learn gold making strategies for World of Warcraft.",
+async function Page({ params }) {
+  const safeParse = (value, defaultValue = []) => {
+    if (!value || value === "undefined") return defaultValue;
+    try {
+      return typeof value === "string" ? JSON.parse(value) : value;
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
+      return defaultValue;
+    }
   };
-}
 
-export default async function SingleGuidePage({ params }) {
-  const guide = await getGuideById((await params).id);
+  const guide = await prisma.guide.findUnique({
+    where: { id: parseInt(params.id) },
+  });
+  if (!guide) notFound();
 
-  if (!guide) {
-    notFound();
-  }
+  const itemsOfNote = safeParse(guide.itemsOfNote);
+  console.log(
+    "DEBUG - itemsOfNote:",
+    itemsOfNote,
+    "Type:",
+    typeof itemsOfNote,
+    "Length:",
+    itemsOfNote?.length
+  );
+  const hasVisibleItems =
+    Array.isArray(itemsOfNote) &&
+    itemsOfNote.some((item) => typeof item === "string" && item.trim() !== "");
 
-  let steps = [];
-  let itemsOfNote = [];
-  let requiredItems = [];
-  let addons = [];
-  let tags = [];
-  let sliderImages = [];
-
-  try {
-    steps = guide.steps ? JSON.parse(guide.steps) : [];
-    itemsOfNote = guide.itemsOfNote ? JSON.parse(guide.itemsOfNote) : [];
-    requiredItems = guide.required_items
-      ? JSON.parse(guide.required_items)
-      : [];
-    addons = guide.addons ? JSON.parse(guide.addons) : [];
-    tags = guide.tags ? guide.tags.split(",") : [];
-    sliderImages = guide.slider_images ? JSON.parse(guide.slider_images) : [];
-  } catch (e) {
-    console.error("Error parsing guide content:", e);
-  }
+  const steps = safeParse(guide.steps);
+  const requiredItems = safeParse(guide.required_items);
+  const addons = safeParse(guide.addons);
+  const tags = guide.tags ? guide.tags.split(",").map((tag) => tag.trim()) : [];
+  const sliderImages = safeParse(guide.slider_images);
 
   return (
     <>
@@ -78,8 +51,7 @@ export default async function SingleGuidePage({ params }) {
         <div className="guide-container">
           <div className="thumbnail-wrapper">
             <div className="thumbnail-card">
-              {" "}
-              {/* This was the main missing/misplaced div */}
+              <GuideCategory category={guide.category} />
               {guide.thumbnail_url && (
                 <Image
                   src={guide.thumbnail_url}
@@ -89,77 +61,75 @@ export default async function SingleGuidePage({ params }) {
                   className="thumbnail-img"
                 />
               )}
-              <div className="thumbnail-overlay">
-                <h1 className="guide-title-overlay">{guide.title}</h1>
-                {(() => {
-                  const exp = WOW_EXPANSIONS.find(
-                    (e) => e.name === guide.expansion
-                  );
-                  const color = exp?.color || "#fff";
-                  return (
-                    <p className="guide-expansion" style={{ color }}>
-                      Expansion – {guide.expansion}
-                    </p>
-                  );
-                })()}
-                {tags.length > 0 && (
-                  <div className="guide-tags-inline">
-                    {tags.map((tag, i) => (
-                      <span key={`${tag}-${i}`} className="guide-tag-pill">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+              <div className="thumbnail-overlay-box">
+                <div className="thumbnail-overlay-content">
+                  <h1 className="guide-title-overlay">{guide.title}</h1>
+                  {(() => {
+                    const exp = WOW_EXPANSIONS.find(
+                      (e) => e.name === guide.expansion
+                    );
+                    const color = exp?.color || "#fff";
+                    return (
+                      <p className="guide-expansion" style={{ color }}>
+                        Expansion – {guide.expansion}
+                      </p>
+                    );
+                  })()}
+                  {tags.length > 0 && (
+                    <div className="guide-tags-container">
+                      <div className="guide-tags-inline">
+                        {tags.map((tag, i) => (
+                          <span
+                            key={`${tag}-${i}`}
+                            className={`guide-tag-pill ${
+                              i > 0 ? "guide-tag-hidden" : ""
+                            }`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="thumbnail-topright">{guide.category}</div>
+              <div className="recommended-classes-button">
+                <button className="dropdown-toggle">
+                  🎯 Recommended Classes
+                </button>
+                <div className="recommended-classes-dropdown">
+                  <div className="class-badges">
+                    {guide.recommended_class.split(",").map((cls, i) => {
+                      const classColor =
+                        WOW_CLASSES[cls.trim()]?.color || "#ccc";
+                      return (
+                        <span
+                          key={`class-${i}`}
+                          className="class-pill"
+                          style={{ backgroundColor: classColor }}
+                        >
+                          {cls.trim()}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
               <div className="thumbnail-bottomright">
                 <div className="info-box">
                   <span className="label">💰 Gold/hr:</span>
                   <span className="value">{guide.gold_pr_hour}</span>
                 </div>
-
                 <div className="info-box">
                   <span className="label">⏱️ Time:</span>
                   <span className="value">{guide.time_to_complete}</span>
                 </div>
               </div>
-            </div>{" "}
-            {/* end of .thumbnail-card */}
-            <div className="recommended-classes-box enhanced-box">
-              <p>
-                <strong>Recommended Classes:</strong>
-              </p>
-              <div className="class-badges">
-                {guide.recommended_class.split(",").map((cls, i) => {
-                  const classColor = WOW_CLASSES[cls.trim()]?.color || "#ccc";
-                  return (
-                    <span
-                      key={`class-${i}`}
-                      className="class-pill"
-                      style={{ backgroundColor: classColor }}
-                    >
-                      {cls.trim()}
-                    </span>
-                  );
-                })}
-              </div>
             </div>
-          </div>{" "}
-          {/* end of .recommended-classes-box */}
+          </div>
+
           <div className="guide-layout">
             <div className="guide-content">
-              {guide.map_image_path && (
-                <div className="map-image">
-                  <Image
-                    src={guide.map_image_path}
-                    alt="Map Image"
-                    width={800}
-                    height={400}
-                  />
-                </div>
-              )}
-
               {guide.description && (
                 <p className="guide-description">{guide.description}</p>
               )}
@@ -249,16 +219,32 @@ export default async function SingleGuidePage({ params }) {
                   </ol>
                 </div>
               )}
+            </div>
 
-              {itemsOfNote.length > 0 && <ItemPrices items={itemsOfNote} />}
-            </div>{" "}
-            {/* end of .guide-content */}
-          </div>{" "}
-          {/* end of .guide-layout */}
-        </div>{" "}
-        {/* end of .guide-container */}
-      </div>{" "}
-      {/* end of .guide-outer */}
+            <aside className="guide-right-panel">
+              <div className="map-section">
+                <h3>Map Image</h3>
+                <MapImageModal src={guide.map_image_path} />
+              </div>
+
+              {hasVisibleItems && (
+                <div className="map-notes-box">
+                  <h4>Items of Note</h4>
+                  <ul>
+                    {itemsOfNote.map((item, index) => (
+                      <li key={`item-${index}`}>
+                        {typeof item === "string" ? item : JSON.stringify(item)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </aside>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
+
+export default Page;
