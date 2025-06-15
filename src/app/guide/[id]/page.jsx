@@ -23,10 +23,34 @@ async function Page({ params }) {
 
   const guide = await prisma.guide.findUnique({
     where: { id: parseInt(params.id) },
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      expansion: true,
+      thumbnail_url: true,
+      recommended_class: true,
+      gold_pr_hour: true,
+      time_to_complete: true,
+      description: true,
+      youtube_video_id: true,
+      tsm_import_string: true,
+      route_string: true,
+      map_image_path: true,
+      steps: true,
+      required_items: true,
+      addons: true,
+      tags: true,
+      slider_images: true,
+      items_of_note: true,
+    },
   });
+
   if (!guide) notFound();
 
-  const itemsOfNote = safeParse(guide.itemsOfNote);
+  console.log("RAW guide.items_of_note:", guide.items_of_note);
+
+  const itemsOfNote = safeParse(guide.items_of_note);
   console.log(
     "DEBUG - itemsOfNote:",
     itemsOfNote,
