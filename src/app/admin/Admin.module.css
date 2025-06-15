@@ -1,0 +1,648 @@
+/* Admin.module.css - Modernized */
+
+/* General form container styles */
+.container {
+  max-width: none;
+  width: 100%;
+  margin: 5rem auto 0 auto;
+  padding: 2.5rem 4rem; /* Increased horizontal padding for more breathing room */
+  background-color: var(--color-surface); /* Uses new surface color */
+  border-radius: 16px; /* Larger border-radius for modern look */
+  border: 1px solid var(--color-border); /* Uses new border variable */
+  box-shadow: var(--shadow-lg); /* Consistent shadow with global styles */
+  box-sizing: border-box; /* Ensure padding is included in width */
+  animation: fadeIn 0.5s ease-out; /* Subtle fade-in on load */
+
+  /* Responsive padding for smaller screens */
+  @media (max-width: 768px) {
+    padding: 2.5rem 2rem;
+  }
+  @media (max-width: 480px) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.container h1 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 2.5rem; /* More space below heading */
+  color: white; /* Always white for main heading */
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 2.8rem; /* Slightly smaller for balance */
+  text-shadow: var(--shadow-glow-md); /* Consistent glow */
+}
+
+/* Form group and input styles */
+.formGroup {
+  margin-bottom: 1.8rem; /* Increased spacing between form groups */
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.6rem; /* More space below label */
+  color: var(--color-text-secondary);
+  font-size: 0.95em; /* Slightly larger font */
+  font-weight: 600; /* Slightly less bold for softer look */
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="url"],
+.formGroup textarea,
+.formGroup select {
+  width: 100%;
+  padding: 0.9rem 1.2rem; /* Increased padding for larger input fields */
+  background-color: var(
+    --color-background
+  ); /* Uses new background color variable */
+  border: 1px solid var(--color-border); /* Uses new border variable */
+  border-radius: 8px; /* Consistent rounding with global inputs */
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: all 0.25s ease; /* Smoother transitions */
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3); /* Subtle inner shadow */
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary-light); /* Lighter primary on focus */
+  box-shadow: 0 0 0 4px rgba(0, 255, 170, 0.35),
+    inset 0 1px 3px rgba(0, 0, 0, 0.4); /* Stronger, softer glow */
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.2
+  ); /* Slightly darker, more transparent background on focus */
+}
+
+/* Error and success messages */
+.errorMessage {
+  color: #ff6b6b;
+  text-align: center;
+  min-height: 1.2em;
+  margin-top: 1.5rem; /* More margin */
+  margin-bottom: 1.5rem; /* Add bottom margin too */
+  font-size: 0.9em;
+  padding: 0.75rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  border: 1px solid #ff6b6b;
+}
+
+.successMessage {
+  color: var(--color-primary);
+  text-align: center;
+  min-height: 1.2em;
+  margin-top: 1.5rem; /* More margin */
+  margin-bottom: 1.5rem;
+  font-size: 0.9em;
+  padding: 0.75rem;
+  background-color: rgba(0, 255, 170, 0.1);
+  border-radius: 8px;
+  border: 1px solid var(--color-primary);
+}
+
+/* Step list and controls */
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem; /* Slightly increased gap between steps */
+  margin-bottom: 1.5rem;
+}
+
+.stepCard {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 12px; /* More rounded */
+  padding: 1.2rem; /* Increased padding */
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem; /* Increased gap */
+  position: relative;
+  box-shadow: var(--shadow-sm); /* Subtle shadow for each step card */
+}
+
+.stepNumber {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.6rem; /* Slightly larger number */
+  color: var(--color-primary);
+  min-width: 35px; /* Wider for better alignment */
+  text-align: center;
+  line-height: 1.2; /* Better line height */
+  padding-top: 0.2rem;
+}
+
+.stepContent {
+  flex-grow: 1;
+}
+
+.stepContent textarea {
+  width: 100%;
+  border: none;
+  background-color: transparent;
+  color: var(--color-text-main);
+  padding: 0;
+  font-size: 1em;
+  resize: vertical;
+  line-height: 1.6; /* Improved readability */
+}
+
+.stepControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Increased gap between buttons */
+  margin-left: 1.5rem; /* More margin from content */
+}
+
+.stepControls button {
+  background: rgba(255, 255, 255, 0.05); /* Slightly visible background */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px; /* Slightly more rounded */
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 6px; /* Larger clickable area */
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-sm); /* Subtle shadow */
+}
+
+.stepControls button:hover:not(:disabled) {
+  background-color: rgba(0, 255, 170, 0.15); /* Primary tint on hover */
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-sm);
+}
+
+.stepControls button svg {
+  fill: currentColor;
+  width: 20px; /* Slightly larger icons */
+  height: 20px;
+  display: block;
+}
+
+.stepControls button:disabled {
+  opacity: 0.4; /* More visible disabled state */
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+}
+
+.addStepButton {
+  width: 100%;
+  padding: 0.95rem; /* Larger padding */
+  background-color: rgba(0, 255, 170, 0.1); /* Light primary background */
+  border: 1px dashed var(--color-primary-light); /* Dashed primary border */
+  border-radius: 8px; /* Consistent rounding */
+  color: var(--color-primary-light);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.05rem; /* Slightly larger text */
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-sm); /* Subtle shadow */
+}
+
+.addStepButton:hover {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-sm);
+  transform: translateY(-2px); /* Subtle lift */
+}
+
+/* Submit button */
+.submitButton {
+  position: relative;
+  width: 100%;
+  padding: 1rem; /* Larger button */
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  ); /* Brighter gradient */
+  border: 1px solid var(--color-primary);
+  border-radius: 8px; /* Consistent rounding */
+  color: #121212;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Stronger text shadow */
+  transition: all 0.3s ease;
+  margin-top: 2.5rem; /* More margin */
+  overflow: hidden; /* For inner glow */
+  box-shadow: var(--shadow-md); /* Default shadow */
+}
+
+.submitButton::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* Changed to inset for full coverage */
+  background-color: var(--color-primary);
+  border-radius: 8px;
+  filter: blur(15px); /* Stronger blur */
+  z-index: -1;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-4px); /* More pronounced lift */
+  box-shadow: var(--shadow-glow-md);
+}
+
+.submitButton:hover::before {
+  opacity: 0.9;
+  filter: blur(20px);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: var(--color-surface);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-secondary);
+}
+
+.submitButton:disabled::before {
+  display: none;
+}
+
+/* Tags and suggestions */
+.tagsInputWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background-color: var(--color-background);
+  align-items: center;
+  min-height: 52px;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.tagsInputWrapper:focus-within {
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 4px rgba(0, 255, 170, 0.35),
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.tagsInputWrapper input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  padding: 0;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  min-width: 100px;
+}
+
+.tagPill {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  padding: 7px 14px;
+  border-radius: 25px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.tagRemoveButton {
+  background: none;
+  border: none;
+  color: var(--color-background);
+  font-size: 1.3em;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.tagRemoveButton:hover {
+  color: rgba(0, 0, 0, 0.8);
+  transform: scale(1.15);
+}
+
+/* Styles for the suggestions list */
+.suggestionsList {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0 0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  position: absolute;
+  width: calc(100% - 8rem);
+  z-index: 100;
+  left: 4rem;
+  right: 4rem;
+
+  @media (max-width: 768px) {
+    width: calc(100% - 4rem);
+    left: 2rem;
+    right: 2rem;
+  }
+  @media (max-width: 480px) {
+    width: calc(100% - 2rem);
+    left: 1rem;
+    right: 1rem;
+  }
+}
+
+.suggestionsList li {
+  padding: 12px 18px;
+  cursor: pointer;
+  color: var(--color-text-main);
+  transition: all 0.2s ease;
+}
+
+.suggestionsList li:hover {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+/* Helper Text */
+.helperText {
+  font-size: 0.85em;
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+/* Addons section */
+.addonList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  margin-bottom: 18px;
+}
+
+.addonItem {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-main);
+  font-size: 0.95em;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+.addonItem:hover {
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-glow-sm);
+}
+
+.addonItem a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.addonItem a:hover {
+  text-decoration: underline;
+  color: var(--color-primary-light);
+}
+
+.addonRemoveButton {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 1.3em;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.addonRemoveButton:hover {
+  color: #ff453a;
+  transform: scale(1.15);
+}
+
+.newAddonInputGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.newAddonInputGroup input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.9rem 1.2rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.newAddonInputGroup input:focus {
+  outline: none;
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 4px rgba(0, 255, 170, 0.35),
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.addAddonButton {
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  color: #121212;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  padding: 0.9rem 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+.addAddonButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-sm);
+}
+
+.addAddonButton::before {
+  display: none;
+}
+
+/* Recommended Class Pill Style (reusing tagPill for multi-selection) */
+.selectedClassPill {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-sm);
+}
+
+/* New styles for guide list cards */
+.guideGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(200px, 1fr)
+  ); /* Adjusted minmax to 200px for smaller cards */
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.guideCard {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.guideCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+.guideCardImage {
+  position: relative;
+  width: 100%;
+  height: 140px; /* Reduced image height for smaller cards */
+  background-color: var(--color-background);
+  overflow: hidden;
+}
+
+.guideCardImage img {
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.guideCard:hover .guideCardImage img {
+  transform: scale(1.05);
+}
+
+.guideCardContent {
+  padding: 0.8rem 1rem; /* Reduced padding for smaller cards */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.guideCardTitle {
+  font-size: 1.15rem; /* Slightly smaller title for smaller cards */
+  color: white;
+  margin-top: 0;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.guideCardMeta {
+  font-size: 0.8em; /* Slightly smaller meta text */
+  color: var(--color-text-secondary);
+  margin-bottom: 0.8rem;
+  flex-grow: 1;
+  line-height: 1.4;
+}
+
+.guideCardActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem; /* Slightly smaller gap */
+  margin-top: auto;
+}
+
+.editButton,
+.deleteButton {
+  padding: 0.5rem 1rem; /* Slightly smaller buttons */
+  border-radius: 6px; /* Consistent rounding */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 0.8em; /* Smaller font size */
+}
+
+.editButton {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.editButton:hover {
+  background-color: var(--color-primary-light);
+  box-shadow: var(--shadow-glow-sm);
+  transform: translateY(-1px);
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+  box-shadow: var(--shadow-sm);
+}
+
+.deleteButton:hover {
+  background-color: #c82333;
+  box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+  transform: translateY(-1px);
+}
+
+.addGuideButton {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-light),
+    var(--color-primary)
+  );
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  color: #121212;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.addGuideButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-sm);
+}
