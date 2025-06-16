@@ -1,7 +1,9 @@
 // /prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // Add the line below to explicitly target the Windows engine
+  binaryTargets   = ["native", "windows"]
 }
 
 datasource db {
@@ -56,4 +58,16 @@ model Guide {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ItemPrice {
+  id               Int      @id @default(autoincrement())
+  itemId           Int
+  region           String   @db.VarChar(10)
+  realmSlug        String   @db.VarChar(35)
+  userRealmPrice   Int?
+  regionalAvgPrice Int?
+  updatedAt        DateTime @updatedAt
+
+  @@index([itemId, region, realmSlug])
 }

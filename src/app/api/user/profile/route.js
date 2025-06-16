@@ -1,5 +1,3 @@
-// aszunalol/aszuna-gold-helper/AsZuna-gold-helper-e7b64661f52d01644dc7d7dea50098deeb640633/src/app/api/user/profile/route.js
-
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -12,7 +10,14 @@ export async function POST(req) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { region, realm } = await req.json();
+  let region, realm;
+  try {
+    const body = await req.json();
+    region = body.region;
+    realm = body.realm;
+  } catch (err) {
+    return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
+  }
 
   if (!region || !realm) {
     return NextResponse.json(
@@ -30,7 +35,6 @@ export async function POST(req) {
       },
     });
 
-    // You might want to return a subset of user data, excluding sensitive info
     return NextResponse.json(
       {
         message: "Profile updated successfully.",
