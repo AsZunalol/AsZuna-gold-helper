@@ -29,38 +29,35 @@ model User {
 
 model Guide {
   id                   Int      @id @default(autoincrement())
-  title     String
-  category  String?
-  expansion String?
-  is_route  Boolean  @default(false)
-  
-  description            String? @db.Text
-  steps                  String? @db.Text // Corrected: Storing as Text (will hold JSON string)
-  addons                 String? @db.Text // Corrected: Storing as Text (will hold JSON string)
-  
-  thumbnail_url          String? @db.VarChar(1024)
-  slider_images          String? @db.Text
-  map_image_path         String? @db.VarChar(1024)
-  video_thumbnail_path   String? @db.VarChar(1024)
-  youtube_video_id       String?
-  
-  time_to_complete       String?
-  recommended_class      String?
-  required_items         String? @db.Text
-  gold_pr_hour           String?
-  
-  tsm_import_string      String? @db.Text
-  route_string           String? @db.Text
-  tags                   String? @db.Text
-  
-  items_of_note       Json?
-
-  // Relationship to the User who created it
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  title                String
+  category             String?
+  status               String   @default("DRAFT") // DRAFT or PUBLISHED
+  expansion            String?
+  is_route             Boolean  @default(false)
+  is_transmog          Boolean  @default(false)
+  guide_type           String?
+  map_image_url        String?  @db.VarChar(1024)
+  recommended_addons   Json?
+  macro_string         String?  @db.Text
+  gold_sessions        Json?
+  description          String?  @db.Text
+  steps                String?  @db.Text
+  thumbnail_url        String?  @db.VarChar(1024)
+  video_thumbnail_path String?  @db.VarChar(1024)
+  youtube_video_id     String?
+  time_to_complete     String?
+  recommended_class    String?
+  required_items       String?  @db.Text
+  items_of_note        Json?
+  gold_pr_hour         String?
+  tsm_import_string    String?  @db.Text
+  route_string         String?  @db.Text
+  slider_images        String?  @db.Text
+  tags                 String?  @db.Text
+  authorId             Int
+  author               User     @relation(fields: [authorId], references: [id])
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 model ItemPrice {
@@ -71,6 +68,9 @@ model ItemPrice {
   userRealmPrice   Int?
   regionalAvgPrice Int?
   updatedAt        DateTime @updatedAt
+
+
+  @@unique([itemId, region, realmSlug])
 
   @@index([itemId, region, realmSlug])
 }
@@ -116,3 +116,4 @@ model apiLog {
   message   String
   timestamp DateTime @default(now())
 }
+

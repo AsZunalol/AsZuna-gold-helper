@@ -1,5 +1,7 @@
+// src/app/api/blizzard/search/route.js
+
 import { NextResponse } from "next/server";
-import { getAccessToken } from "../token/route";
+import { getAccessToken } from "@/lib/wow/blizzard-api";
 
 // Helper function to search by name
 async function searchByName(accessToken, region, itemName) {
@@ -22,14 +24,13 @@ async function searchById(accessToken, region, itemId) {
   if (!response.ok) throw new Error("Failed to find item by ID.");
   const itemData = await response.json();
 
-  // We format the single result to look like the array from the search results
   return {
     results: [
       {
         data: {
           id: itemData.id,
           name: itemData.name,
-          media: { id: itemData.media.id },
+          media: { href: itemData.media?.href }, // Use optional chaining for safety
         },
       },
     ],
@@ -39,7 +40,7 @@ async function searchById(accessToken, region, itemId) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
-  const region = "us"; // Or dynamically get from user session if needed
+  const region = "us";
 
   if (!query) {
     return NextResponse.json(
@@ -49,21 +50,54 @@ export async function GET(request) {
   }
 
   try {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessToken(region);
     let searchData;
 
-    // Check if the query is a number (an ID) or a string (a name)
     if (!isNaN(query) && parseInt(query) > 0) {
       searchData = await searchById(accessToken, region, query);
     } else {
       searchData = await searchByName(accessToken, region, query);
     }
 
-    const formattedResults = searchData.results.map((item) => ({
-      id: item.data.id,
-      name: item.data.name.en_US,
-      icon: item.data.media.id,
-    }));
+    // --- START OF FIX ---
+    // This mapping is now more robust and checks for missing data before processing.
+    const formattedResults = await Promise.all(
+      searchData.results.map(async (item) => {
+        let iconUrl =
+          "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
+
+        // Check if media and href exist before trying to fetch
+        if (item.data.media && item.data.media.href) {
+          try {
+            const mediaResponse = await fetch(item.data.media.href, {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+
+            if (mediaResponse.ok) {
+              const mediaData = await mediaResponse.json();
+              const iconAsset = mediaData.assets?.find(
+                (asset) => asset.key === "icon"
+              );
+              if (iconAsset && iconAsset.value) {
+                iconUrl = iconAsset.value;
+              }
+            }
+          } catch (mediaError) {
+            console.error(
+              `Could not fetch media for item ${item.data.id}:`,
+              mediaError
+            );
+          }
+        }
+
+        return {
+          id: item.data.id,
+          name: item.data.name.en_US,
+          icon: iconUrl,
+        };
+      })
+    );
+    // --- END OF FIX ---
 
     return NextResponse.json(formattedResults);
   } catch (error) {

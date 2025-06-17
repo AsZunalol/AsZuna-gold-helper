@@ -1,146 +1,85 @@
 // src/app/admin/guides-list/page.jsx
-"use client"; // This must be at the very top
 
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import prisma from "@/lib/prisma";
+import { FilePenLine, Trash2 } from "lucide-react";
+import styles from "./guides-list.module.css"; // Using a new CSS module
 
-// Adjust path to Admin.module.css if it's in a different location relative to guides-list/page.jsx
-import styles from "../Admin.module.css";
-
-export default function AdminGuidesList() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [guides, setGuides] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (status === "loading") return; // Do nothing while session is loading
-
-    // Redirect if not authenticated or not an admin
-    if (status === "unauthenticated" || session?.user.role !== "ADMIN") {
-      router.push("/");
-      return;
-    }
-
-    const fetchGuides = async () => {
-      try {
-        const response = await fetch("/api/guides"); // Assuming a GET /api/guides endpoint
-        if (!response.ok) {
-          throw new Error("Failed to fetch guides.");
-        }
-        const data = await response.json();
-        setGuides(data);
-      } catch (err) {
-        console.error("Error fetching guides:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGuides();
-  }, [session, status, router]);
-
-  // Initial loading state or access denied
-  if (loading || status === "loading") {
-    return (
-      <div className={styles.container}>
-        <h1 style={{ textAlign: "center", marginTop: "5rem", color: "white" }}>
-          Loading Guides...
-        </h1>
-      </div>
-    );
+async function getGuides() {
+  try {
+    const guides = await prisma.guide.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        author: {
+          select: { username: true },
+        },
+      },
+    });
+    return guides;
+  } catch (error) {
+    console.error("Failed to fetch guides:", error);
+    return [];
   }
+}
 
-  // Access denied after loading
-  if (status === "unauthenticated" || session?.user.role !== "ADMIN") {
-    return (
-      <div className={styles.container}>
-        <h1 style={{ textAlign: "center", marginTop: "5rem", color: "white" }}>
-          Access Denied
-        </h1>
-        <p
-          style={{ textAlign: "center", color: "var(--color-text-secondary)" }}
-        >
-          You do not have permission to view this page.
-        </p>
-      </div>
-    );
-  }
+export default async function GuidesListPage() {
+  const guides = await getGuides();
 
   return (
     <div className={styles.container}>
-      <h1
-        style={{
-          textAlign: "center",
-          marginBottom: "2.5rem",
-          color: "white",
-          textShadow: "var(--shadow-glow-md)",
-        }}
-      >
-        Manage Guides
-      </h1>
-      {error && <p className={styles.errorMessage}>{error}</p>}
-
-      <div className={styles.guideGrid}>
-        {guides.length === 0 ? (
-          <p
-            style={{
-              textAlign: "center",
-              width: "100%",
-              color: "var(--color-text-secondary)",
-            }}
-          >
-            No guides found.{" "}
-            <Link
-              href="/admin/create-guide"
-              style={{ color: "var(--color-primary)" }}
-            >
-              Create one now!
-            </Link>
-          </p>
-        ) : (
-          guides.map((guide) => (
-            <div key={guide.id} className={styles.guideCard}>
-              <div className={styles.guideCardImage}>
-                <Image
-                  src={guide.thumbnail_url || "/images/default-thumb.jpg"}
-                  alt={guide.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-              <div className={styles.guideCardContent}>
-                <h3 className={styles.guideCardTitle}>{guide.title}</h3>
-                <p className={styles.guideCardMeta}>
-                  Category: {guide.category || "N/A"}{" "}
-                  {guide.expansion && ` | Expansion: ${guide.expansion}`}
-                </p>
-                <div className={styles.guideCardActions}>
-                  <Link
-                    href={`/admin/edit-guide/${guide.id}`}
-                    className={styles.editButton}
-                  >
-                    Edit
-                  </Link>
-                  {/* Delete functionality would be here. Example: */}
-                  {/* <button className={styles.deleteButton} onClick={() => handleDelete(guide.id)}>Delete</button> */}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+      <div className={styles.header}>
+        <h1>Manage Guides</h1>
       </div>
-      <div style={{ textAlign: "center", marginTop: "3rem" }}>
-        <Link href="/admin/create-guide" className={styles.addGuideButton}>
-          + Create New Guide
-        </Link>
-      </div>
+      {guides.length > 0 ? (
+        <div className={styles.tableWrapper}>
+          <table className={styles.guidesTable}>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Author</th>
+                <th>Last Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {guides.map((guide) => (
+                <tr key={guide.id}>
+                  <td>{guide.title}</td>
+                  <td>{guide.category}</td>
+                  <td>
+                    <span
+                      className={`${styles.statusPill} ${
+                        guide.status === "PUBLISHED"
+                          ? styles.published
+                          : styles.draft
+                      }`}
+                    >
+                      {guide.status}
+                    </span>
+                  </td>
+                  <td>{guide.author.username}</td>
+                  <td>{new Date(guide.updatedAt).toLocaleDateString()}</td>
+                  <td className={styles.actionsCell}>
+                    <Link
+                      href={`/admin/edit-guide/${guide.id}`}
+                      className={styles.actionButton}
+                    >
+                      <FilePenLine size={16} /> Edit
+                    </Link>
+                    {/* You would add a delete button/handler here */}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p>No guides found.</p>
+      )}
     </div>
   );
 }

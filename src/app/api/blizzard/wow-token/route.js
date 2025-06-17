@@ -1,6 +1,11 @@
+// src/app/api/blizzard/wow-token/route.js
+
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getAccessToken } from "../token/route";
+// --- START OF FIX ---
+// Import the centralized getAccessToken function from your utility file
+import { getAccessToken } from "@/lib/wow/blizzard-api";
+// --- END OF FIX ---
 
 async function getTokenDataForRegion(region, accessToken) {
   const now = new Date();
@@ -8,8 +13,6 @@ async function getTokenDataForRegion(region, accessToken) {
     where: { region },
   });
 
-  // **Original Hourly Logic (Restored)**
-  // This robust check determines if the top of the hour has passed.
   const isStale =
     !lastPriceRecord ||
     new Date(lastPriceRecord.updatedAt).getHours() !== now.getHours();
@@ -96,7 +99,9 @@ async function getTokenDataForRegion(region, accessToken) {
 
 export async function GET() {
   try {
-    const accessToken = await getAccessToken();
+    // A single token is valid for all regions. We'll get a US token to use for all requests.
+    const accessToken = await getAccessToken("us");
+
     const [usData, euData] = await Promise.all([
       getTokenDataForRegion("us", accessToken),
       getTokenDataForRegion("eu", accessToken),

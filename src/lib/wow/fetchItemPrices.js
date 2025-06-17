@@ -1,127 +1,53 @@
-// src/utils/fetchItemPrices.js
+// src/lib/wow/fetchItemPrices.js
 
-import axios from "axios";
+// Using fetch for consistency with other API utility files
+import { getAccessToken, getConnectedRealmId } from "./blizzard-api";
 
-const CLIENT_ID = process.env.BLIZZARD_CLIENT_ID;
-const CLIENT_SECRET = process.env.BLIZZARD_CLIENT_SECRET;
-
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-const cache = new Map();
-
-const getAccessToken = async () => {
-  const cacheKey = "blizzard_access_token";
-  const cached = cache.get(cacheKey);
-
-  if (cached && Date.now() < cached.expiresAt) {
-    return cached.token;
-  }
-
-  const response = await axios.post(
-    `https://oauth.battle.net/token`,
-    "grant_type=client_credentials",
-    {
-      auth: {
-        username: CLIENT_ID,
-        password: CLIENT_SECRET,
-      },
-    }
-  );
-
-  const token = response.data.access_token;
-  const expiresInMs = response.data.expires_in * 1000; // typically 86400 seconds
-  const expiresAt = Date.now() + expiresInMs;
-
-  cache.set(cacheKey, { token, expiresAt });
-  return token;
-};
-
+// This retry logic is now built for the native fetch API
 const retry = async (fn, retries = 3, delayMs = 500) => {
   try {
-    return await fn();
+    const res = await fn();
+    // If the response is not OK (e.g., 404, 500), it's an error
+    if (!res.ok) {
+      const error = new Error(`Request failed with status code ${res.status}`);
+      error.response = res;
+      throw error;
+    }
+    // If successful, parse the JSON response
+    return res.json();
   } catch (err) {
     if (retries > 0) {
+      // Wait a moment and try again
       await new Promise((res) => setTimeout(res, delayMs));
       return retry(fn, retries - 1, delayMs);
     }
-    throw err;
+    // If all retries fail, log the error and return null so the app doesn't crash
+    console.error(`Request failed after all retries:`, err.message);
+    return null;
   }
-};
-
-const getConnectedRealmIdFromSlug = async (realmSlug, region, accessToken) => {
-  const cacheKey = `realmId:${region}:${realmSlug}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.value;
-  }
-
-  const response = await retry(() =>
-    axios.get(
-      `https://${region}.api.blizzard.com/data/wow/realm/${realmSlug}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          namespace: `dynamic-${region}`,
-          locale: "en_US",
-        },
-      }
-    )
-  );
-
-  const href = response.data.connected_realm.href;
-  const match = href.match(/connected-realm\/(\d+)/);
-  if (!match) throw new Error("Failed to parse connected realm ID");
-
-  const realmId = match[1];
-  cache.set(cacheKey, { value: realmId, timestamp: Date.now() });
-  return realmId;
 };
 
 const getItemPriceFromCommodities = async (itemId, region, accessToken) => {
-  console.log(
-    `📦 Fetching commodity auctions for region ${region}, item ${itemId}...`
-  );
-
-  const cacheKey = `commodity:${region}:${itemId}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.value;
-  }
-
-  const response = await retry(() =>
-    axios.get(
-      `https://${region}.api.blizzard.com/data/wow/auctions/commodities`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          namespace: `dynamic-${region}`,
-          locale: "en_US",
-        },
-      }
+  const data = await retry(() =>
+    fetch(
+      `https://${region}.api.blizzard.com/data/wow/auctions/commodities?namespace=dynamic-${region}&locale=en_US`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
     )
   );
 
-  const auctions = response.data.auctions;
-  const itemAuctions = auctions.filter((auction) => auction.item.id === itemId);
+  if (!data || !data.auctions) return null;
 
-  console.log(`🔎 Commodities: ${itemAuctions.length} matched item ID`);
+  const itemAuctions = data.auctions.filter(
+    (auction) => auction.item.id === itemId
+  );
 
   if (itemAuctions.length === 0) return null;
-
   const prices = itemAuctions
     .map((a) => a.unit_price ?? a.buyout)
     .filter((price) => typeof price === "number" && price > 0);
-
   if (prices.length === 0) return null;
 
-  const avgPrice = Math.round(
-    prices.reduce((a, b) => a + b, 0) / prices.length
-  );
-  cache.set(cacheKey, { value: avgPrice, timestamp: Date.now() });
-  return avgPrice;
+  return Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
 };
 
 const getItemPriceFromServer = async (
@@ -130,66 +56,28 @@ const getItemPriceFromServer = async (
   region,
   accessToken
 ) => {
-  const cacheKey = `price:${region}:${connectedRealmId}:${itemId}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.value;
-  }
+  if (!connectedRealmId) return null;
 
-  console.log(
-    `📦 Fetching auctions for realm ${connectedRealmId}, item ${itemId}...`
-  );
-
-  const response = await retry(() =>
-    axios.get(
-      `https://${region}.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        params: {
-          namespace: `dynamic-${region}`,
-          locale: "en_US",
-        },
-      }
+  const data = await retry(() =>
+    fetch(
+      `https://${region}.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=dynamic-${region}&locale=en_US`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
     )
   );
 
-  const auctions = response.data.auctions;
-  console.log(
-    `🔍 Realm ${connectedRealmId}: ${auctions.length} total auctions`
-  );
+  if (!data || !data.auctions) return null;
 
-  const itemIds = new Set();
-  auctions.forEach((a) => {
-    if (a.item && a.item.id) itemIds.add(a.item.id);
-  });
-
-  console.log(
-    `🧾 Realm ${connectedRealmId}: Found ${itemIds.size} unique item IDs`
-  );
-  console.log("🔢 Sample item IDs:", Array.from(itemIds).slice(0, 10));
-
-  const itemAuctions = auctions.filter((auction) => auction.item.id === itemId);
-  console.log(
-    `🔎 Realm ${connectedRealmId}: ${itemAuctions.length} matched item ID`
+  const itemAuctions = data.auctions.filter(
+    (auction) => auction.item.id === itemId
   );
 
   if (itemAuctions.length === 0) return null;
-
   const prices = itemAuctions
     .map((a) => a.unit_price ?? a.buyout)
     .filter((price) => typeof price === "number" && price > 0);
-
-  console.log(`💰 Realm ${connectedRealmId}: ${prices.length} valid prices`);
-
   if (prices.length === 0) return null;
 
-  const avgPrice = Math.round(
-    prices.reduce((a, b) => a + b, 0) / prices.length
-  );
-  cache.set(cacheKey, { value: avgPrice, timestamp: Date.now() });
-  return avgPrice;
+  return Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
 };
 
 const fetchItemPrices = async (
@@ -199,52 +87,50 @@ const fetchItemPrices = async (
   regionalServerSlugs
 ) => {
   try {
-    const accessToken = await getAccessToken();
+    const accessToken = await getAccessToken(region);
 
-    const userPriceFromCommodity = await getItemPriceFromCommodities(
+    const commodityPrice = await getItemPriceFromCommodities(
       itemId,
       region,
       accessToken
     );
-
-    if (userPriceFromCommodity !== null) {
+    if (commodityPrice !== null) {
       return {
-        userServerPrice: userPriceFromCommodity,
-        regionalMarketPrice: userPriceFromCommodity,
+        userServerPrice: commodityPrice,
+        regionalMarketPrice: commodityPrice,
       };
     }
 
-    const userConnectedRealmId = await getConnectedRealmIdFromSlug(
-      userServerSlug,
-      region,
-      accessToken
-    );
+    const allUniqueServerSlugs = [
+      ...new Set([userServerSlug, ...regionalServerSlugs]),
+    ];
 
-    const regionalConnectedRealmIds = await Promise.all(
-      regionalServerSlugs.map((slug) =>
-        getConnectedRealmIdFromSlug(slug, region, accessToken)
+    const allRealmIds = (
+      await Promise.all(
+        allUniqueServerSlugs.map((slug) => getConnectedRealmId(region, slug))
       )
-    );
+    ).filter(Boolean);
 
-    const userServerPricePromise = getItemPriceFromServer(
-      itemId,
-      userConnectedRealmId,
-      region,
-      accessToken
-    );
-
-    const regionalPricesPromises = regionalConnectedRealmIds.map((id) =>
+    const pricePromises = allRealmIds.map((id) =>
       getItemPriceFromServer(itemId, id, region, accessToken)
     );
 
-    const [userServerPrice, ...regionalPrices] = await Promise.all([
-      userServerPricePromise,
-      ...regionalPricesPromises,
-    ]);
+    const prices = await Promise.all(pricePromises);
 
-    const validRegionalPrices = regionalPrices.filter(
-      (price) => price !== null
+    const priceMap = new Map();
+    allRealmIds.forEach((id, index) => {
+      if (prices[index] !== null) {
+        priceMap.set(id, prices[index]);
+      }
+    });
+
+    const userConnectedRealmId = await getConnectedRealmId(
+      region,
+      userServerSlug
     );
+    const userServerPrice = priceMap.get(userConnectedRealmId) ?? null;
+
+    const validRegionalPrices = Array.from(priceMap.values());
     const regionalMarketPrice =
       validRegionalPrices.length > 0
         ? Math.round(
@@ -253,16 +139,10 @@ const fetchItemPrices = async (
           )
         : null;
 
-    return {
-      userServerPrice,
-      regionalMarketPrice,
-    };
+    return { userServerPrice, regionalMarketPrice };
   } catch (error) {
-    console.error("Error fetching item prices:", error);
-    return {
-      userServerPrice: null,
-      regionalMarketPrice: null,
-    };
+    console.error("Error in fetchItemPrices orchestration:", error);
+    return { userServerPrice: null, regionalMarketPrice: null };
   }
 };
 

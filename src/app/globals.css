@@ -1,3 +1,5 @@
+/* src/app/globals.css */
+
 /* ===================================================================================
 //
 //  AsZuna's Gold Helper - Main Stylesheet
@@ -68,6 +70,9 @@ body {
   color: var(--color-text-main);
   line-height: 1.7;
   overflow-x: hidden; /* Prevent horizontal scroll on small screens */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 h1,
@@ -128,6 +133,10 @@ header {
 
 main {
   padding-top: 80px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 nav {
@@ -165,7 +174,7 @@ nav a:hover {
 
 footer {
   padding: 3rem 2rem;
-  margin-top: 4rem;
+  margin-top: auto; /* Pushes footer to the bottom */
   color: var(--color-text-secondary);
   border-top: 1px solid var(--color-border);
   border-bottom: none;
@@ -558,7 +567,11 @@ footer {
 .admin-content-card {
   padding: 0;
   border-radius: 16px;
-  overflow: hidden;
+  position: relative;
+}
+
+.admin-content-card:focus-within {
+  z-index: 20;
 }
 
 .collapsible-header-static {
@@ -592,11 +605,11 @@ footer {
   padding: 2rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
+  position: relative;
 }
-.sidebar-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-glow-sm);
-  transform: translateY(-2px);
+
+.sidebar-card:focus-within {
+  z-index: 20;
 }
 
 .page-container h2 {
@@ -1100,7 +1113,13 @@ footer {
 /* --- Forms --- */
 .form-group {
   margin-bottom: 1.5rem;
+  position: relative;
 }
+
+.form-group:focus-within {
+  z-index: 10;
+}
+
 .sidebar-card .form-group {
   margin-bottom: 1rem;
 }
@@ -1732,6 +1751,9 @@ footer {
   box-shadow: var(--shadow-md);
 }
 .search-results-list li {
+  display: flex; /* Added for alignment */
+  align-items: center; /* Added for alignment */
+  gap: 0.75rem; /* Added for spacing */
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
@@ -1780,4 +1802,175 @@ footer {
 }
 .item-price-container div:first-child {
   color: var(--color-primary);
+}
+
+/* New Gold Session Styles */
+.gold-session-inputs {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.gold-session-inputs input {
+  flex-grow: 1;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+}
+
+.gph-display {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: 8px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.gph-display span {
+  color: var(--color-primary);
+  margin-left: 0.5rem;
+}
+
+.item-content .item-link svg {
+  margin-right: 0.25rem;
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================================================
+   8. GUIDE DISPLAY & PREVIEW STYLES
+   ========================================================================== */
+
+.guide-outer {
+  background-color: var(--color-background);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 1400px;
+}
+
+.guide-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.thumbnail-wrapper {
+  width: 100%;
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.thumbnail-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0.75rem;
+}
+
+.thumbnail-overlay-box {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  max-width: 90%;
+  z-index: 10;
+}
+
+.thumbnail-overlay-content {
+  min-width: 320px;
+  background: linear-gradient(
+    135deg,
+    rgba(15, 23, 42, 0.85),
+    rgba(30, 41, 59, 0.8)
+  );
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  color: #f8fafc;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.guide-title-overlay {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+.guide-expansion {
+  font-size: 1rem;
+  color: inherit;
+}
+
+.guide-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.guide-content {
+  width: 100%;
+}
+
+.guide-right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 100px;
+}
+
+.map-notes-box {
+  background-color: var(--color-surface);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  color: #f1f5f9;
+}
+
+.map-notes-box h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.75rem;
+}
+
+.map-notes-box ul {
+  padding-left: 1.2rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.map-notes-box ul li {
+  margin-bottom: 0.5rem;
+}
+
+.map-notes-box .code-block {
+  margin-top: 1rem;
+  font-size: 0.85em;
 }

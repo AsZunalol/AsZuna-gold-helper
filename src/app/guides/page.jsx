@@ -1,31 +1,31 @@
-// aszunalol/aszuna-gold-helper/AsZuna-gold-helper-e7b64661f52d01644dc7d7dea50098deeb640633/src/app/guides/page.jsx
+// src/app/guides/page.jsx
 
 import Link from "next/link";
 import Image from "next/image";
-import prisma from "@/lib/prisma"; // Use the shared PrismaClient instance
+import prisma from "@/lib/prisma";
 
-// Function to fetch all guides from the database
-async function getAllGuides() {
+async function getPublishedGuides() {
   try {
     const guides = await prisma.guide.findMany({
-      where: { is_route: false }, // Assuming 'routes' are separate from 'guides' based on homepage logic
-      orderBy: { createdAt: "desc" }, // Order by most recent
+      where: {
+        status: "PUBLISHED", // Only fetch published guides
+      },
+      orderBy: { createdAt: "desc" },
     });
     return guides;
   } catch (error) {
-    console.error("Failed to fetch guides:", error);
+    console.error("Failed to fetch published guides:", error);
     return [];
   }
 }
 
 export const metadata = {
-  title: "All Gold Guides - AsZuna's Gold Helper",
-  description:
-    "Browse all World of Warcraft gold-making guides and strategies.",
+  title: "Gold-Making Guides - AsZuna's Gold Helper",
+  description: "Browse all World of Warcraft gold-making guides.",
 };
 
 export default async function GuidesPage() {
-  const guides = await getAllGuides();
+  const guides = await getPublishedGuides();
 
   return (
     <main className="page-container">
@@ -33,7 +33,7 @@ export default async function GuidesPage() {
         className="section-title"
         style={{ textAlign: "center", marginBottom: "3rem" }}
       >
-        All Gold Guides
+        All Guides
       </h1>
 
       <div className="guides-grid-container">
@@ -44,7 +44,7 @@ export default async function GuidesPage() {
               color: "var(--color-text-secondary)",
             }}
           >
-            No guides found. Check back soon for new content!
+            No guides have been published yet. Check back soon!
           </p>
         ) : (
           <div className="guides-grid">
@@ -69,7 +69,6 @@ export default async function GuidesPage() {
                 <div className="guide-card-content">
                   <h3>{guide.title}</h3>
                   <p className="guide-description">{guide.description}</p>
-                  {/* Potentially add more details here like author, date, etc. */}
                 </div>
               </Link>
             ))}

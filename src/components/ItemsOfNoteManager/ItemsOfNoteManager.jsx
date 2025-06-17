@@ -1,3 +1,5 @@
+// src/components/ItemsOfNoteManager/ItemsOfNoteManager.jsx
+
 "use client";
 import React, { useState } from "react";
 import { Trash2, LoaderCircle, Server, Globe } from "lucide-react";
@@ -29,7 +31,11 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
 
       try {
         const response = await fetch(
-          `/api/blizzard/item-price?itemId=${newItem.id}&region=${region}&realmSlug=${realm}`
+          `/api/blizzard/item-price?itemId=${
+            newItem.id
+          }&region=${region}&realmSlug=${realm}&itemName=${encodeURIComponent(
+            newItem.name
+          )}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -41,6 +47,7 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       } finally {
         setItems((prevItems) => [
           ...prevItems,
+          // Make sure to include the icon from newItem in the final object
           { ...newItem, serverPrice, regionalAveragePrice },
         ]);
         setLoadingPrices((prev) => ({ ...prev, [newItem.id]: false }));
@@ -69,11 +76,13 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
                   gap: "0.75rem",
                 }}
               >
+                {/* Use the item.icon URL directly in the src attribute */}
                 <img
-                  src={`https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg`}
-                  data-wowhead={`item=${item.id}&domain=www`}
+                  src={item.icon}
                   alt={item.name}
                   className="item-icon-small"
+                  width="24"
+                  height="24"
                 />
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   <span className="item-name">{item.name}</span>

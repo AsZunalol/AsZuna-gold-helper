@@ -1,3 +1,5 @@
+// src/components/ItemSearch/ItemSearch.jsx
+
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { Search, LoaderCircle } from "lucide-react";
@@ -10,20 +12,17 @@ export default function ItemSearch({ onItemSelected }) {
   const [error, setError] = useState("");
 
   const fetchItems = async (query) => {
-    if (query.length < 3) {
+    if (query.length < 2) {
+      // Changed to 2 for better UX
       setResults([]);
       return;
     }
     setIsLoading(true);
     setError("");
     try {
-      // --- THIS IS THE FIX ---
-      // Changed 'itemName' to 'query' to match the API route
       const response = await fetch(
         `/api/blizzard/search?query=${encodeURIComponent(query)}`
       );
-      // ---------------------
-
       if (!response.ok) {
         throw new Error("Failed to fetch items from server.");
       }
@@ -68,11 +67,13 @@ export default function ItemSearch({ onItemSelected }) {
         <ul className="search-results-list">
           {results.map((item) => (
             <li key={item.id} onClick={() => handleSelect(item)}>
+              {/* Use the new icon URL directly in the src attribute */}
               <img
-                src={`https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg`}
-                data-wowhead={`item=${item.id}&domain=www&icon-size=large`}
+                src={item.icon}
                 alt={item.name}
                 className="item-icon"
+                width="36"
+                height="36"
               />
               <span>{item.name}</span>
             </li>
