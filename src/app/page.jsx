@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PrismaClient } from "@prisma/client";
-import HomepageSlideshow from "@/components/HomepageSlideshow";
-import ParticlesComponent from "@/components/ParticlesComponent";
+import HomepageSlideshow from "@/components/HomepageSlideshow/HomepageSlideshow";
+import ParticlesComponent from "@/components/ParticlesComponent/ParticlesComponent";
 
 const prisma = new PrismaClient();
 

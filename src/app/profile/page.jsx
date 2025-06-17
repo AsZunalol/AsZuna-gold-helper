@@ -1,51 +1,67 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import RegionRealmSelector from "@/components/RegionRealmSelector";
+import Image from "next/image";
+import RegionRealmSelector from "@/components/RegionRealmSelector/RegionRealmSelector";
+import ChangePasswordModal from "@/components/ChangePasswordModal/ChangePasswordModal";
 import { toast } from "react-hot-toast";
+import { Eye, KeyRound } from "lucide-react";
+import styles from "./profile.module.css";
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
 
-  const [region, setRegion] = useState("");
-  const [realm, setRealm] = useState("");
-  const [initialRegion, setInitialRegion] = useState("");
-  const [initialRealm, setInitialRealm] = useState("");
-  const [initialLoaded, setInitialLoaded] = useState(false);
+  const [formState, setFormState] = useState({ region: "", realm: "" });
+  const [initialState, setInitialState] = useState({ region: "", realm: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("settings");
+  const [isEmailVisible, setIsEmailVisible] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
+
+  const favoriteGuides = []; // Placeholder
 
   useEffect(() => {
-    if (session) {
-      const r = session.user.region || "us";
-      const rl = session.user.realm || "stormrage";
-      console.log("Session loaded:", r, rl); // 🔍 Debug log
-      setRegion(r);
-      setRealm(rl);
-      setInitialRegion(r);
-      setInitialRealm(rl);
-      setInitialLoaded(true);
+    if (session?.user) {
+      const initialData = {
+        region: session.user.region || "us",
+        realm: session.user.realm || "stormrage",
+      };
+      setFormState(initialData);
+      setInitialState(initialData);
     }
   }, [session]);
 
+  const handleRegionChange = useCallback((newRegion) => {
+    setFormState({ region: newRegion, realm: "" });
+  }, []);
+
+  const handleRealmChange = useCallback((newRealm) => {
+    setFormState((prevState) => ({ ...prevState, realm: newRealm }));
+  }, []);
+
   const handleSettingsSubmit = async (e) => {
     e.preventDefault();
-    if (!region || !realm) {
-      setMessage("Please select both region and realm.");
-      toast.error("Missing region or realm");
+    if (!formState.region || !formState.realm) {
+      toast.error("Please select a region and realm.");
       return;
     }
+
+    const previousInitialState = { ...initialState };
+
+    // **Optimistic UI Update:**
+    // Update the UI state immediately, assuming success.
+    setInitialState(formState);
     setIsLoading(true);
-    setMessage("");
 
     try {
       const response = await fetch("/api/user/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ region, realm }),
+        body: JSON.stringify(formState),
       });
 
       if (!response.ok) {
@@ -53,80 +69,135 @@ export default function ProfilePage() {
         throw new Error(errorData.message || "Failed to save settings.");
       }
 
-      await update({ region, realm });
-      setInitialRegion(region);
-      setInitialRealm(realm);
+      // Update the session in the background
+      await update(formState);
 
-      // Force refresh of session data (optional)
-      router.refresh();
-
-      toast.success("Settings saved successfully!");
+      toast.success("Settings saved successfully!", { duration: 4000 });
     } catch (error) {
-      setMessage(error.message);
-      toast.error("Failed to save settings");
+      // If the save fails, revert the UI state and show an error.
+      setInitialState(previousInitialState);
+      toast.error("Failed to save settings: " + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const hasChanges =
-    initialLoaded && (region !== initialRegion || realm !== initialRealm);
+    formState.region !== initialState.region ||
+    formState.realm !== initialState.realm;
 
   if (status === "loading") return <p>Loading profile...</p>;
   if (status === "unauthenticated") {
     router.push("/");
-    console.log("initialLoaded:", initialLoaded);
-    console.log("region:", region, "initialRegion:", initialRegion);
-    console.log("realm:", realm, "initialRealm:", initialRealm);
-    console.log("hasChanges:", hasChanges);
     return null;
   }
 
   return (
     <main className="page-container">
-      <h2 className="profile-main-title">Your Profile</h2>
-
-      {session?.user && (
-        <div className="glass-panel profile-card profile-header-card">
-          <h3 className="section-subtitle">Account Information</h3>
-          <p>
-            <strong>Username:</strong> {session.user.name}
-          </p>
-          <p>
-            <strong>Email:</strong> {session.user.email}
-          </p>
-          <p>
-            <strong>Role:</strong> {session.user.role}
-          </p>
+      <div className={styles.profileGrid}>
+        <div className={styles.leftColumn}>
+          <div className={styles.userCard}>
+            <div className={styles.userAvatar}>
+              <Image
+                src={session.user.imageUrl || "/images/default-avatar.png"}
+                alt="User Avatar"
+                width={100}
+                height={100}
+              />
+            </div>
+            <h2 className={styles.username}>{session.user.name}</h2>
+            <div className={styles.userStats}>
+              <div className={styles.stat}>
+                <span className={styles.statValue}>
+                  {favoriteGuides.length}
+                </span>
+                <span className={styles.statLabel}>Favorite Guides</span>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
-
-      <div className="profile-body-grid">
-        <div className="glass-panel profile-card wow-settings-card">
-          <h3 className="section-subtitle">WoW Game Settings</h3>
-          <form onSubmit={handleSettingsSubmit}>
-            <RegionRealmSelector
-              defaultRegion={region}
-              defaultRealm={realm}
-              onChange={({ region, realm }) => {
-                setRegion(region);
-                setRealm(realm);
-              }}
-            />
-
+        <div className={styles.rightColumn}>
+          <div className={styles.tabs}>
             <button
-              type="submit"
-              className="form-button"
-              disabled={isLoading /* remove || !hasChanges for testing */}
+              className={`${styles.tabButton} ${
+                activeTab === "favorites" ? styles.activeTab : ""
+              }`}
+              onClick={() => setActiveTab("favorites")}
             >
-              {isLoading ? "Saving..." : "Save Settings"}
+              Favorite Guides
             </button>
-            {message && (
-              <p className="form-message success-message">{message}</p>
+            <button
+              className={`${styles.tabButton} ${
+                activeTab === "settings" ? styles.activeTab : ""
+              }`}
+              onClick={() => setActiveTab("settings")}
+            >
+              Settings
+            </button>
+          </div>
+          <div className={styles.tabContent}>
+            {activeTab === "favorites" && (
+              <div className={styles.favoritesGrid}>
+                <p>Your favorite guides will appear here.</p>
+              </div>
             )}
-          </form>
+            {activeTab === "settings" && (
+              <div className={styles.settingsGrid}>
+                <div className={styles.settingsColumn}>
+                  <h3 className={styles.sectionSubtitle}>Account Settings</h3>
+                  <div className={styles.settingItem}>
+                    <div className={styles.settingLabel}>Email Address</div>
+                    <div className={styles.settingValue}>
+                      {isEmailVisible ? session.user.email : "••••••••••••••"}
+                    </div>
+                    <button
+                      className={styles.settingButton}
+                      onClick={() => setIsEmailVisible(!isEmailVisible)}
+                    >
+                      <Eye size={18} />
+                      <span>{isEmailVisible ? "Hide" : "Show"}</span>
+                    </button>
+                  </div>
+                  <div className={styles.settingItem}>
+                    <div className={styles.settingLabel}>Password</div>
+                    <div className={styles.settingValue}>••••••••</div>
+                    <button
+                      className={styles.settingButton}
+                      onClick={() => setIsChangePasswordModalOpen(true)}
+                    >
+                      <KeyRound size={18} />
+                      <span>Change</span>
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.settingsColumn}>
+                  <h3 className={styles.sectionSubtitle}>WoW Game Settings</h3>
+                  <form onSubmit={handleSettingsSubmit}>
+                    <RegionRealmSelector
+                      region={formState.region}
+                      realm={formState.realm}
+                      onRegionChange={handleRegionChange}
+                      onRealmChange={handleRealmChange}
+                    />
+                    <button
+                      type="submit"
+                      className="form-button"
+                      disabled={isLoading || !hasChanges}
+                    >
+                      {isLoading ? "Saving..." : "Save Settings"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      {isChangePasswordModalOpen && (
+        <ChangePasswordModal
+          onClose={() => setIsChangePasswordModalOpen(false)}
+        />
+      )}
     </main>
   );
 }

@@ -1,18 +1,27 @@
-// aszunalol/aszuna-gold-helper/AsZuna-gold-helper-e7b64661f52d01644dc7d7dea50098deeb640633/src/app/api/upload/route.js
-
 import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]/route"; // Make sure this path is correct
+import { authOptions } from "../auth/[...nextauth]/route";
+import prisma from "@/lib/prisma"; // Import prisma
 
 export async function POST(request) {
   try {
-    // --- Re-enabled Security Check ---
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "ADMIN") {
+
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    // --------------------------------
+
+    // **NEW SECURITY CHECK**
+    // Fetch the user's current data from the database
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    // Check the role from the fresh database data
+    if (!currentUser || !["ADMIN", "OWNER"].includes(currentUser.role)) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get("filename");
@@ -26,7 +35,7 @@ export async function POST(request) {
 
     const blob = await put(filename, request.body, {
       access: "public",
-      addRandomSuffix: true, // Added this line to fix the "blob already exists" error
+      addRandomSuffix: true,
     });
 
     return NextResponse.json(blob);

@@ -5,7 +5,7 @@
 //  TABLE OF CONTENTS
 //  1.  Root & Global Styles
 //  2.  Layout (Header, Footer, Main)
-//  3.  Page-Specific Styles (Homepage, Admin, Profile, Guides)
+//  3.  Page-Specific Styles (Homepage, Admin, Guides)
 //  4.  Reusable Components (Buttons, Cards)
 //  5.  UI Components (Modals, Dropdowns, Pills, etc.)
 //  6.  Tiptap Editor & Content Management
@@ -16,6 +16,9 @@
 /* ==========================================================================
    1. ROOT & GLOBAL STYLES
    ========================================================================== */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --color-background: #0d1117; /* Deep charcoal/black */
@@ -209,6 +212,12 @@ footer {
   gap: 1rem;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .user-menu-container,
 .admin-dropdown-container {
   position: relative;
@@ -297,7 +306,7 @@ footer {
 }
 
 /* ==========================================================================
-   3. PAGE-SPECIFIC STYLES (HOMEPAGE, ADMIN, PROFILE, GUIDES)
+   3. PAGE-SPECIFIC STYLES (HOMEPAGE, ADMIN, GUIDES)
    ========================================================================== */
 
 /* --- Homepage --- */
@@ -375,25 +384,24 @@ footer {
 /* Homepage Slideshow Styling */
 .slideshow-container {
   position: relative;
-  max-width: 1200px; /* Limit width to avoid stretching too much */
-  margin: 0 auto; /* Center the slideshow */
-  height: 400px; /* Fixed height for consistency, adjust as needed */
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 400px;
   overflow: hidden;
-  border-radius: 12px; /* Consistent with other cards */
-  box-shadow: var(--shadow-md); /* Add a subtle shadow */
-  background-color: var(--color-surface); /* Fallback background */
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  background-color: var(--color-surface);
   transition: all 0.3s ease;
 }
 
 .slideshow-container .prev {
-  /* ADDED/MODIFIED THIS RULE */
-  left: 0; /* Positions the 'prev' button to the left edge */
-  border-radius: 0 3px 3px 0; /* Ensures correct rounded corners for left side */
+  left: 0;
+  border-radius: 0 3px 3px 0;
 }
 
 .slideshow-container .next {
-  right: 0; /* Positions the 'next' button to the right edge */
-  border-radius: 3px 0 0 3px; /* Ensures correct rounded corners for right side */
+  right: 0;
+  border-radius: 3px 0 0 3px;
 }
 
 .slideshow-container .prev:hover,
@@ -408,11 +416,11 @@ footer {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 1s ease-in-out; /* Smooth fade transition between slides */
+  transition: opacity 1s ease-in-out;
   display: flex;
-  align-items: flex-end; /* Align slide-text to bottom */
-  justify-content: flex-start; /* Align slide-text to left */
-  padding: 2rem; /* Padding for content inside slide */
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 2rem;
 }
 
 .slide.active {
@@ -420,35 +428,30 @@ footer {
 }
 
 .slide img {
-  /* Next/Image `fill` prop handles width/height/position */
-  object-fit: cover; /* Ensure image covers the slide area */
-  filter: brightness(0.7); /* Slightly dim the image for text readability */
-  transition: filter 1s ease-in-out; /* Smooth dimming transition */
+  object-fit: cover;
+  filter: brightness(0.7);
+  transition: filter 1s ease-in-out;
 }
 
 .slide.active img {
-  filter: brightness(1); /* Return to full brightness when active */
+  filter: brightness(1);
 }
 
 .slide-text {
-  position: relative; /* Position relative to the slide */
-  z-index: 10; /* Ensure text is above the image */
+  position: relative;
+  z-index: 10;
   color: white;
   text-align: left;
-  max-width: 60%; /* Limit text width for better readability */
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0)
-  ); /* Gradient background for text readability */
-  padding: 1rem 1.5rem; /* Padding within the text overlay */
-  border-radius: 8px; /* Rounded corners for the text overlay */
+  max-width: 60%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
 }
 
 .slide-text h3 {
-  font-size: 1.8rem; /* Larger title for impact */
+  font-size: 1.8rem;
   margin-bottom: 0.5rem;
-  color: white; /* Title white for contrast */
+  color: white;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
 }
 
@@ -469,7 +472,6 @@ footer {
   transform: translateY(-2px);
 }
 
-/* Slideshow navigation arrows */
 .slideshow-container .prev,
 .slideshow-container .next {
   cursor: pointer;
@@ -498,10 +500,6 @@ footer {
 }
 
 /* --- Admin Pages --- */
-/* The main container for the admin page is now handled by Admin.module.css .container */
-/* Ensure the page-container is removed from here if it was wrapping the entire main for admin pages */
-/* And if used for other pages, keep its original max-width and margin: auto for centering them. */
-/* If this page-container is *only* for admin pages, then these styles can be merged into Admin.module.css .container */
 .page-container {
   padding: 2rem;
   max-width: none;
@@ -512,13 +510,12 @@ footer {
   gap: 2.5rem;
 }
 
-/* Redesign admin-page-layout for full-width grid structure */
 .admin-page-layout {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
   width: 100%;
-  padding: 0 2rem; /* Add horizontal padding inside the layout to prevent content touching edges */
+  padding: 0 2rem;
   box-sizing: border-box;
 }
 
@@ -529,7 +526,6 @@ footer {
   }
 }
 
-/* General glass panel styling for content cards */
 .glass-panel {
   background-color: var(--color-glass-bg);
   backdrop-filter: blur(16px);
@@ -547,40 +543,34 @@ footer {
   transform: translateY(-3px);
 }
 
-/* Main content column adjustments */
 .main-content-col {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* Sidebar column adjustments */
 .sidebar-col {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* Card specific adjustments within admin pages */
-/* Removed collapsible-card specific styles, as they are no longer collapsible */
 .admin-content-card {
-  /* Now applies to all admin content cards, not just collapsible ones */
-  padding: 0; /* Keep padding at 0 as inner static header/content define it */
-  border-radius: 16px; /* Ensure this matches glass-panel */
-  overflow: hidden; /* Important for containing children with borders */
+  padding: 0;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-/* New Static Header for Admin Cards (replaces collapsible-header button behavior) */
 .collapsible-header-static {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem; /* Consistent with previous collapsible headers */
+  padding: 1.5rem 2rem;
   background-color: var(--color-overlay-dark);
-  border-bottom: 1px solid var(--color-border); /* Subtle divider below header */
-  border-top-left-radius: 16px; /* Match parent's border radius */
-  border-top-right-radius: 16px; /* Match parent's border radius */
+  border-bottom: 1px solid var(--color-border);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   color: white;
   font-family: var(--font-heading);
   text-align: left;
@@ -588,15 +578,13 @@ footer {
   font-weight: 700;
 }
 
-/* New Static Content Wrapper for Admin Cards */
 .collapsible-content-static {
-  padding: 1.5rem 2rem 2rem; /* Consistent padding */
-  background-color: var(--color-surface); /* Content background */
-  border-bottom-left-radius: 16px; /* Match parent's border radius */
-  border-bottom-right-radius: 16px; /* Match parent's border radius */
+  padding: 1.5rem 2rem 2rem;
+  background-color: var(--color-surface);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
-/* Adjust sidebar card styling */
 .sidebar-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -611,111 +599,12 @@ footer {
   transform: translateY(-2px);
 }
 
-/* Adjust title of admin page */
 .page-container h2 {
   text-align: center;
   font-size: 3rem;
   color: white;
   text-shadow: var(--shadow-glow-md);
   margin-bottom: 2.5rem;
-}
-
-/* --- Profile Page (Collapsible Design) --- */
-.profile-main-title {
-  text-align: center;
-  margin-bottom: 0;
-  font-size: 3.5rem;
-  color: white;
-  text-shadow: 0 0 15px rgba(0, 255, 170, 0.3);
-}
-
-/* Base styles for all profile cards (glass-panel is implicitly applied) */
-.profile-card {
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: all 0.3s ease;
-  border-radius: 16px;
-  box-shadow: inset 0 0 10px rgba(0, 255, 170, 0.05),
-    0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  background-color: var(--color-glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-border);
-}
-
-.profile-card:hover {
-  transform: translateY(-5px);
-  box-shadow: inset 0 0 15px rgba(0, 255, 170, 0.1),
-    0 12px 40px rgba(0, 0, 0, 0.5);
-}
-
-/* Profile Banner Card */
-.profile-banner-card {
-  text-align: center;
-}
-
-.profile-banner-card .section-subtitle {
-  font-size: 2.2rem;
-  margin-bottom: 1rem;
-}
-
-.profile-banner-card .banner-details p {
-  margin: 0.5rem 0;
-  font-size: 1.1em;
-  color: var(--color-text-secondary);
-}
-
-.profile-banner-card .banner-details strong {
-  color: var(--color-text-main);
-}
-
-/* Collapsible Card Specific Styles */
-/* These are general collapsible card styles, which are slightly overridden for admin pages where needed */
-.collapsible-card {
-  padding: 0;
-  overflow: hidden;
-}
-
-.collapsible-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2.5rem;
-  background-color: var(--color-overlay-dark);
-  border: none;
-  cursor: pointer;
-  color: white;
-  font-family: var(--font-heading);
-  text-align: left;
-  transition: background-color 0.3s ease;
-}
-
-.collapsible-header:hover {
-  background-color: rgba(0, 255, 170, 0.1);
-}
-
-.collapsible-header .section-subtitle {
-  margin-bottom: 0;
-  font-size: 1.6rem;
-  color: white;
-}
-
-.collapse-icon {
-  font-size: 1.5rem;
-  transition: transform 0.3s ease;
-}
-
-.collapse-icon.expanded {
-  transform: rotate(180deg);
-}
-
-.collapsible-content {
-  padding: 1.5rem 2.5rem 2.5rem;
-  background-color: var(--color-surface);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ==========================================================================
@@ -1245,6 +1134,17 @@ footer {
   border-color: var(--color-primary-light);
   box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.3);
   background-color: rgba(0, 0, 0, 0.15);
+}
+.select-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
+.select-field option {
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
 }
 .modal-textarea {
   font-family: monospace;
@@ -1784,11 +1684,36 @@ footer {
   box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.3);
   background-color: rgba(0, 0, 0, 0.15);
 }
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.75;
+  }
+}
+
 .spinner {
-  position: absolute;
-  right: 0.75rem;
-  color: var(--color-primary);
-  animation: spin 1s linear infinite;
+  animation: spin 2s linear infinite, pulse 2s ease-in-out infinite;
+  display: block;
+  margin: 0 auto;
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+  transform-origin: center;
+  transform-box: fill-box;
+  transform: rotate(0deg);
 }
 
 .search-results-list {

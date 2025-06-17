@@ -1,0 +1,104 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tokenIcon {
+  border-radius: 4px;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.regionLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.priceValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.separator {
+  width: 1px;
+  height: 1.2rem;
+  background-color: var(--color-border);
+}
+
+/* Tooltip Styles */
+.tooltip {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tooltip .tooltipContent {
+  position: absolute;
+  /* Changed from 'bottom' to 'top' to position it below */
+  top: 1.5rem; /* Start position slightly below the element */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease, top 0.2s ease; /* Animate the 'top' property */
+  z-index: 10;
+  box-shadow: var(--shadow-lg);
+}
+
+.tooltip:hover .tooltipContent {
+  opacity: 1;
+  visibility: visible;
+  /* Move to the final position on hover */
+  top: 2.5rem;
+}
+
+.tooltipTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.tooltipRow span:first-child {
+  color: var(--color-text-secondary);
+}
+
+.tooltipRow span:last-child {
+  font-weight: 600;
+}
+
+/* Trend Icon Styles */
+.trendUp {
+  color: #22c55e; /* Green */
+}
+
+.trendDown {
+  color: #ef4444; /* Red */
+}
+
+.trendStable {
+  color: var(--color-text-secondary); /* Grey */
+}

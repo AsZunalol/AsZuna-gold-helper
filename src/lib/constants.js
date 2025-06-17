@@ -80,3 +80,8 @@ export const GUIDE_CATEGORIES = [
   "Vendor Shuffle",
   "Miscellaneous",
 ].sort();
+
+export const PROFILE_IMAGES = Array.from(
+  { length: 50 },
+  (_, i) => `/images/avatars/avatar${i + 2}.png`
+);

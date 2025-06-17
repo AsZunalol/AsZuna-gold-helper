@@ -1,5 +1,3 @@
-// aszunalol/aszuna-gold-helper/AsZuna-gold-helper-e7b64661f52d01644dc7d7dea50098deeb640633/src/app/api/guides/route.js
-
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -27,19 +25,23 @@ export async function GET(request) {
 export async function POST(request) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  // **NEW SECURITY CHECK**
+  // Fetch the user's current data from the database
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+  });
+
+  // Check the role from the fresh database data
+  if (!currentUser || !["ADMIN", "OWNER"].includes(currentUser.role)) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
 
   try {
     const data = await request.json();
-
-    if (!data.title || !data.authorId) {
-      return NextResponse.json(
-        { message: "Title and author are required" },
-        { status: 400 }
-      );
-    }
 
     const authorId = parseInt(data.authorId, 10);
     if (isNaN(authorId)) {
@@ -69,7 +71,7 @@ export async function POST(request) {
         tsm_import_string: data.tsm_import_string,
         route_string: data.gathermate2_string,
         tags: data.tags,
-        itemsOfNote: data.itemsOfNote, // ✅ ADDED FIELD TO BE SAVED
+        itemsOfNote: data.itemsOfNote,
         authorId: authorId,
       },
     });

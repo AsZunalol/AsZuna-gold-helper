@@ -1,75 +1,111 @@
-// src/app/api/blizzard/item-price/route.js
-
-import { fetchItemPrices } from "@/lib/wow/fetchItemPrices";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import fetchItemPrices from "@/lib/wow/fetchItemPrices";
+import { logEntry } from "@/lib/logEntry";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const itemId = parseInt(searchParams.get("itemId"));
   const region = searchParams.get("region");
   const realmSlug = searchParams.get("realmSlug");
+  const itemName = searchParams.get("itemName") || "unknown item";
 
   if (!itemId || !region || !realmSlug) {
-    return new Response(
-      JSON.stringify({ error: "Missing itemId, region, or realmSlug" }),
+    return NextResponse.json(
+      { error: "Missing query parameters." },
       { status: 400 }
     );
   }
 
   try {
-    const existing = await prisma.itemPrice.findUnique({
+    const existing = await prisma.itemPrice.findFirst({
       where: {
-        itemId_region_realmSlug: { itemId, region, realmSlug },
+        itemId,
+        region,
+        realmSlug,
       },
     });
 
+    const oneHour = 60 * 60 * 1000;
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    const stale =
+      !existing ||
+      new Date(existing.updatedAt).getTime() < now.getTime() - oneHour;
 
-    if (existing && existing.updatedAt > oneHourAgo) {
-      return new Response(
-        JSON.stringify({
-          userRealmPrice: existing.userRealmPrice,
-          regionalAvgPrice: existing.regionalAvgPrice,
-          cached: true,
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }
+    if (existing && !stale) {
+      return NextResponse.json({
+        userRealmPrice: existing.userRealmPrice,
+        regionalAvgPrice: existing.regionalAvgPrice,
+        cached: true,
+      });
+    }
+
+    const data = await fetchItemPrices(itemId, region, realmSlug);
+
+    if (!data || !data.userRealmPrice || !data.regionalAvgPrice) {
+      await logEntry(
+        "item-price",
+        `❌ Invalid or missing price data for ${itemName} (ID ${itemId}) on ${realmSlug} (${region})`,
+        "warn"
+      );
+      return NextResponse.json(
+        { error: "Failed to fetch valid price data." },
+        { status: 500 }
       );
     }
 
-    const prices = await fetchItemPrices(itemId, region, realmSlug);
-
     await prisma.itemPrice.upsert({
       where: {
-        itemId_region_realmSlug: { itemId, region, realmSlug },
+        itemId_region_realmSlug: {
+          itemId,
+          region,
+          realmSlug,
+        },
       },
       update: {
-        userRealmPrice: prices.userRealmPrice,
-        regionalAvgPrice: prices.regionalAvgPrice,
+        userRealmPrice: data.userRealmPrice,
+        regionalAvgPrice: data.regionalAvgPrice,
       },
       create: {
         itemId,
         region,
         realmSlug,
-        userRealmPrice: prices.userRealmPrice,
-        regionalAvgPrice: prices.regionalAvgPrice,
+        userRealmPrice: data.userRealmPrice,
+        regionalAvgPrice: data.regionalAvgPrice,
       },
     });
 
-    return new Response(JSON.stringify({ ...prices, cached: false }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
+    await prisma.itemPriceHistory.create({
+      data: {
+        itemId,
+        region,
+        realmSlug,
+        userRealmPrice: data.userRealmPrice,
+        regionalAvgPrice: data.regionalAvgPrice,
+        timestamp: new Date(),
+      },
+    });
+
+    await logEntry(
+      "item-price",
+      `✅ Fetched price for ${itemName} (ID ${itemId}) on ${realmSlug} (${region})`
+    );
+
+    return NextResponse.json({
+      userRealmPrice: data.userRealmPrice,
+      regionalAvgPrice: data.regionalAvgPrice,
+      cached: false,
     });
   } catch (err) {
-    console.error("Price fetch failed:", err);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch item prices" }),
-      {
-        status: 500,
-      }
+    console.error("LOG API ERROR:", err);
+    await logEntry(
+      "item-price",
+      `❌ Internal error fetching ${itemName} (${itemId}) for ${realmSlug} (${region})`,
+      "error"
+    );
+    return NextResponse.json(
+      { error: "Internal server error." },
+      { status: 500 }
     );
   }
 }

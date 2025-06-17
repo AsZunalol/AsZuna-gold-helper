@@ -12,16 +12,19 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  username  String   @unique
-  password  String   @db.VarChar(255)
-  role      String   @default("USER")
-  region    String?  
-  realm     String?  
-  createdAt DateTime @default(now())
-  
-  guides    Guide[]
+  id                   Int       @id @default(autoincrement())
+  email                String    @unique
+  username             String    @unique
+  password             String    @db.VarChar(255)
+  imageUrl             String?   @db.VarChar(191)
+  role                 String    @default("USER") // Can be "USER", "ADMIN", or "OWNER"
+  status               String    @default("active") // Can be "active" or "banned"
+  region               String?
+  realm                String?
+  createdAt            DateTime  @default(now())
+  guides               Guide[]
+  passwordResetToken   String?   @unique
+  passwordResetExpires DateTime?
 }
 
 model Guide {
@@ -70,4 +73,46 @@ model ItemPrice {
   updatedAt        DateTime @updatedAt
 
   @@index([itemId, region, realmSlug])
+}
+
+model WowTokenPrice {
+  id        Int      @id @default(autoincrement())
+  region    String   @unique
+  price     Float
+  trend     String   @default("stable") // This line is crucial
+  updatedAt DateTime @updatedAt
+}
+
+model WowTokenPriceHistory {
+  id        Int      @id @default(autoincrement())
+  region    String
+  price     Float
+  createdAt DateTime @default(now())
+
+  @@index([region])
+}
+
+model LogEntry {
+  id        String   @id @default(cuid())
+  time      DateTime
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model ItemPriceHistory {
+  id               String   @id @default(cuid())
+  itemId           Int
+  region           String
+  realmSlug        String
+  userRealmPrice   Int
+  regionalAvgPrice Int
+  timestamp        DateTime @default(now())
+}
+
+model apiLog {
+  id        Int      @id @default(autoincrement())
+  type      String
+  level     String
+  message   String
+  timestamp DateTime @default(now())
 }

@@ -1,11 +1,14 @@
 import { Montserrat, Lato } from "next/font/google";
 import Image from "next/image";
-import Script from "next/script"; // Import the Script component
+import Script from "next/script";
+import { Suspense } from "react"; // Import Suspense
 import AuthProvider from "./AuthProvider";
 import { AuthModalProvider } from "@/context/AuthModalContext";
-import Header from "@/components/Header";
-import AuthModal from "@/components/AuthModal";
-import ParticlesComponent from "@/components/ParticlesComponent";
+import Header from "@/components/Header/Header";
+import AuthModal from "@/components/AuthModal/AuthModal";
+import ParticlesComponent from "@/components/ParticlesComponent/ParticlesComponent";
+import { Toaster } from "react-hot-toast";
+import NotificationHandler from "@/components/NotificationHandler/NotificationHandler";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -31,9 +34,42 @@ export default function RootLayout({ children }) {
       <body className={`${montserrat.variable} ${lato.variable}`}>
         <AuthProvider>
           <AuthModalProvider>
+            <Toaster
+              position="top-center"
+              containerStyle={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}
+              toastOptions={{
+                style: {
+                  background: "var(--color-surface)",
+                  color: "var(--color-text-main)",
+                  border: "1px solid var(--color-border)",
+                  minWidth: "250px",
+                  padding: "1rem",
+                },
+                success: {
+                  iconTheme: {
+                    primary: "var(--color-primary)",
+                    secondary: "var(--color-surface)",
+                  },
+                },
+                error: {
+                  iconTheme: {
+                    primary: "#ff6b6b",
+                    secondary: "var(--color-surface)",
+                  },
+                },
+              }}
+            />
+            {/* Wrap the NotificationHandler in a Suspense boundary */}
+            <Suspense fallback={null}>
+              <NotificationHandler />
+            </Suspense>
             <ParticlesComponent />
             <div className="background-overlay"></div>
-
             <Header />
             <main>{children}</main>
             <footer>
@@ -126,7 +162,6 @@ export default function RootLayout({ children }) {
             <AuthModal />
           </AuthModalProvider>
         </AuthProvider>
-        {/* --- WOWHEAD TOOLTIP SCRIPT --- */}
         <Script src="https://wow.zamimg.com/js/tooltips.js" />
       </body>
     </html>

@@ -1,9 +1,6 @@
-// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ... existing configurations like 'images'
   images: {
-    //
     remotePatterns: [
       {
         protocol: "https",
@@ -11,20 +8,23 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
-      // ... other remote patterns
+      // This pattern is now simplified to allow any path from this hostname
+      {
+        protocol: "https",
+        hostname: "wow.zamimg.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   async headers() {
     return [
       {
-        source: "/:path*", // Apply to all paths
+        source: "/:path*",
         headers: [
           {
             key: "Permissions-Policy",
-            // Explicitly allow picture-in-picture. You can add other features here as needed.
-            // Be mindful of security when setting this header.
-            value: "picture-in-picture=()", // Allow picture-in-picture for all origins
-            // OR to allow only specific origins: 'picture-in-picture=(self "https://www.youtube.com")'
+            value: "picture-in-picture=()",
           },
         ],
       },

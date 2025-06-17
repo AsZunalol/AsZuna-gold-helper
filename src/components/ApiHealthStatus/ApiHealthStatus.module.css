@@ -1,0 +1,55 @@
+.healthCard {
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.title {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+}
+
+.statusContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  position: relative;
+}
+
+.indicator.loading {
+  background-color: #f59e0b; /* Amber */
+  animation: pulse 1.5s infinite;
+}
+
+.indicator.ok {
+  background-color: #22c55e; /* Green */
+}
+
+.indicator.error {
+  background-color: #ef4444; /* Red */
+}
+
+.message {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

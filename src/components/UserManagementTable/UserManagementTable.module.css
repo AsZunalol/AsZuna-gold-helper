@@ -1,0 +1,173 @@
+.tableContainer {
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: var(--color-text-main);
+}
+
+.userTable th,
+.userTable td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.userTable th {
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border-bottom-width: 2px;
+}
+
+.userTable tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.userTable tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.userTable td:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.userTable td:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.avatar {
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.roleSelect {
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.roleSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
+}
+
+.statusPill {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.activeStatus {
+  background-color: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.bannedStatus {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.actionsCell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.changeAvatarButton {
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.changeAvatarButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.banButton {
+  background-color: transparent;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+.banButton:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+.unbanButton {
+  background-color: transparent;
+  color: #22c55e;
+  border-color: #22c55e;
+}
+.unbanButton:hover {
+  background-color: #22c55e;
+  color: white;
+}
+
+.controlsContainer {
+  margin-bottom: 1.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
+}
+
+.loadingCell {
+  text-align: center !important;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+}
+
+.loadingCell {
+  text-align: center !important;
+  padding: 3rem;
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+}

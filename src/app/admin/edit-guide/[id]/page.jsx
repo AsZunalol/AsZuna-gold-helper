@@ -8,25 +8,31 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import styles from "../../Admin.module.css"; // Corrected path based on previous turn
 
-const TiptapEditor = dynamic(() => import("@/components/TiptapEditor"), {
-  ssr: false,
-});
-const StepManager = dynamic(() => import("@/components/StepManager"), {
-  ssr: false,
-});
+const TiptapEditor = dynamic(
+  () => import("@/components/TiptapEditor/TiptapEditor"),
+  {
+    ssr: false,
+  }
+);
+const StepManager = dynamic(
+  () => import("@/components/StepManager/StepManager"),
+  {
+    ssr: false,
+  }
+);
 
-import TagInput from "@/components/TagInput";
-import MultiClassSelect from "@/components/MultiClassSelect";
-import ExpansionSelect from "@/components/ExpansionSelect";
-import CategorySelect from "@/components/CategorySelect";
-import GoldInput from "@/components/GoldInput";
-import TimeInput from "@/components/TimeInput";
-import ListManager from "@/components/ListManager";
-import StringImportManager from "@/components/StringImportManager";
-import RouteManager from "@/components/RouteManager";
-import ImageUpload from "@/components/ImageUpload";
-import ImageSliderManager from "@/components/ImageSliderManager";
-import ItemsOfNoteManager from "@/components/ItemsOfNoteManager";
+import TagInput from "@/components/TagInput/TagInput";
+import MultiClassSelect from "@/components/MultiClassSelect/MultiClassSelect";
+import ExpansionSelect from "@/components/ExpansionSelect/ExpansionSelect";
+import CategorySelect from "@/components/CategorySelect/CategorySelect";
+import GoldInput from "@/components/GoldInput/GoldInput";
+import TimeInput from "@/components/TimeInput/TimeInput";
+import ListManager from "@/components/ListManager/ListManager";
+import StringImportManager from "@/components/StringImportManager/StringImportManager";
+import RouteManager from "@/components/RouteManager/RouteManager";
+import ImageUpload from "@/components/ImageUpload/ImageUpload";
+import ImageSliderManager from "@/components/ImageSliderManager/ImageSliderManager";
+import ItemsOfNoteManager from "@/components/ItemsOfNoteManager/ItemsOfNoteManager";
 
 // Consistent form input style using CSS variables
 const formInputStyle = {

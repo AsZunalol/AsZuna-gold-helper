@@ -2,9 +2,9 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import ItemPrices from "@/components/ItemPrices";
-import GuideCategory from "@/components/GuideCategory";
-import MapImageModal from "@/components/MapImageModal";
+import ItemPrices from "@/components/ItemPrices/ItemPrices";
+import GuideCategory from "@/components/GuideCategory/GuideCategory";
+import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import "./guide.css";
 import "../../../components/map-image-modal.css";
 
