@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Spinner from "@/components/ui/spinner"; // ✅ Correct
+import Spinner from "@/components/ui/spinner";
 import { FiAlertTriangle, FiInfo, FiCheckCircle } from "react-icons/fi";
 
 const ApiLogsCard = () => {
@@ -18,7 +18,6 @@ const ApiLogsCard = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // sort logs by timestamp descending and take the latest 10
         const sortedLogs = data.sort(
           (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
         );
@@ -32,10 +31,7 @@ const ApiLogsCard = () => {
     };
 
     fetchLogs();
-    // Refresh logs every 30 seconds
     const intervalId = setInterval(fetchLogs, 30000);
-
-    // Cleanup on unmount
     return () => clearInterval(intervalId);
   }, []);
 
@@ -75,8 +71,11 @@ const ApiLogsCard = () => {
         </div>
       ) : logs.length > 0 ? (
         <ul className="space-y-2 overflow-y-auto max-h-80 pr-2">
-          {logs.map((log) => (
-            <li key={log.id} className="text-xs p-2 bg-gray-700 rounded-md">
+          {logs.map((log, index) => (
+            <li
+              key={log.id || index}
+              className="text-xs p-2 bg-gray-700 rounded-md"
+            >
               <div className="flex justify-between items-center mb-1">
                 <span
                   className={`font-bold flex items-center ${getLogLevelClass(

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Spinner from "@/components/ui/spinner"; // ✅ Correct
+import Spinner from "@/components/ui/spinner";
 
 const DataMonitoringCard = () => {
   const [healthData, setHealthData] = useState(null);
@@ -27,15 +27,12 @@ const DataMonitoringCard = () => {
     };
 
     fetchHealthData();
-    // Set up an interval to refetch the data every minute
     const intervalId = setInterval(fetchHealthData, 60000);
-
-    // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
   const StatusIndicator = ({ status }) => {
-    const isOk = status === "OK";
+    const isOk = status?.toLowerCase() === "ok";
     const color = isOk ? "bg-green-500" : "bg-red-500";
     const pulse = isOk ? "" : "animate-pulse";
     return (
