@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
-import { useState, useContext, useEffect, useRef } from "react";
-import AuthModalContext from "@/context/AuthModalContext";
+import { useState, useEffect, useRef } from "react";
+// This import path is correct and will work after we fix the other files.
+import { useAuthModal } from "@/context/AuthModalContext";
 import WowTokenPrice from "../WowTokenPrice/WowTokenPrice";
 
 export default function Header() {
   const { data: session, status } = useSession();
-  const { openModal } = useContext(AuthModalContext);
+  const { openModal } = useAuthModal();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
@@ -107,7 +108,7 @@ export default function Header() {
             </div>
           ) : (
             <button
-              onClick={openModal}
+              onClick={() => openModal("login")}
               className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded transition-colors"
             >
               Login
@@ -170,7 +171,7 @@ export default function Header() {
               </>
             ) : (
               <button
-                onClick={openModal}
+                onClick={() => openModal("login")}
                 className="w-full text-left block bg-yellow-500 hover:bg-yellow-600 text-black font-bold mt-2 py-2 px-4 rounded transition-colors"
               >
                 Login
