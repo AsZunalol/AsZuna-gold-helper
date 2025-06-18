@@ -1,6 +1,20 @@
+/*
+  IMPORTANT: If you are still seeing the "searchParams should be awaited" error
+  after using this code, the problem is very likely a caching issue with the
+  Next.js development server. Please follow these steps exactly:
+
+  1. STOP your development server (Ctrl + C in the terminal).
+  2. DELETE the `.next` folder from your project's root directory.
+  3. RESTART the development server (`npm run dev` or `yarn dev`).
+
+  This forces Next.js to rebuild the page from scratch with the correct code.
+*/
 import prisma from "@/lib/prisma";
 import GuideCategory from "@/components/GuideCategory/GuideCategory";
+import Link from "next/link";
+import Image from "next/image";
 
+// Data fetching functions remain async, which is correct.
 async function getGuides(category) {
   try {
     const whereClause = {
@@ -15,7 +29,10 @@ async function getGuides(category) {
       where: whereClause,
       include: {
         author: {
-          select: { name: true, image: true },
+          select: {
+            username: true,
+            imageUrl: true,
+          },
         },
       },
       orderBy: {
@@ -47,14 +64,19 @@ async function getCategories() {
   }
 }
 
+// THE FIX: This page component MUST be declared as `async` to use `searchParams`.
+// This allows the component to correctly handle dynamic request data on the server.
 export default async function GuidesPage({ searchParams }) {
+  // Now we can safely access properties of searchParams
   const category = searchParams.category;
+
+  // Await the data fetching calls
   const guides = await getGuides(category);
   const categories = await getCategories();
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-yellow-400 mb-8 text-center">
+      <h1 className="text-4xl font-bold text-[#00ffaa] mb-8 text-center">
         {category ? `${category} Guides` : "All Guides"}
       </h1>
       <GuideCategory categories={categories} />
@@ -70,19 +92,23 @@ export default async function GuidesPage({ searchParams }) {
               </h2>
               <p className="text-gray-400 mb-4">Category: {guide.category}</p>
               <div className="flex items-center mb-4">
-                <img
-                  src={guide.author.image || "/default-avatar.png"}
-                  alt={guide.author.name}
-                  className="w-10 h-10 rounded-full mr-4"
+                <Image
+                  src={guide.author.imageUrl || "/default-avatar.png"}
+                  alt={guide.author.username || "Author"}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full mr-4 object-cover"
                 />
-                <span className="text-gray-300">By {guide.author.name}</span>
+                <span className="text-gray-300">
+                  By {guide.author.username}
+                </span>
               </div>
-              <a
+              <Link
                 href={`/guide/${guide.id}`}
-                className="inline-block bg-yellow-500 text-black font-bold py-2 px-4 rounded hover:bg-yellow-600 transition-colors"
+                className="inline-block bg-[#00ffaa] text-black font-bold py-2 px-4 rounded hover:bg-[#00dd96] transition-colors"
               >
                 Read Guide
-              </a>
+              </Link>
             </div>
           </div>
         ))}

@@ -1,35 +1,56 @@
-// src/components/MapImageModal.jsx
 "use client";
-
 import { useState } from "react";
 import Image from "next/image";
+import "./map-image-modal.css";
 
-export default function MapImageModal({ src }) {
-  const [isOpen, setIsOpen] = useState(false);
+const MapImageModal = ({ imageUrl, coordinates }) => {
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <>
-      <div className="map-thumbnail" onClick={() => setIsOpen(true)}>
+    <div>
+      <div className="map-container" onClick={() => setModalOpen(true)}>
         <Image
-          src={src}
-          alt="Map Thumbnail"
-          width={240}
-          height={140}
-          className="map-thumbnail-img"
+          src={imageUrl}
+          alt="Farming Route Map"
+          width={800}
+          height={600}
+          className="map-image"
+          style={{ height: "auto" }} // This maintains the aspect ratio
         />
-        <p className="map-click-text">Click to enlarge</p>
+        {coordinates.map((coord, index) => (
+          <div
+            key={index}
+            className="map-dot"
+            style={{ left: `${coord.x}%`, top: `${coord.y}%` }}
+          >
+            {index + 1}
+          </div>
+        ))}
       </div>
 
-      {isOpen && (
-        <div className="map-modal-overlay" onClick={() => setIsOpen(false)}>
-          <div
-            className="map-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image src={src} alt="Map Full" width={1000} height={600} />
+      {modalOpen && (
+        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src={imageUrl}
+              alt="Farming Route Map"
+              layout="fill"
+              objectFit="contain"
+            />
+            {coordinates.map((coord, index) => (
+              <div
+                key={index}
+                className="map-dot-modal"
+                style={{ left: `${coord.x}%`, top: `${coord.y}%` }}
+              >
+                {index + 1}
+              </div>
+            ))}
           </div>
         </div>
       )}
-    </>
+    </div>
   );
-}
+};
+
+export default MapImageModal;

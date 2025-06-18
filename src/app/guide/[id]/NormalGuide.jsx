@@ -19,13 +19,13 @@ export default function NormalGuide({ guide }) {
 
       <div className="author-info">
         <Image
-          src={guide.author.image || "/default-avatar.png"}
-          alt={guide.author.name}
+          src={guide.author.imageUrl || "/default-avatar.png"}
+          alt={guide.author.username || "Author"}
           width={40}
           height={40}
           className="author-avatar"
         />
-        <span>By {guide.author.name}</span>
+        <span>By {guide.author.username}</span>
       </div>
 
       {guide.videoUrl && (

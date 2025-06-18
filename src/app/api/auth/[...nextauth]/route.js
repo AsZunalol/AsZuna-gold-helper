@@ -1,10 +1,8 @@
-// src/app/api/auth/[...nextauth]/route.js
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export const authOptions = {
   providers: [
@@ -36,15 +34,8 @@ export const authOptions = {
           throw new Error("Incorrect password");
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.username,
-          role: user.role,
-          region: user.region,
-          realm: user.realm,
-          imageUrl: user.imageUrl, // Add imageUrl to the user object
-        };
+        // On successful authorization, return the full user object.
+        return user;
       },
     }),
   ],
@@ -52,30 +43,37 @@ export const authOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    // This callback is invoked when a JWT is created.
     async jwt({ token, user }) {
+      // The `user` object is only available on the first login.
+      // We persist the user's data to the token here.
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.region = user.region;
         token.realm = user.realm;
-        token.imageUrl = user.imageUrl; // Add imageUrl to the JWT
+        // THE FIX: Map the `imageUrl` from your database to the standard `image` property of the token.
+        token.image = user.imageUrl;
       }
       return token;
     },
+    // This callback is invoked when a session is checked.
     async session({ session, token }) {
+      // We pass the data from the token to the client-side session object.
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.region = token.region;
         session.user.realm = token.realm;
-        session.user.imageUrl = token.imageUrl; // Add imageUrl to the session
+        // THE FIX: Map the `image` from the token to the standard `session.user.image` property.
+        session.user.image = token.image;
       }
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
-    signIn: "/login",
+    signIn: "/",
   },
 };
 

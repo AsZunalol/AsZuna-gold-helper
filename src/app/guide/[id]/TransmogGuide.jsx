@@ -74,15 +74,15 @@ export default function TransmogGuide({ guide }) {
             <h2 className="widget-title-redesigned">Guide Details</h2>
             <div className="author-info-redesigned">
               <Image
-                src={guide.author.image || "/default-avatar.png"}
-                alt={guide.author.name}
+                src={guide.author.imageUrl || "/default-avatar.png"}
+                alt={guide.author.username || "Author"}
                 width={50}
                 height={50}
                 className="author-avatar-redesigned"
               />
               <div className="author-name-redesigned">
                 <span>By</span>
-                <strong>{guide.author.name}</strong>
+                <strong>{guide.author.username}</strong>
               </div>
             </div>
             <div className="guide-meta-redesigned">

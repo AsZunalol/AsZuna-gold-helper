@@ -1,298 +1,50 @@
-// src/app/guide/[id]/page.jsx
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import GuideCategory from "@/components/GuideCategory/GuideCategory";
-import MapImageModal from "@/components/map-image-modal/MapImageModal";
-import "./guide.css";
-import "@/components/map-image-modal/map-image-modal.css";
+import TransmogGuide from "./TransmogGuide";
+import NormalGuide from "./NormalGuide";
 
-import { WOW_EXPANSIONS, WOW_CLASSES } from "@/lib/constants";
-
-// The fix is in the function signature: we destructure `params` from the props object.
-async function Page({ params }) {
-  const safeParse = (value, defaultValue = []) => {
-    if (!value || value === "undefined") return defaultValue;
-    try {
-      if (typeof value === "object" && value !== null) return value;
-      return typeof value === "string" ? JSON.parse(value) : value;
-    } catch (e) {
-      console.error("Error parsing JSON for guide ID:", params.id, e);
-      return defaultValue;
-    }
-  };
-
-  // And here, where we use `params.id` directly.
-  const guideId = parseInt(params.id, 10);
-  if (isNaN(guideId)) {
-    notFound();
+// Make the getGuide function async
+async function getGuide(id) {
+  try {
+    const guide = await prisma.guide.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: {
+            username: true,
+            imageUrl: true,
+          },
+        },
+        itemsOfNote: {
+          select: { id: true, name: true },
+        },
+        route: true,
+        steps: {
+          orderBy: {
+            order: "asc",
+          },
+        },
+      },
+    });
+    return guide;
+  } catch (error) {
+    console.error("Failed to fetch guide:", error);
+    return null;
   }
+}
 
-  const guide = await prisma.guide.findUnique({
-    where: { id: guideId },
-    // --- THIS IS THE FIX ---
-    // Corrected `addons` to `recommended_addons` and removed legacy fields.
-    select: {
-      id: true,
-      title: true,
-      category: true,
-      expansion: true,
-      thumbnail_url: true,
-      recommended_class: true,
-      gold_pr_hour: true,
-      time_to_complete: true,
-      description: true,
-      youtube_video_id: true,
-      tsm_import_string: true,
-      route_string: true,
-      map_image_url: true,
-      steps: true,
-      required_items: true,
-      recommended_addons: true, // Use the correct field name
-      tags: true,
-      slider_images: true,
-      items_of_note: true,
-      macro_string: true,
-    },
-  });
+// Make the page component async and destructure params
+export default async function Page({ params }) {
+  const guide = await getGuide(params.id);
 
   if (!guide) {
     notFound();
   }
 
-  const itemsOfNote = safeParse(guide.items_of_note);
-  const steps = safeParse(guide.steps);
-  const requiredItems = safeParse(guide.required_items);
-  const addons = safeParse(guide.recommended_addons); // Use the correct field from the guide object
-  const tags = guide.tags ? guide.tags.split(",").map((tag) => tag.trim()) : [];
-  const sliderImages = safeParse(guide.slider_images);
-  const mapImage = guide.map_image_url;
-
-  return (
-    <>
-      <div className="guide-outer">
-        <div className="guide-container">
-          <div className="thumbnail-wrapper">
-            <div className="thumbnail-card">
-              <GuideCategory category={guide.category} />
-              {guide.thumbnail_url && (
-                <Image
-                  src={guide.thumbnail_url}
-                  alt="Guide Thumbnail"
-                  width={1200}
-                  height={300}
-                  className="thumbnail-img"
-                  priority
-                />
-              )}
-              <div className="thumbnail-overlay-box">
-                <div className="thumbnail-overlay-content">
-                  <h1 className="guide-title-overlay">{guide.title}</h1>
-                  {(() => {
-                    const exp = WOW_EXPANSIONS.find(
-                      (e) => e.name === guide.expansion
-                    );
-                    const color = exp?.color || "#fff";
-                    return (
-                      <p className="guide-expansion" style={{ color }}>
-                        Expansion – {guide.expansion}
-                      </p>
-                    );
-                  })()}
-                  {tags.length > 0 && (
-                    <div className="guide-tags-container">
-                      <div className="guide-tags-inline">
-                        {tags.map((tag, i) => (
-                          <span key={`${tag}-${i}`} className="guide-tag-pill">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="recommended-classes-button">
-                <button className="dropdown-toggle">
-                  🎯 Recommended Classes
-                </button>
-                <div className="recommended-classes-dropdown">
-                  <div className="class-badges">
-                    {(guide.recommended_class || "")
-                      .split(",")
-                      .map((cls, i) => {
-                        const className = cls.trim();
-                        if (!className) return null;
-                        const classColor =
-                          WOW_CLASSES[className]?.color || "#ccc";
-                        return (
-                          <span
-                            key={`class-${i}`}
-                            className="class-pill"
-                            style={{
-                              backgroundColor: classColor,
-                              color:
-                                className === "Priest" ? "#000" : undefined,
-                            }}
-                          >
-                            {className}
-                          </span>
-                        );
-                      })}
-                  </div>
-                </div>
-              </div>
-              <div className="thumbnail-bottomright">
-                {guide.gold_pr_hour && (
-                  <div className="info-box">
-                    <span className="label">💰 Gold/hr:</span>
-                    <span className="value">{guide.gold_pr_hour}</span>
-                  </div>
-                )}
-                {guide.time_to_complete && (
-                  <div className="info-box">
-                    <span className="label">⏱️ Time:</span>
-                    <span className="value">{guide.time_to_complete}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="guide-layout">
-            <div className="guide-content">
-              {guide.description && (
-                <div
-                  dangerouslySetInnerHTML={{ __html: guide.description }}
-                  className="guide-description"
-                />
-              )}
-
-              {guide.youtube_video_id && (
-                <div className="video-wrapper">
-                  <iframe
-                    width="100%"
-                    height="400"
-                    src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              )}
-
-              {sliderImages.length > 0 && (
-                <div className="image-slider">
-                  <h3>Gallery</h3>
-                  <div className="slider-grid">
-                    {sliderImages.map((img, idx) => (
-                      <Image
-                        key={`slide-${idx}`}
-                        src={img}
-                        alt={`Slide ${idx + 1}`}
-                        width={400}
-                        height={250}
-                        style={{ objectFit: "cover", borderRadius: "8px" }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {guide.tsm_import_string && (
-                <div className="tsm-string">
-                  <h3>TSM Import String</h3>
-                  <pre>{guide.tsm_import_string}</pre>
-                </div>
-              )}
-
-              {guide.route_string && (
-                <div className="tsm-string">
-                  <h3>Route String</h3>
-                  <pre>{guide.route_string}</pre>
-                </div>
-              )}
-
-              {guide.macro_string && (
-                <div className="tsm-string">
-                  <h3>Helpful Macro</h3>
-                  <pre>{guide.macro_string}</pre>
-                </div>
-              )}
-
-              {requiredItems.length > 0 && (
-                <div className="required-items">
-                  <h3>Required Items</h3>
-                  <ul>
-                    {requiredItems.map((item, i) => (
-                      <li key={`req-${i}`}>{item.name || item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {addons.length > 0 && (
-                <div className="addons">
-                  <h3>Recommended Addons</h3>
-                  <ul>
-                    {addons.map((addon, i) => (
-                      <li key={`addon-${i}`}>{addon.name || addon}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {steps.length > 0 && steps[0].content && (
-                <div className="guide-steps">
-                  <h2>Steps</h2>
-                  <ol>
-                    {steps.map((step, index) => (
-                      <li
-                        key={`step-${index}`}
-                        dangerouslySetInnerHTML={{ __html: step.content }}
-                      />
-                    ))}
-                  </ol>
-                </div>
-              )}
-            </div>
-
-            <aside className="guide-right-panel">
-              {mapImage && (
-                <div className="map-section">
-                  <h3>Map Image</h3>
-                  <MapImageModal src={mapImage} />
-                </div>
-              )}
-
-              {itemsOfNote.length > 0 && (
-                <div className="map-notes-box">
-                  <h4>Items of Note</h4>
-                  <ul style={{ listStyle: "none", padding: 0 }}>
-                    {itemsOfNote.map((item, index) => (
-                      <li key={`item-${index}`} className="item-list-item">
-                        <Image
-                          src={
-                            item.icon ||
-                            "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg"
-                          }
-                          alt={item.name}
-                          width={24}
-                          height={24}
-                          className="item-icon-small"
-                        />
-                        <span>{item.name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </aside>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+  // Conditionally render the correct guide component based on category
+  if (guide.category === "Transmog") {
+    return <TransmogGuide guide={guide} />;
+  } else {
+    return <NormalGuide guide={guide} />;
+  }
 }
-
-export default Page;
