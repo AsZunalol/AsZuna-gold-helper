@@ -5,15 +5,15 @@ import Image from "next/image";
 import GuideCategory from "@/components/GuideCategory/GuideCategory";
 import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import "./guide.css";
-import "@/components/map-image-modal/map-image-modal.css"; // Corrected Path
+import "@/components/map-image-modal/map-image-modal.css";
 
 import { WOW_EXPANSIONS, WOW_CLASSES } from "@/lib/constants";
 
+// The fix is in the function signature: we destructure `params` from the props object.
 async function Page({ params }) {
   const safeParse = (value, defaultValue = []) => {
     if (!value || value === "undefined") return defaultValue;
     try {
-      // If it's already an object (from a direct DB call), just return it
       if (typeof value === "object" && value !== null) return value;
       return typeof value === "string" ? JSON.parse(value) : value;
     } catch (e) {
@@ -22,8 +22,16 @@ async function Page({ params }) {
     }
   };
 
+  // And here, where we use `params.id` directly.
+  const guideId = parseInt(params.id, 10);
+  if (isNaN(guideId)) {
+    notFound();
+  }
+
   const guide = await prisma.guide.findUnique({
-    where: { id: parseInt(params.id) },
+    where: { id: guideId },
+    // --- THIS IS THE FIX ---
+    // Corrected `addons` to `recommended_addons` and removed legacy fields.
     select: {
       id: true,
       title: true,
@@ -37,10 +45,10 @@ async function Page({ params }) {
       youtube_video_id: true,
       tsm_import_string: true,
       route_string: true,
-      map_image_url: true, // Use the correct field name
+      map_image_url: true,
       steps: true,
       required_items: true,
-      addons: true,
+      recommended_addons: true, // Use the correct field name
       tags: true,
       slider_images: true,
       items_of_note: true,
@@ -55,10 +63,9 @@ async function Page({ params }) {
   const itemsOfNote = safeParse(guide.items_of_note);
   const steps = safeParse(guide.steps);
   const requiredItems = safeParse(guide.required_items);
-  const addons = safeParse(guide.addons);
+  const addons = safeParse(guide.recommended_addons); // Use the correct field from the guide object
   const tags = guide.tags ? guide.tags.split(",").map((tag) => tag.trim()) : [];
   const sliderImages = safeParse(guide.slider_images);
-  // Use the new field name
   const mapImage = guide.map_image_url;
 
   return (

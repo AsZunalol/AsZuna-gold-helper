@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
-// No specific CSS module is needed, styles will come from globals.css
 
 async function getTransmogGuides() {
   try {
     const guides = await prisma.guide.findMany({
-      where: { is_transmog: true }, // Filtering for transmog guides
+      where: {
+        OR: [{ is_transmog: true }, { category: "Transmog" }],
+        status: "PUBLISHED",
+      },
       orderBy: { createdAt: "desc" },
     });
     return guides;
@@ -49,7 +51,7 @@ export default async function TransmogPage() {
           <div className="guides-grid">
             {guides.map((guide) => (
               <Link
-                href={`/guide/${guide.id}`}
+                href={`/transmog/${guide.id}`} // Corrected Link
                 key={guide.id}
                 className="guide-card"
               >
@@ -68,7 +70,6 @@ export default async function TransmogPage() {
                 <div className="guide-card-content">
                   <h3>{guide.title}</h3>
                   <p className="guide-description">{guide.description}</p>
-                  {/* Potentially add more details here like author, date, etc. */}
                 </div>
               </Link>
             ))}

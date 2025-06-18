@@ -6,9 +6,16 @@ import prisma from "@/lib/prisma";
 
 async function getPublishedGuides() {
   try {
+    // --- THIS IS THE FIX ---
+    // The where clause now explicitly excludes guides that are flagged as transmog
+    // or have the category 'Transmog'. This ensures only farming/general guides are shown.
     const guides = await prisma.guide.findMany({
       where: {
-        status: "PUBLISHED", // Only fetch published guides
+        status: "PUBLISHED",
+        is_transmog: false,
+        NOT: {
+          category: "Transmog",
+        },
       },
       orderBy: { createdAt: "desc" },
     });

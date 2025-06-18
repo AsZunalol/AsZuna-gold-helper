@@ -7,7 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
-// Fully patched version to workaround Next.js bug with params
+// Your helper function to correctly resolve params, fixing the Next.js bug.
 async function getParams(context) {
   if (typeof context.params === "function") {
     return await context.params();
@@ -16,7 +16,7 @@ async function getParams(context) {
 }
 
 export async function GET(request, context) {
-  await request.text();
+  await request.text(); // Ensures request stream is consumed
   const params = await getParams(context);
 
   try {
@@ -80,7 +80,8 @@ export async function PUT(request, context) {
       "addons",
       "required_items",
       "items_of_note",
-      "map_image_path",
+      "map_image_path", // Keep for backwards compatibility if needed
+      "map_image_url",
       "tsm_import_string",
       "route_string",
       "guide_type",
