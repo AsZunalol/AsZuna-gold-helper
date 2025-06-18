@@ -1,0 +1,68 @@
+.page {
+  min-height: 100vh;
+  background-color: #0d1117;
+  color: white;
+  padding: 3rem 1rem;
+}
+
+.container {
+  max-width: 90rem;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  color: #00ffaa;
+  margin-bottom: 2.5rem;
+  letter-spacing: -0.02em;
+}
+
+.sortRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.sortRow a,
+.sortRow select {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid #00ffaa;
+  background-color: transparent;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sortRow a.active,
+.sortRow a:hover,
+.sortRow select:hover {
+  background-color: #00ffaa;
+  color: black;
+  border-color: transparent;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
