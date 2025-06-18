@@ -1,10 +1,19 @@
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import GuideCategory from "@/components/GuideCategory/GuideCategory";
 import Link from "next/link";
 import Image from "next/image";
+import styles from "./guidesPage.module.css";
+import cardStyles from "./GuideCard.module.css";
+import GuidesSortDropdown from "./GuidesSortDropdown";
 
-async function getGuides(type, category) {
-  try {
+export default async function GuidesPage({ searchParams }) {
+  const category = searchParams.get("category") || null;
+  const type = searchParams.get("type") || "gold";
+  const sort = searchParams.get("sort") || "latest";
+
+  async function getGuides(type, category, sort) {
+    const orderBy = sort === "title" ? { title: "asc" } : { createdAt: "desc" };
     return await prisma.guide.findMany({
       where: {
         status: "published",
@@ -13,80 +22,51 @@ async function getGuides(type, category) {
           : { is_transmog: false }),
         ...(category ? { category } : {}),
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy,
     });
-  } catch (error) {
-    console.error("Failed to fetch guides:", error);
-    return [];
   }
-}
 
-async function getCategories() {
-  try {
+  async function getCategories() {
     const guides = await prisma.guide.findMany({
-      where: {
-        status: "published",
-      },
-      select: {
-        category: true,
-      },
+      where: { status: "published" },
+      select: { category: true },
       distinct: ["category"],
     });
     return guides.map((guide) => guide.category);
-  } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    return [];
   }
-}
 
-export default async function GuidesPage({ searchParams }) {
-  const { category, type = "gold" } = await searchParams;
   const [guides, categories] = await Promise.all([
-    getGuides(type, category),
+    getGuides(type, category, sort),
     getCategories(),
   ]);
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white px-4 py-12">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-5xl font-extrabold text-center text-[#00ffaa] mb-10 tracking-tight">
-          Explore Gold & Transmog Guides
-        </h1>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Explore Gold & Transmog Guides</h1>
 
-        <div className="flex flex-wrap justify-center gap-4 mb-10">
+        <div className={styles.sortRow}>
           <Link
-            href="/guides?type=gold"
-            className={`px-6 py-3 rounded-full border-2 transition-all ${
-              type === "gold"
-                ? "bg-[#00ffaa] text-black border-transparent"
-                : "border-[#00ffaa] hover:bg-[#00ffaa22]"
-            }`}
+            href={`/guides?type=gold&sort=${sort}`}
+            className={type === "gold" ? "active" : ""}
           >
             Gold Guides
           </Link>
           <Link
-            href="/guides?type=transmog"
-            className={`px-6 py-3 rounded-full border-2 transition-all ${
-              type === "transmog"
-                ? "bg-[#00ffaa] text-black border-transparent"
-                : "border-[#00ffaa] hover:bg-[#00ffaa22]"
-            }`}
+            href={`/guides?type=transmog&sort=${sort}`}
+            className={type === "transmog" ? "active" : ""}
           >
             Transmog Guides
           </Link>
+          <GuidesSortDropdown type={type} category={category} sort={sort} />
         </div>
 
         <GuideCategory categories={categories} selectedCategory={category} />
 
-        <div className="grid gap-8 mt-12 md:grid-cols-2 lg:grid-cols-3">
+        <div className={styles.grid}>
           {guides.map((guide) => (
-            <div
-              key={guide.id}
-              className="bg-[#1a1f2c] rounded-2xl shadow-lg overflow-hidden transition-transform hover:-translate-y-1 hover:shadow-2xl"
-            >
-              <div className="relative w-full h-52">
+            <div key={guide.id} className={cardStyles.card}>
+              <div className={cardStyles.thumbnail}>
                 <Image
                   src={guide.thumbnail || "/images/default-thumb.jpg"}
                   alt={guide.title}
@@ -108,13 +88,13 @@ export default async function GuidesPage({ searchParams }) {
                   </div>
                 )}
               </div>
-              <div className="p-5 flex flex-col justify-between h-full">
-                <h2 className="text-2xl font-bold mb-3 leading-snug">
+              <div className="p-4">
+                <h2 className="text-lg font-bold mb-2 leading-snug">
                   {guide.title}
                 </h2>
                 <Link
                   href={`/guide/${guide.id}`}
-                  className="inline-block mt-auto bg-[#00ffaa] text-black text-center font-semibold py-2 px-5 rounded-xl hover:bg-[#00cc88] transition"
+                  className={cardStyles.readButton}
                 >
                   Read Guide
                 </Link>
