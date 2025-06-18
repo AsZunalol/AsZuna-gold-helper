@@ -203,16 +203,31 @@ footer {
   display: flex;
   gap: 1.25rem;
 }
+
+/* --- FIX STARTS HERE --- */
+.footer-socials a {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s ease;
+  position: relative; /* Needed for the Image fill to work correctly */
+}
+
+.footer-socials a:hover {
+  transform: translateY(-2px) scale(1.1);
+}
+
 .footer-socials a img {
   filter: brightness(0) invert(1);
   opacity: 0.7;
   transition: all 0.2s ease;
 }
+
 .footer-socials a:hover img {
   opacity: 1;
-  transform: translateY(-2px) scale(1.1);
   filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--color-primary));
 }
+/* --- FIX ENDS HERE --- */
 
 /* --- User & Admin Menu Dropdown --- */
 .header-right {

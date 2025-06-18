@@ -43,7 +43,7 @@ const DataMonitoringCard = () => {
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white h-full">
+    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white h-full w-full overflow-hidden">
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <Spinner />
@@ -53,7 +53,7 @@ const DataMonitoringCard = () => {
           <p>{error}</p>
         </div>
       ) : healthData ? (
-        <ul className="space-y-3">
+        <ul className="space-y-3 max-h-80 overflow-y-auto">
           <li className="flex justify-between items-center">
             <span className="font-semibold text-gray-300">
               Database Status:

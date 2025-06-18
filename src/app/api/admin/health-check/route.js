@@ -2,20 +2,21 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getAccessToken } from "@/app/api/blizzard/token/route";
+import { kv } from "@vercel/kv";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   const session = await getServerSession(authOptions);
 
-  // Secure this endpoint to only be accessible by OWNERs
   if (session?.user.role !== "OWNER") {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // Attempt to get an access token as a simple health check
     const accessToken = await getAccessToken();
 
-    // Try to make a simple, lightweight request to the Blizzard API
     const response = await fetch(
       `https://us.api.blizzard.com/data/wow/token/index?namespace=dynamic-us`,
       {
@@ -29,12 +30,39 @@ export async function GET() {
       throw new Error(`Blizzard API responded with status: ${response.status}`);
     }
 
-    // If both requests succeed, the API is healthy
-    return NextResponse.json({ status: "ok", message: "API is operational" });
+    let redisStatus = "ok";
+    try {
+      await kv.set("health-check", "ok");
+      const redisTest = await kv.get("health-check");
+      if (redisTest !== "ok") redisStatus = "fail";
+    } catch (e) {
+      console.error("[Redis Check] Error:", e.message);
+      redisStatus = "error";
+    }
+
+    let dbStatus = "ok";
+    try {
+      await prisma.user.findFirst();
+    } catch (e) {
+      console.error("[Database Check] Error:", e.message);
+      dbStatus = "error";
+    }
+
+    return NextResponse.json({
+      blizzardApi: "ok",
+      database: dbStatus,
+      redis: redisStatus,
+      timestamp: Date.now(),
+    });
   } catch (error) {
     console.error("[API Health Check] Error:", error.message);
     return NextResponse.json(
-      { status: "error", message: "Failed to connect to Blizzard API" },
+      {
+        blizzardApi: "error",
+        database: "unknown",
+        redis: "unknown",
+        timestamp: Date.now(),
+      },
       { status: 500 }
     );
   }

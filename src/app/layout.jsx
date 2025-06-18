@@ -105,8 +105,8 @@ export default function RootLayout({ children }) {
                         <Image
                           src="/icons/youtube.svg"
                           alt="YouTube Logo"
-                          width={24}
-                          height={24}
+                          fill
+                          sizes="24px"
                         />
                       </a>
                     </li>
@@ -120,8 +120,8 @@ export default function RootLayout({ children }) {
                         <Image
                           src="/icons/twitter.svg"
                           alt="Twitter Logo"
-                          width={24}
-                          height={24}
+                          fill
+                          sizes="24px"
                         />
                       </a>
                     </li>
@@ -135,8 +135,8 @@ export default function RootLayout({ children }) {
                         <Image
                           src="/icons/discord.svg"
                           alt="Discord Logo"
-                          width={24}
-                          height={24}
+                          fill
+                          sizes="24px"
                         />
                       </a>
                     </li>
@@ -150,8 +150,8 @@ export default function RootLayout({ children }) {
                         <Image
                           src="/icons/twitch.svg"
                           alt="Twitch Logo"
-                          width={24}
-                          height={24}
+                          fill
+                          sizes="24px"
                         />
                       </a>
                     </li>

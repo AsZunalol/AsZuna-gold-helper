@@ -11,13 +11,17 @@ const MonitoringGrid = () => {
         <h3 className="text-xl font-bold mb-4">User Management</h3>
         <UserManagementTable />
       </div>
-      <div className="bg-gray-700 p-4 rounded-lg">
+      <div className="bg-gray-700 p-4 rounded-lg h-full min-h-[250px] flex flex-col">
         <h3 className="text-xl font-bold mb-4">Data Monitoring</h3>
-        <DataMonitoringCard />
+        <div className="flex-grow overflow-hidden">
+          <DataMonitoringCard />
+        </div>
       </div>
-      <div className="bg-gray-700 p-4 rounded-lg">
+      <div className="bg-gray-700 p-4 rounded-lg h-full min-h-[250px] flex flex-col">
         <h3 className="text-xl font-bold mb-4">API Logs</h3>
-        <ApiLogsCard />
+        <div className="flex-grow overflow-hidden">
+          <ApiLogsCard />
+        </div>
       </div>
     </div>
   );

@@ -1,74 +1,225 @@
 /* src/app/admin/guides-list/guides-list.module.css */
 
 .container {
-  padding: 2rem 4rem;
-  max-width: 1400px;
-  margin: 2rem auto;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background-color: var(--color-background);
+  min-height: calc(100vh - 80px); /* Full height minus header */
 }
 
 .header {
-  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  padding: 1.5rem 2.5rem;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
+  color: white;
+  font-weight: 700;
+  margin-right: auto;
+}
+
+.filterContainer {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--color-background);
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.filterButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-.tableWrapper {
+.activeFilter {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-glow-sm);
+}
+
+.searchInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  font-size: 1rem;
+  width: 100%;
+  max-width: 350px;
+  transition: all 0.2s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2);
+}
+
+.tabContainer {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 2.5rem;
+  background-color: var(--color-surface);
+}
+
+.tabButton {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tabButton:hover {
+  color: white;
+}
+
+.tabButton.activeTab {
+  color: var(--color-primary);
+}
+
+.tabButton.activeTab::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: 2px;
+}
+
+.tabContent {
+  padding: 2.5rem;
+}
+
+.guidesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.guideCard {
   background-color: var(--color-surface);
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--color-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.guidesTable {
+.guideCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 255, 170, 0.4);
+}
+
+.thumbnailContainer {
+  position: relative;
   width: 100%;
-  border-collapse: collapse;
+  aspect-ratio: 16 / 9;
+  background-color: var(--color-background);
 }
 
-.guidesTable th,
-.guidesTable td {
-  padding: 1rem 1.5rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
+.thumbnailContainer img {
+  object-fit: cover;
 }
 
-.guidesTable th {
-  background-color: rgba(255, 255, 255, 0.05);
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
+.contentWrapper {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.guidesTable tbody tr:last-child td {
-  border-bottom: none;
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.guidesTable tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.03);
+.cardHeader h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.4;
+  flex-grow: 1;
 }
 
 .statusPill {
   padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
+  flex-shrink: 0;
+  border: 1px solid transparent;
 }
 
 .published {
-  background-color: rgba(0, 255, 170, 0.15);
+  background-color: rgba(0, 255, 170, 0.1);
   color: var(--color-primary-light);
+  border-color: rgba(0, 255, 170, 0.3);
 }
 
 .draft {
-  background-color: rgba(255, 184, 0, 0.15);
+  background-color: rgba(255, 184, 0, 0.1);
   color: #ffb800;
+  border-color: rgba(255, 184, 0, 0.3);
 }
 
-.actionsCell {
-  text-align: right;
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .actionButton {
@@ -76,11 +227,12 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: var(--color-surface);
+  background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-text-main);
   transition: all 0.2s ease;
+  font-weight: 600;
 }
 
 .actionButton:hover {
@@ -88,4 +240,15 @@
   color: var(--color-background);
   border-color: var(--color-primary);
   text-shadow: none;
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
 }
