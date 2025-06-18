@@ -1,6 +1,7 @@
 "use client";
 import { SessionProvider } from "next-auth/react";
 import React, { useState, createContext, useContext } from "react";
+import AuthModal from "@/components/AuthModal/AuthModal";
 
 // Create the context for the modal
 const AuthModalContext = createContext();
@@ -32,6 +33,12 @@ export const AuthModalProvider = ({ children }) => {
   return (
     <AuthModalContext.Provider value={value}>
       {children}
+      <AuthModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        view={modalView}
+        setView={setModalView}
+      />
     </AuthModalContext.Provider>
   );
 };

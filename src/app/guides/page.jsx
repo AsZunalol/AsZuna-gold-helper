@@ -1,87 +1,92 @@
-// src/app/guides/page.jsx
-
-import Link from "next/link";
-import Image from "next/image";
 import prisma from "@/lib/prisma";
+import GuideCategory from "@/components/GuideCategory/GuideCategory";
 
-async function getPublishedGuides() {
+async function getGuides(category) {
   try {
-    // --- THIS IS THE FIX ---
-    // The where clause now explicitly excludes guides that are flagged as transmog
-    // or have the category 'Transmog'. This ensures only farming/general guides are shown.
+    const whereClause = {
+      status: "published",
+    };
+
+    if (category) {
+      whereClause.category = category;
+    }
+
     const guides = await prisma.guide.findMany({
-      where: {
-        status: "PUBLISHED",
-        is_transmog: false,
-        NOT: {
-          category: "Transmog",
+      where: whereClause,
+      include: {
+        author: {
+          select: { name: true, image: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     return guides;
   } catch (error) {
-    console.error("Failed to fetch published guides:", error);
+    console.error("Failed to fetch guides:", error);
     return [];
   }
 }
 
-export const metadata = {
-  title: "Gold-Making Guides - AsZuna's Gold Helper",
-  description: "Browse all World of Warcraft gold-making guides.",
-};
+async function getCategories() {
+  try {
+    const guides = await prisma.guide.findMany({
+      where: {
+        status: "published",
+      },
+      select: {
+        category: true,
+      },
+      distinct: ["category"],
+    });
+    return guides.map((guide) => guide.category);
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+}
 
-export default async function GuidesPage() {
-  const guides = await getPublishedGuides();
+export default async function GuidesPage({ searchParams }) {
+  const category = searchParams.category;
+  const guides = await getGuides(category);
+  const categories = await getCategories();
 
   return (
-    <main className="page-container">
-      <h1
-        className="section-title"
-        style={{ textAlign: "center", marginBottom: "3rem" }}
-      >
-        All Guides
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-yellow-400 mb-8 text-center">
+        {category ? `${category} Guides` : "All Guides"}
       </h1>
-
-      <div className="guides-grid-container">
-        {guides.length === 0 ? (
-          <p
-            style={{
-              textAlign: "center",
-              color: "var(--color-text-secondary)",
-            }}
+      <GuideCategory categories={categories} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+        {guides.map((guide) => (
+          <div
+            key={guide.id}
+            className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"
           >
-            No guides have been published yet. Check back soon!
-          </p>
-        ) : (
-          <div className="guides-grid">
-            {guides.map((guide) => (
-              <Link
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {guide.title}
+              </h2>
+              <p className="text-gray-400 mb-4">Category: {guide.category}</p>
+              <div className="flex items-center mb-4">
+                <img
+                  src={guide.author.image || "/default-avatar.png"}
+                  alt={guide.author.name}
+                  className="w-10 h-10 rounded-full mr-4"
+                />
+                <span className="text-gray-300">By {guide.author.name}</span>
+              </div>
+              <a
                 href={`/guide/${guide.id}`}
-                key={guide.id}
-                className="guide-card"
+                className="inline-block bg-yellow-500 text-black font-bold py-2 px-4 rounded hover:bg-yellow-600 transition-colors"
               >
-                <div className="guide-card-image-container">
-                  <Image
-                    src={guide.thumbnail_url || "/images/default-thumb.jpg"}
-                    alt={guide.title}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  {guide.category && (
-                    <span className="category-tag">{guide.category}</span>
-                  )}
-                </div>
-                <div className="guide-card-content">
-                  <h3>{guide.title}</h3>
-                  <p className="guide-description">{guide.description}</p>
-                </div>
-              </Link>
-            ))}
+                Read Guide
+              </a>
+            </div>
           </div>
-        )}
+        ))}
       </div>
-    </main>
+    </div>
   );
 }
