@@ -7,12 +7,18 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
-// The fix is to access the `request` object in each function before using `params`.
-// This works around a known bug in Node.js that can cause `params` to be empty.
-// See: https://nextjs.org/docs/messages/sync-dynamic-apis
+// Fully patched version to workaround Next.js bug with params
+async function getParams(context) {
+  if (typeof context.params === "function") {
+    return await context.params();
+  }
+  return context.params;
+}
 
-export async function GET(request, { params }) {
-  await request.text(); //  <-- THIS IS THE FIX: Ensures request is processed
+export async function GET(request, context) {
+  await request.text();
+  const params = await getParams(context);
+
   try {
     const guideId = parseInt(params.id, 10);
     if (isNaN(guideId)) {
@@ -23,22 +29,22 @@ export async function GET(request, { params }) {
     }
 
     const guide = await prisma.guide.findUnique({ where: { id: guideId } });
-
     if (!guide) {
       return NextResponse.json({ message: "Guide not found" }, { status: 404 });
     }
 
-    return NextResponse.json(guide, { status: 200 });
+    return NextResponse.json(guide);
   } catch (error) {
     console.error("Error fetching guide:", error);
     return NextResponse.json(
-      { message: "Failed to fetch guide." },
+      { message: "Internal server error" },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(request, context) {
+  const params = await getParams(context);
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !["ADMIN", "OWNER"].includes(session.user.role)) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
@@ -53,8 +59,7 @@ export async function PUT(request, { params }) {
       );
     }
 
-    const data = await request.json(); // We read the body here, which counts as using the request.
-
+    const data = await request.json();
     const updateData = {};
     const allowedFields = [
       "title",
@@ -116,8 +121,9 @@ export async function PUT(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
-  await request.text(); //  <-- THIS IS THE FIX: Ensures request is processed
+export async function DELETE(request, context) {
+  await request.text();
+  const params = await getParams(context);
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || !["ADMIN", "OWNER"].includes(session.user.role)) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });

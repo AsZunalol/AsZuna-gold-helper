@@ -15,6 +15,9 @@ function formatGold(copper) {
 export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
   const [loadingPrices, setLoadingPrices] = useState({});
 
+  // Ensure `items` is always an array to prevent crashes.
+  const safeItems = Array.isArray(items) ? items : [];
+
   const handleItemSelected = async (newItem) => {
     if (!region || !realm) {
       alert(
@@ -23,7 +26,7 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       return;
     }
 
-    if (!items.some((item) => item.id === newItem.id)) {
+    if (!safeItems.some((item) => item.id === newItem.id)) {
       setLoadingPrices((prev) => ({ ...prev, [newItem.id]: true }));
 
       let serverPrice = null;
@@ -45,28 +48,32 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       } catch (error) {
         console.error("Failed to fetch price for item", newItem.id, error);
       } finally {
-        setItems((prevItems) => [
-          ...prevItems,
-          // Make sure to include the icon from newItem in the final object
+        // --- THIS IS THE FIX ---
+        // Construct the new array first, then pass it to the state setter.
+        const newItems = [
+          ...safeItems,
           { ...newItem, serverPrice, regionalAveragePrice },
-        ]);
+        ];
+        setItems(newItems);
+        // -----------------------
         setLoadingPrices((prev) => ({ ...prev, [newItem.id]: false }));
       }
     }
   };
 
   const removeItem = (idToRemove) => {
-    setItems(items.filter((item) => item.id !== idToRemove));
+    const updatedItems = safeItems.filter((item) => item.id !== idToRemove);
+    setItems(updatedItems);
   };
 
   return (
     <div className="list-manager">
       <ItemSearch onItemSelected={handleItemSelected} />
       <div className="managed-list" style={{ marginTop: "1rem" }}>
-        {items.length === 0 ? (
+        {safeItems.length === 0 ? (
           <p className="empty-list-text">No items added yet.</p>
         ) : (
-          items.map((item) => (
+          safeItems.map((item) => (
             <div key={item.id} className="managed-list-item">
               <div
                 className="item-content"
@@ -76,7 +83,6 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
                   gap: "0.75rem",
                 }}
               >
-                {/* Use the item.icon URL directly in the src attribute */}
                 <img
                   src={item.icon}
                   alt={item.name}

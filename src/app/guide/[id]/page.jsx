@@ -2,11 +2,10 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import GuideCategory from "@/components/GuideCategory/GuideCategory";
 import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import "./guide.css";
-import "../../../components/map-image-modal.css";
+import "@/components/map-image-modal/map-image-modal.css"; // Corrected Path
 
 import { WOW_EXPANSIONS, WOW_CLASSES } from "@/lib/constants";
 
@@ -14,9 +13,11 @@ async function Page({ params }) {
   const safeParse = (value, defaultValue = []) => {
     if (!value || value === "undefined") return defaultValue;
     try {
+      // If it's already an object (from a direct DB call), just return it
+      if (typeof value === "object" && value !== null) return value;
       return typeof value === "string" ? JSON.parse(value) : value;
     } catch (e) {
-      console.error("Error parsing JSON:", e);
+      console.error("Error parsing JSON for guide ID:", params.id, e);
       return defaultValue;
     }
   };
@@ -36,38 +37,29 @@ async function Page({ params }) {
       youtube_video_id: true,
       tsm_import_string: true,
       route_string: true,
-      map_image_path: true,
+      map_image_url: true, // Use the correct field name
       steps: true,
       required_items: true,
       addons: true,
       tags: true,
       slider_images: true,
       items_of_note: true,
+      macro_string: true,
     },
   });
 
-  if (!guide) notFound();
-
-  console.log("RAW guide.items_of_note:", guide.items_of_note);
+  if (!guide) {
+    notFound();
+  }
 
   const itemsOfNote = safeParse(guide.items_of_note);
-  console.log(
-    "DEBUG - itemsOfNote:",
-    itemsOfNote,
-    "Type:",
-    typeof itemsOfNote,
-    "Length:",
-    itemsOfNote?.length
-  );
-  const hasVisibleItems =
-    Array.isArray(itemsOfNote) &&
-    itemsOfNote.some((item) => typeof item === "string" && item.trim() !== "");
-
   const steps = safeParse(guide.steps);
   const requiredItems = safeParse(guide.required_items);
   const addons = safeParse(guide.addons);
   const tags = guide.tags ? guide.tags.split(",").map((tag) => tag.trim()) : [];
   const sliderImages = safeParse(guide.slider_images);
+  // Use the new field name
+  const mapImage = guide.map_image_url;
 
   return (
     <>
@@ -83,6 +75,7 @@ async function Page({ params }) {
                   width={1200}
                   height={300}
                   className="thumbnail-img"
+                  priority
                 />
               )}
               <div className="thumbnail-overlay-box">
@@ -103,12 +96,7 @@ async function Page({ params }) {
                     <div className="guide-tags-container">
                       <div className="guide-tags-inline">
                         {tags.map((tag, i) => (
-                          <span
-                            key={`${tag}-${i}`}
-                            className={`guide-tag-pill ${
-                              i > 0 ? "guide-tag-hidden" : ""
-                            }`}
-                          >
+                          <span key={`${tag}-${i}`} className="guide-tag-pill">
                             {tag}
                           </span>
                         ))}
@@ -123,31 +111,43 @@ async function Page({ params }) {
                 </button>
                 <div className="recommended-classes-dropdown">
                   <div className="class-badges">
-                    {guide.recommended_class.split(",").map((cls, i) => {
-                      const classColor =
-                        WOW_CLASSES[cls.trim()]?.color || "#ccc";
-                      return (
-                        <span
-                          key={`class-${i}`}
-                          className="class-pill"
-                          style={{ backgroundColor: classColor }}
-                        >
-                          {cls.trim()}
-                        </span>
-                      );
-                    })}
+                    {(guide.recommended_class || "")
+                      .split(",")
+                      .map((cls, i) => {
+                        const className = cls.trim();
+                        if (!className) return null;
+                        const classColor =
+                          WOW_CLASSES[className]?.color || "#ccc";
+                        return (
+                          <span
+                            key={`class-${i}`}
+                            className="class-pill"
+                            style={{
+                              backgroundColor: classColor,
+                              color:
+                                className === "Priest" ? "#000" : undefined,
+                            }}
+                          >
+                            {className}
+                          </span>
+                        );
+                      })}
                   </div>
                 </div>
               </div>
               <div className="thumbnail-bottomright">
-                <div className="info-box">
-                  <span className="label">💰 Gold/hr:</span>
-                  <span className="value">{guide.gold_pr_hour}</span>
-                </div>
-                <div className="info-box">
-                  <span className="label">⏱️ Time:</span>
-                  <span className="value">{guide.time_to_complete}</span>
-                </div>
+                {guide.gold_pr_hour && (
+                  <div className="info-box">
+                    <span className="label">💰 Gold/hr:</span>
+                    <span className="value">{guide.gold_pr_hour}</span>
+                  </div>
+                )}
+                {guide.time_to_complete && (
+                  <div className="info-box">
+                    <span className="label">⏱️ Time:</span>
+                    <span className="value">{guide.time_to_complete}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -155,7 +155,10 @@ async function Page({ params }) {
           <div className="guide-layout">
             <div className="guide-content">
               {guide.description && (
-                <p className="guide-description">{guide.description}</p>
+                <div
+                  dangerouslySetInnerHTML={{ __html: guide.description }}
+                  className="guide-description"
+                />
               )}
 
               {guide.youtube_video_id && (
@@ -182,6 +185,7 @@ async function Page({ params }) {
                         alt={`Slide ${idx + 1}`}
                         width={400}
                         height={250}
+                        style={{ objectFit: "cover", borderRadius: "8px" }}
                       />
                     ))}
                   </div>
@@ -196,9 +200,16 @@ async function Page({ params }) {
               )}
 
               {guide.route_string && (
-                <div className="route-string">
-                  <h3>GatherMate2 Route String</h3>
+                <div className="tsm-string">
+                  <h3>Route String</h3>
                   <pre>{guide.route_string}</pre>
+                </div>
+              )}
+
+              {guide.macro_string && (
+                <div className="tsm-string">
+                  <h3>Helpful Macro</h3>
+                  <pre>{guide.macro_string}</pre>
                 </div>
               )}
 
@@ -207,9 +218,7 @@ async function Page({ params }) {
                   <h3>Required Items</h3>
                   <ul>
                     {requiredItems.map((item, i) => (
-                      <li key={`req-${i}`}>
-                        {typeof item === "string" ? item : JSON.stringify(item)}
-                      </li>
+                      <li key={`req-${i}`}>{item.name || item}</li>
                     ))}
                   </ul>
                 </div>
@@ -220,17 +229,13 @@ async function Page({ params }) {
                   <h3>Recommended Addons</h3>
                   <ul>
                     {addons.map((addon, i) => (
-                      <li key={`addon-${i}`}>
-                        {typeof addon === "string"
-                          ? addon
-                          : JSON.stringify(addon)}
-                      </li>
+                      <li key={`addon-${i}`}>{addon.name || addon}</li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {steps.length > 0 && (
+              {steps.length > 0 && steps[0].content && (
                 <div className="guide-steps">
                   <h2>Steps</h2>
                   <ol>
@@ -238,7 +243,7 @@ async function Page({ params }) {
                       <li
                         key={`step-${index}`}
                         dangerouslySetInnerHTML={{ __html: step.content }}
-                      ></li>
+                      />
                     ))}
                   </ol>
                 </div>
@@ -246,18 +251,30 @@ async function Page({ params }) {
             </div>
 
             <aside className="guide-right-panel">
-              <div className="map-section">
-                <h3>Map Image</h3>
-                <MapImageModal src={guide.map_image_path} />
-              </div>
+              {mapImage && (
+                <div className="map-section">
+                  <h3>Map Image</h3>
+                  <MapImageModal src={mapImage} />
+                </div>
+              )}
 
-              {hasVisibleItems && (
+              {itemsOfNote.length > 0 && (
                 <div className="map-notes-box">
                   <h4>Items of Note</h4>
-                  <ul>
+                  <ul style={{ listStyle: "none", padding: 0 }}>
                     {itemsOfNote.map((item, index) => (
-                      <li key={`item-${index}`}>
-                        {typeof item === "string" ? item : JSON.stringify(item)}
+                      <li key={`item-${index}`} className="item-list-item">
+                        <Image
+                          src={
+                            item.icon ||
+                            "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg"
+                          }
+                          alt={item.name}
+                          width={24}
+                          height={24}
+                          className="item-icon-small"
+                        />
+                        <span>{item.name}</span>
                       </li>
                     ))}
                   </ul>
