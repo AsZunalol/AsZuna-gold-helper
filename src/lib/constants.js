@@ -1,3 +1,4 @@
+// Updated constants.js
 // A centralized place for WoW-related constants
 
 export const WOW_CLASSES = {
@@ -17,7 +18,6 @@ export const WOW_CLASSES = {
   Any: { name: "Any", color: "#A0A0A0" },
 };
 
-// The approved list of tags admins can choose from.
 export const APPROVED_TAGS = [
   "dragonflight",
   "the war within",
@@ -50,8 +50,6 @@ export const APPROVED_TAGS = [
   "group",
 ];
 
-// ... (Keep WOW_CLASSES and APPROVED_TAGS at the top)
-
 export const WOW_EXPANSIONS = [
   { name: "The War Within", color: "#4B54A8" },
   { name: "Dragonflight", color: "#D39E4B" },
@@ -65,8 +63,6 @@ export const WOW_EXPANSIONS = [
   { name: "The Burning Crusade", color: "#00A36C" },
   { name: "Classic", color: "#D2B48C" },
 ];
-
-// ... (Keep WOW_CLASSES, APPROVED_TAGS, and WOW_EXPANSIONS)
 
 export const GUIDE_CATEGORIES = [
   "Raw Gold",
@@ -85,3 +81,9 @@ export const PROFILE_IMAGES = Array.from(
   { length: 50 },
   (_, i) => `/images/avatars/avatar${i + 2}.png`
 );
+
+export const ROLES = {
+  ADMIN: "admin",
+  OWNER: "owner",
+  USER: "user",
+};

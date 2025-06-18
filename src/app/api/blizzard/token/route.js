@@ -15,3 +15,6 @@ export async function GET() {
     );
   }
 }
+
+// Re-export for external access
+export { getNewAccessToken as getAccessToken };

@@ -1,3 +1,4 @@
+// Updated spinner.jsx
 import React from "react";
 
 export default function Spinner({ size = 50, color = "#00ffaa" }) {

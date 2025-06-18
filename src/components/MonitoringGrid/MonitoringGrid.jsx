@@ -1,37 +1,26 @@
-import React, { useEffect, useState } from "react";
-import DataMonitoringCard from "@/components/DataMonitoringCard/DataMonitoringCard";
-import ApiLogsCard from "@/components/ApiLogsCard/ApiLogsCard";
-import PriceHistoryCardWrapper from "@/components/Charts/PriceHistoryCardWrapper";
-import styles from "./MonitoringGrid.module.css";
+"use client";
+import React from "react";
+import DataMonitoringCard from "../../components/DataMonitoringCard/DataMonitoringCard";
+import ApiLogsCard from "../../components/ApiLogsCard/ApiLogsCard";
+import UserManagementTable from "../../components/UserManagementTable/UserManagementTable";
 
-export default function MonitoringGrid({ lastUpdate, nextUpdate }) {
-  const [logs, setLogs] = useState([]);
-
-  useEffect(() => {
-    fetch("/api/logs")
-      .then((res) => res.json())
-      .then((data) => setLogs(data));
-  }, []);
-
+const MonitoringGrid = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        gap: "1.5rem",
-        alignItems: "flex-start",
-      }}
-    >
-      <div className={styles.cardWrapper}>
-        <DataMonitoringCard lastUpdate={lastUpdate} nextUpdate={nextUpdate} />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="lg:col-span-2 bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-xl font-bold mb-4">User Management</h3>
+        <UserManagementTable />
       </div>
-      <div className={styles.cardWrapper}>
-        <ApiLogsCard logs={logs} />
+      <div className="bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-xl font-bold mb-4">Data Monitoring</h3>
+        <DataMonitoringCard />
       </div>
-      <div className={styles.cardWrapper}>
-        <PriceHistoryCardWrapper />
+      <div className="bg-gray-700 p-4 rounded-lg">
+        <h3 className="text-xl font-bold mb-4">API Logs</h3>
+        <ApiLogsCard />
       </div>
     </div>
   );
-}
+};
+
+export default MonitoringGrid;
