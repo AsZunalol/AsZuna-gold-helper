@@ -14,38 +14,25 @@ import GuideCategory from "@/components/GuideCategory/GuideCategory";
 import Link from "next/link";
 import Image from "next/image";
 
-// Data fetching functions remain async, which is correct.
+// Fetch guides filtered by category
 async function getGuides(category) {
   try {
-    const whereClause = {
-      status: "published",
-    };
-
-    if (category) {
-      whereClause.category = category;
-    }
-
-    const guides = await prisma.guide.findMany({
-      where: whereClause,
-      include: {
-        author: {
-          select: {
-            username: true,
-            imageUrl: true,
-          },
-        },
+    return await prisma.guide.findMany({
+      where: {
+        status: "published",
+        ...(category ? { category } : {}),
       },
       orderBy: {
         createdAt: "desc",
       },
     });
-    return guides;
   } catch (error) {
     console.error("Failed to fetch guides:", error);
     return [];
   }
 }
 
+// Fetch distinct guide categories
 async function getCategories() {
   try {
     const guides = await prisma.guide.findMany({
@@ -64,45 +51,52 @@ async function getCategories() {
   }
 }
 
-// THE FIX: This page component MUST be declared as `async` to use `searchParams`.
-// This allows the component to correctly handle dynamic request data on the server.
+// Page component – must be async so we can await searchParams
 export default async function GuidesPage({ searchParams }) {
-  // Now we can safely access properties of searchParams
-  const category = searchParams.category;
+  // ✅ In Next.js 15 `searchParams` is a Promise – await it *before* using its properties.
+  const { category } = await searchParams;
 
-  // Await the data fetching calls
-  const guides = await getGuides(category);
-  const categories = await getCategories();
+  // Fetch data in parallel for better performance
+  const [guides, categories] = await Promise.all([
+    getGuides(category),
+    getCategories(),
+  ]);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-[#00ffaa] mb-8 text-center">
         {category ? `${category} Guides` : "All Guides"}
       </h1>
+
+      {/* Category filter tabs */}
       <GuideCategory categories={categories} />
+
+      {/* Guides grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {guides.map((guide) => (
           <div
             key={guide.id}
             className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300"
           >
+            {/* Thumbnail */}
+            {guide.thumbnail && (
+              <Image
+                src={guide.thumbnail}
+                alt={guide.title}
+                width={640}
+                height={360}
+                className="w-full h-48 object-cover"
+              />
+            )}
+
+            {/* Card content */}
             <div className="p-6">
               <h2 className="text-2xl font-bold text-white mb-2">
                 {guide.title}
               </h2>
-              <p className="text-gray-400 mb-4">Category: {guide.category}</p>
-              <div className="flex items-center mb-4">
-                <Image
-                  src={guide.author.imageUrl || "/default-avatar.png"}
-                  alt={guide.author.username || "Author"}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full mr-4 object-cover"
-                />
-                <span className="text-gray-300">
-                  By {guide.author.username}
-                </span>
-              </div>
+              <p className="text-gray-400 mb-4 line-clamp-3">
+                {guide.description}
+              </p>
               <Link
                 href={`/guide/${guide.id}`}
                 className="inline-block bg-[#00ffaa] text-black font-bold py-2 px-4 rounded hover:bg-[#00dd96] transition-colors"
