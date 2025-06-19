@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Spinner from "@/components/ui/spinner"; // Assuming spinner is available
-import "./ItemPrices.css"; // Import the new CSS file
+import Spinner from "@/components/ui/spinner";
+import "./ItemPrices.css";
 
 // Helper to format gold from copper values
 function formatGold(copper) {
@@ -25,24 +25,23 @@ export default function ItemPrices({ items }) {
     }
 
     async function fetchPricesAndIcons() {
-      // Renamed for clarity
       setLoading(true);
       const updatedItems = await Promise.all(
         items.map(async (item) => {
           let iconUrl = item.icon;
 
-          // --- START OF FIX ---
-          // If the icon URL is missing from the item data, fetch it.
-          if (!iconUrl) {
+          if (!iconUrl || !iconUrl.startsWith("http")) {
             try {
               const iconResponse = await fetch(
                 `/api/blizzard/search?query=${item.id}`
               );
               if (iconResponse.ok) {
                 const searchResult = await iconResponse.json();
-                // The search returns an array, so we take the first result's icon.
                 if (searchResult && searchResult.length > 0) {
-                  iconUrl = searchResult[0].icon;
+                  const iconFromApi = searchResult[0].icon;
+                  iconUrl = iconFromApi?.startsWith("http")
+                    ? iconFromApi
+                    : `https://render.worldofwarcraft.com/us/icons/56/${iconFromApi}`;
                 }
               }
             } catch (error) {
@@ -52,9 +51,7 @@ export default function ItemPrices({ items }) {
               );
             }
           }
-          // --- END OF FIX ---
 
-          // Fallback if the icon is still missing after the fetch attempt
           const finalIconUrl =
             iconUrl ||
             "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
@@ -67,14 +64,14 @@ export default function ItemPrices({ items }) {
             const priceData = await priceRes.json();
             return {
               ...item,
-              icon: finalIconUrl, // Use the fetched or fallback icon
+              icon: finalIconUrl,
               serverPrice: priceData?.serverPrice ?? "N/A",
               regionalAveragePrice: priceData?.regionalAveragePrice ?? "N/A",
             };
           } catch {
             return {
               ...item,
-              icon: finalIconUrl, // Also use it in the catch block
+              icon: finalIconUrl,
               serverPrice: "N/A",
               regionalAveragePrice: "N/A",
             };
