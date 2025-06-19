@@ -2,58 +2,16 @@
 
 /* Main container to establish the max-width and center the layout on large screens */
 .guide-container-redesigned {
+  /* REMOVED: background, backdrop-filter, border-radius, padding, box-shadow, border */
+  /* These properties are now handled by .main-content-card-wrapper */
   width: 100%;
-  max-width: 1600px; /* Wider layout */
-  margin: 0 auto;
-  padding: 2rem 1.5rem; /* More vertical and horizontal padding */
+  max-width: 1600px; /* Keep max-width for internal layout responsiveness */
+  margin: 0 auto; /* Keep for internal centering within the wrapper */
   color: #fff;
-}
-
-/* Page Header - Just the title */
-.guide-header-redesigned {
-  margin-bottom: 2rem;
-  padding-left: 1rem;
-  border-left: 4px solid #00ffaa;
-}
-
-.guide-title-redesigned {
-  font-size: 3.5em; /* Larger title */
-  font-weight: bold;
-  color: #fff;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-  line-height: 1.2;
-}
-
-/* Flexbox layout for main content and sidebar */
-.guide-layout-redesigned {
-  display: flex;
-  flex-direction: column; /* Stack on mobile */
-  gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-  .guide-layout-redesigned {
-    flex-direction: row; /* Side-by-side on desktop */
-  }
-}
-
-/* Main content column */
-.main-content-redesigned {
-  flex: 3; /* Takes up 3/4 of the space on desktop */
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* Sidebar column */
-.sidebar-redesigned {
-  flex: 1; /* Takes up 1/4 of the space on desktop */
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
 }
 
 /* Styling for individual cards/widgets in both columns */
+/* These should still have their backgrounds and glass effects as internal sections */
 .content-bg-redesigned,
 .sidebar-widget-redesigned {
   background: rgba(10, 10, 15, 0.75);

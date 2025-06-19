@@ -1,40 +1,91 @@
+/* src/app/guides/GuideCard.module.css */
+
 .card {
-  background-color: #1a1f2c;
+  background-color: var(--color-surface); /* Consistent with theme */
   border-radius: 1rem;
   overflow: hidden;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease; /* Smoother transitions */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  height: 252px;
-  position: relative;
+  box-shadow: var(--shadow-md); /* Added a stronger shadow for depth */
+  border: 1px solid var(--color-border); /* Subtle border */
 }
 
 .card:hover {
-  transform: translateY(-0.25rem);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+  transform: translateY(-8px) scale(1.02); /* More pronounced lift and slight scale */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5), var(--shadow-glow-md); /* Stronger shadow + glow */
+  border-color: var(--color-primary-light); /* Highlight border on hover */
 }
 
 .thumbnail {
-  height: 270px;
-  width: 100%;
   position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background-color: var(--color-background); /* Background for images */
+  overflow: hidden;
+}
+
+.thumbnail img {
+  object-fit: cover;
+  transition: transform 0.3s ease; /* Smooth zoom on hover */
+}
+
+.card:hover .thumbnail img {
+  transform: scale(1.05); /* Slight zoom on image hover */
+}
+
+/* Enhancements for tags/GPH over thumbnail */
+.thumbnail > div {
+  /* Targeting the div wrapping GPH/expansion */
+  background-color: rgba(
+    26,
+    32,
+    39,
+    0.8
+  ); /* Slightly more opaque for readability */
+  backdrop-filter: blur(4px); /* Subtle blur effect */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Thin border */
+  padding: 0.35rem 0.8rem; /* Adjusted padding */
+  border-radius: 0.5rem; /* Softer corners */
+  box-shadow: var(--shadow-sm); /* Small shadow */
 }
 
 .readButton {
-  background-color: #00ffaa;
-  color: black;
-  font-weight: 600;
-  font-size: 0.8rem;
-  padding: 0.3rem 0.75rem;
+  display: inline-block; /* Ensure it behaves like a block for full padding */
+  background-color: var(--color-primary);
+  color: var(--color-background); /* Dark text on primary background */
+  font-weight: 700; /* Bolder font */
+  font-size: 1rem; /* Slightly larger text */
+  padding: 0.75rem 1.5rem; /* More generous padding */
   text-align: center;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease;
+  border-radius: 0.75rem; /* Softer corners */
+  transition: all 0.2s ease; /* Smooth transitions */
   text-decoration: none;
-  align-self: flex-start;
-  margin-top: 0.75rem;
+  align-self: flex-start; /* Align button to start in flex container */
+  margin-top: 1rem; /* Space from title */
+  box-shadow: var(--shadow-sm); /* Subtle shadow */
 }
 
 .readButton:hover {
-  background-color: #00cc88;
+  background-color: var(--color-primary-light); /* Lighter on hover */
+  box-shadow: var(--shadow-glow-sm); /* Glow on hover */
+  transform: translateY(-2px); /* Slight lift */
+}
+
+/* Ensure content section has proper spacing and layout */
+.card > div:last-child {
+  /* Targets the content div below thumbnail */
+  padding: 1.5rem; /* Consistent padding */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes button to bottom if content is short */
+  flex-grow: 1; /* Allows content area to expand */
+}
+
+.card h2 {
+  font-size: 1.5rem; /* Larger title in card */
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.75rem; /* Space below title */
+  line-height: 1.3;
 }

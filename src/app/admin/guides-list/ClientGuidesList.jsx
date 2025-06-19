@@ -1,3 +1,5 @@
+// src/app/admin/guides-list/ClientGuidesList.jsx
+
 "use client";
 
 import { useState, useTransition } from "react";
@@ -64,13 +66,20 @@ const GuideCard = ({ guide, onSelectDelete }) => {
   );
 };
 
-export default function ClientGuidesList({ guides }) {
+// FIX: Accept initialPublished and initialDrafts as props
+export default function ClientGuidesList({ initialPublished, initialDrafts }) {
   const [activeTab, setActiveTab] = useState("published");
   const [guideTypeFilter, setGuideTypeFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [allGuides, setAllGuides] = useState(guides);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [isPending, startTransition] = useTransition();
+
+  // FIX: Initialize allGuides by combining initialPublished and initialDrafts
+  // This ensures allGuides is an array from the start.
+  const [allGuides, setAllGuides] = useState(() => [
+    ...initialPublished,
+    ...initialDrafts,
+  ]);
 
   const handleDelete = async (id) => {
     try {
@@ -97,8 +106,6 @@ export default function ClientGuidesList({ guides }) {
   });
 
   const typeFilteredGuides = statusFilteredGuides.filter((guide) => {
-    // --- THIS IS THE FIX ---
-    // A guide is considered "Transmog" if the category is "Transmog" OR the is_transmog flag is true.
     const isTransmog = guide.is_transmog || guide.category === "Transmog";
 
     if (guideTypeFilter === "all") return true;

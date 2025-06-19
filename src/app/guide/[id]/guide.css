@@ -1,18 +1,16 @@
-/* guide.css */
+/* src/app/guide/[id]/guide.css */
 
-.guide-outer {
-  background-color: #0f172a;
-  border-radius: 1rem;
-  padding: 2rem;
-  margin: 2rem auto;
-  max-width: 1400px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-}
-
+/* The .guide-outer class in the file's original context was likely a wrapper in the HTML */
+/* If NormalGuide.jsx has a div with className="guide-container" directly inside the global wrapper, */
+/* then this selector should apply to it. */
 .guide-container {
+  /* This is the direct container within .main-content-card-wrapper */
+  /* It manages the internal flex layout of the guide content. */
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2rem; /* Spacing between main sections of the guide */
+  width: 100%; /* Occupy full width within .main-content-card-wrapper */
+  padding: 0; /* Padding is handled by .main-content-card-wrapper */
 }
 
 .thumbnail-wrapper {

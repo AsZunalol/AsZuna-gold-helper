@@ -1,3 +1,5 @@
+// src/app/guide/[id]/page.jsx
+
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import TransmogGuide from "./TransmogGuide";
@@ -7,7 +9,7 @@ import NormalGuide from "./NormalGuide";
 async function getGuide(id) {
   try {
     const guide = await prisma.guide.findUnique({
-      where: { id },
+      where: { id: parseInt(id, 10) },
       include: {
         author: {
           select: {
@@ -15,15 +17,8 @@ async function getGuide(id) {
             imageUrl: true,
           },
         },
-        itemsOfNote: {
-          select: { id: true, name: true },
-        },
-        route: true,
-        steps: {
-          orderBy: {
-            order: "asc",
-          },
-        },
+        // Removed 'itemsOfNote' and 'route' from include as they are scalar JSON/TEXT fields.
+        // Their data is returned directly on the guide object.
       },
     });
     return guide;
@@ -35,16 +30,22 @@ async function getGuide(id) {
 
 // Make the page component async and destructure params
 export default async function Page({ params }) {
-  const guide = await getGuide(params.id);
+  // Await params before accessing its properties
+  const { id } = await params;
+  const guide = await getGuide(id);
 
   if (!guide) {
     notFound();
   }
 
-  // Conditionally render the correct guide component based on category
-  if (guide.category === "Transmog") {
-    return <TransmogGuide guide={guide} />;
-  } else {
-    return <NormalGuide guide={guide} />;
-  }
+  return (
+    // Wrap the guide content with the new global wrapper class
+    <div className="main-content-card-wrapper">
+      {guide.category === "Transmog" ? (
+        <TransmogGuide guide={guide} />
+      ) : (
+        <NormalGuide guide={guide} />
+      )}
+    </div>
+  );
 }

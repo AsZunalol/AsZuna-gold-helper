@@ -1,68 +1,287 @@
+/* src/app/guides/guidesPage.module.css */
+
 .page {
-  min-height: 100vh;
-  background-color: #0d1117;
-  color: white;
-  padding: 3rem 1rem;
+  min-height: calc(100vh - 80px); /* Adjust for header height */
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  padding: 3rem 1.5rem; /* Increased padding */
 }
 
 .container {
-  max-width: 90rem;
+  max-width: 1400px; /* Increased max-width for content */
   margin: 0 auto;
 }
 
 .heading {
-  font-size: 3rem;
-  font-weight: 800;
+  font-size: 3.5rem; /* Larger heading */
+  font-weight: 900; /* Bolder font */
   text-align: center;
-  color: #00ffaa;
-  margin-bottom: 2.5rem;
-  letter-spacing: -0.02em;
+  color: white; /* Changed to white to fit better with the glow */
+  margin-bottom: 3rem; /* Increased margin */
+  letter-spacing: -0.05em; /* Tighter letter spacing */
+  text-shadow: 0 0 15px rgba(0, 255, 170, 0.6); /* Vibrant glow effect */
 }
 
 .sortRow {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
+  gap: 1.25rem; /* Increased gap */
+  margin-bottom: 2rem; /* Adjusted margin to make space for search bar below */
   flex-wrap: wrap;
+  padding-bottom: 1.5rem; /* Padding to give space below controls */
+  border-bottom: 1px solid var(--color-border); /* Subtle separator */
 }
 
 .sortRow a,
 .sortRow select {
   padding: 0.75rem 1.5rem;
   border-radius: 9999px;
-  border: 2px solid #00ffaa;
-  background-color: transparent;
-  color: white;
-  transition: all 0.2s ease;
+  border: 2px solid var(--color-primary); /* Use primary color for border */
+  background-color: var(--color-surface); /* Use surface color for background */
+  color: var(--color-primary); /* Text color from primary */
+  transition: all 0.3s ease; /* Smoother transition */
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
+  box-shadow: var(--shadow-sm); /* Subtle shadow */
+  appearance: none; /* Remove default select styles */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300ffaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); /* Custom arrow for select */
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.2em 1.2em;
 }
 
 .sortRow a.active,
 .sortRow a:hover,
 .sortRow select:hover {
-  background-color: #00ffaa;
-  color: black;
+  background-color: var(--color-primary);
+  color: var(--color-background); /* Dark text on primary background */
   border-color: transparent;
+  transform: translateY(-2px); /* Slight lift effect */
+  box-shadow: var(--shadow-glow-sm); /* Glow on hover/active */
+}
+
+.sortRow select option {
+  background-color: var(--color-surface); /* Option background */
+  color: var(--color-text-main); /* Option text color */
+}
+
+/* New styles for the segmented type buttons */
+.typeButton {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.typeButton:first-of-type {
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+  border-right: none; /* Remove right border to create segmented look */
+}
+
+.typeButton:last-of-type {
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+}
+
+.typeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  z-index: 1; /* Bring hovered button slightly forward */
+}
+
+.activeTypeButton {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  border: 1px solid var(--color-primary);
+  box-shadow: var(--shadow-glow-sm);
+  z-index: 2; /* Ensure active button is on top */
+}
+
+.activeTypeButton:first-of-type {
+  border-top-left-radius: 9999px;
+  border-bottom-left-radius: 9999px;
+  border-right: 1px solid var(--color-primary); /* Keep border for active button */
+}
+
+.activeTypeButton:last-of-type {
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+}
+
+/* Styles for the new search bar */
+.searchRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem; /* Space below search bar */
+  padding: 0 1.5rem; /* Match page padding */
+}
+
+.searchInputContainer {
+  position: relative;
+  width: 100%;
+  max-width: 600px; /* Limit width */
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.75rem; /* Left padding for icon */
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary-light);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.3),
+    inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none; /* Ensure icon doesn't block input interaction */
+}
+
+/* Styles for the new category filter buttons/tags */
+.categoryFilterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem; /* Spacing between buttons */
+  margin-bottom: 3rem; /* Space below category filter */
+  padding: 0 1.5rem; /* Match page padding */
+}
+
+.categoryButton,
+.activeCategoryButton {
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px; /* Pill shape */
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  background-color: var(--color-surface); /* Default background */
+  color: var(--color-text-secondary); /* Default text color */
+}
+
+.categoryButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: var(--shadow-sm);
+}
+
+.activeCategoryButton {
+  background-color: var(--color-primary); /* Active background color */
+  color: var(--color-background); /* Active text color */
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow-sm); /* Glow for active */
+  font-weight: 700;
+}
+
+/* Styles for the Load More button */
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem; /* Space above the button */
+  margin-bottom: 2rem; /* Space below the button */
+}
+
+.loadMoreButton {
+  padding: 1rem 2.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-background);
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md); /* Matching button shadow */
+}
+
+.loadMoreButton:hover {
+  background-color: var(--color-primary-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-glow-md); /* Enhanced glow on hover */
+}
+
+.loadMoreButton:disabled {
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+/* Styles for the Clear Filters button */
+.clearFiltersButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px; /* Pill shape */
+  background-color: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.clearFiltersButton:hover {
+  background-color: #ef4444; /* Red background on hover */
+  color: white;
+  border-color: #ef4444;
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); /* Red glow */
 }
 
 .grid {
   display: grid;
-  gap: 2rem;
+  gap: 2rem; /* Consistent gap */
   margin-top: 3rem;
 }
 
 @media (min-width: 768px) {
   .grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(300px, 1fr)
+    ); /* More flexible grid */
   }
 }
 
 @media (min-width: 1024px) {
   .grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(320px, 1fr)
+    ); /* Slightly larger min-width for cards */
   }
 }

@@ -1,46 +1,118 @@
+// src/app/guides/page.jsx
+
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
-import GuideCategory from "@/components/GuideCategory/GuideCategory";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./guidesPage.module.css";
 import cardStyles from "./GuideCard.module.css";
 import GuidesSortDropdown from "./GuidesSortDropdown";
+import GuideTypeSwitcher from "./GuideTypeSwitcher";
+import ExpansionFilter from "./ExpansionFilter";
+import SearchFilter from "./SearchFilter";
+import CategoryFilter from "./CategoryFilter";
+import LoadMoreButton from "./LoadMoreButton";
+import { GUIDE_CATEGORIES } from "@/lib/constants"; // Import GUIDE_CATEGORIES directly
+import ClearFiltersButton from "./ClearFiltersButton"; // ADD THIS LINE: Import the ClearFiltersButton component
+
+const GUIDES_PER_PAGE = 9; // Define how many guides to load per page
 
 export default async function GuidesPage({ searchParams }) {
-  // Corrected lines: Directly access properties from searchParams object
-  // This resolves the error by using the correct access pattern for server components.
-  const category = searchParams.category ?? null;
-  const type = searchParams.type ?? "gold";
-  const sort = searchParams.sort ?? "latest";
+  const { category, type, sort, expansion, search, page } = await searchParams;
 
-  async function getGuides(type, category, sort) {
-    const orderBy = sort === "title" ? { title: "asc" } : { createdAt: "desc" };
-    return await prisma.guide.findMany({
-      where: {
-        status: "published",
-        ...(type === "transmog"
-          ? { is_transmog: true }
-          : { is_transmog: false }),
-        ...(category ? { category } : {}),
-      },
-      orderBy,
-    });
-  }
+  const currentPage = parseInt(page || "1", 10);
+  const skip = (currentPage - 1) * GUIDES_PER_PAGE;
 
-  async function getCategories() {
+  // Function to parse gold_pr_hour string into a comparable number
+  const parseGoldPerHour = (gphString) => {
+    if (!gphString) return 0;
+    const numericPart = gphString.replace(/[^0-9.]/g, "");
+    return parseFloat(numericPart) || 0;
+  };
+
+  async function getGuides(
+    type,
+    category,
+    sort,
+    expansion,
+    search,
+    take,
+    skip
+  ) {
+    let orderBy = {};
+
+    if (sort === "title") {
+      orderBy = { title: "asc" };
+    } else if (sort === "gph_desc") {
+      orderBy = {
+        gold_pr_hour: "desc",
+      };
+    } else if (sort === "gph_asc") {
+      orderBy = {
+        gold_pr_hour: "asc",
+      };
+    } else {
+      orderBy = { createdAt: "desc" };
+    }
+
+    const whereClause = {
+      status: "published",
+      ...(type === "transmog" ? { is_transmog: true } : { is_transmog: false }),
+      ...(category ? { category } : {}),
+      ...(expansion ? { expansion } : {}),
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { tags: { contains: search, mode: "insensitive" } },
+          { category: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+    };
+
     const guides = await prisma.guide.findMany({
-      where: { status: "published" },
-      select: { category: true },
-      distinct: ["category"],
+      where: whereClause,
+      orderBy,
+      take: take,
+      skip: skip,
     });
-    return guides.map((guide) => guide.category);
+
+    const totalGuidesCount = await prisma.guide.count({
+      where: whereClause,
+    });
+
+    if (sort === "gph_desc") {
+      guides.sort(
+        (a, b) =>
+          parseGoldPerHour(b.gold_pr_hour) - parseGoldPerHour(a.gold_pr_hour)
+      );
+    } else if (sort === "gph_asc") {
+      guides.sort(
+        (a, b) =>
+          parseGoldPerHour(a.gold_pr_hour) - parseGoldPerHour(b.gold_pr_hour)
+      );
+    }
+
+    return { guides, totalGuidesCount };
   }
 
-  const [guides, categories] = await Promise.all([
-    getGuides(type, category, sort),
-    getCategories(),
+  // Directly use GUIDE_CATEGORIES from the imported constants
+  // The sorting logic is already handled in src/lib/constants.js
+  const availableCategories = GUIDE_CATEGORIES;
+
+  const [{ guides, totalGuidesCount }] = await Promise.all([
+    getGuides(
+      type ?? "gold",
+      category ?? null,
+      sort ?? "latest",
+      expansion ?? null,
+      search ?? null,
+      GUIDES_PER_PAGE,
+      skip
+    ),
   ]);
+
+  const hasMoreGuides = currentPage * GUIDES_PER_PAGE < totalGuidesCount;
 
   return (
     <div className={styles.page}>
@@ -48,29 +120,50 @@ export default async function GuidesPage({ searchParams }) {
         <h1 className={styles.heading}>Explore Gold & Transmog Guides</h1>
 
         <div className={styles.sortRow}>
-          <Link
-            href={`/guides?type=gold&sort=${sort}`}
-            className={type === "gold" ? "active" : ""}
-          >
-            Gold Guides
-          </Link>
-          <Link
-            href={`/guides?type=transmog&sort=${sort}`}
-            className={type === "transmog" ? "active" : ""}
-          >
-            Transmog Guides
-          </Link>
-          <GuidesSortDropdown type={type} category={category} sort={sort} />
+          <GuideTypeSwitcher
+            currentType={type ?? "gold"}
+            currentSort={sort ?? "latest"}
+            currentCategory={category ?? null}
+          />
+          <GuidesSortDropdown
+            type={type ?? "gold"}
+            currentCategory={category ?? null}
+            sort={sort ?? "latest"}
+          />
+          <ExpansionFilter
+            currentExpansion={expansion ?? null}
+            currentType={type ?? "gold"}
+            currentSort={sort ?? "latest"}
+            currentCategory={category ?? null}
+          />
+          <ClearFiltersButton />
         </div>
 
-        <GuideCategory categories={categories} selectedCategory={category} />
+        <div className={styles.searchRow}>
+          <SearchFilter
+            currentSearch={search ?? ""}
+            currentType={type ?? "gold"}
+            currentSort={sort ?? "latest"}
+            currentCategory={category ?? null}
+            currentExpansion={expansion ?? null}
+          />
+        </div>
+
+        <CategoryFilter
+          availableCategories={availableCategories}
+          currentCategory={category ?? null}
+          currentType={type ?? "gold"}
+          currentSort={sort ?? "latest"}
+          currentExpansion={expansion ?? null}
+          currentSearch={search ?? null}
+        />
 
         <div className={styles.grid}>
           {guides.map((guide) => (
             <div key={guide.id} className={cardStyles.card}>
               <div className={cardStyles.thumbnail}>
                 <Image
-                  src={guide.thumbnail || "/images/default-thumb.jpg"}
+                  src={guide.thumbnail_url || "/images/default-thumb.jpg"}
                   alt={guide.title}
                   fill
                   className="object-cover"
@@ -104,6 +197,17 @@ export default async function GuidesPage({ searchParams }) {
             </div>
           ))}
         </div>
+
+        {hasMoreGuides && (
+          <LoadMoreButton
+            currentPage={currentPage}
+            currentType={type ?? "gold"}
+            currentSort={sort ?? "latest"}
+            currentCategory={category ?? null}
+            currentExpansion={expansion ?? null}
+            currentSearch={search ?? null}
+          />
+        )}
       </div>
     </div>
   );
