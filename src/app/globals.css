@@ -892,8 +892,8 @@ footer {
   color: var(--color-primary);
   margin-top: 0;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .guide-description-html p {
@@ -1119,4 +1119,22 @@ footer {
 }
 .date-info:last-child {
   margin-bottom: 0;
+}
+
+.main-content-card-wrapper {
+  max-width: 1400px;
+  width: 100%;
+  margin: 2rem auto; /* Centers the content and adds space top/bottom */
+  padding: 2.5rem; /* Generous padding inside the card */
+  background-color: #111827; /* Solid dark background */
+  border-radius: 1rem; /* Rounded corners */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Deep shadow for a floating effect */
+}
+
+@media (max-width: 768px) {
+  .main-content-card-wrapper {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
 }

@@ -1,22 +1,71 @@
 /* src/app/guide/[id]/guide.css */
 
-/* The .guide-outer class in the file's original context was likely a wrapper in the HTML */
-/* If NormalGuide.jsx has a div with className="guide-container" directly inside the global wrapper, */
-/* then this selector should apply to it. */
 .guide-container {
-  /* This is the direct container within .main-content-card-wrapper */
-  /* It manages the internal flex layout of the guide content. */
+  width: 100%;
+}
+
+.guide-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .guide-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.guide-main-col {
   display: flex;
   flex-direction: column;
-  gap: 2rem; /* Spacing between main sections of the guide */
-  width: 100%; /* Occupy full width within .main-content-card-wrapper */
-  padding: 0; /* Padding is handled by .main-content-card-wrapper */
+  gap: 2rem;
+}
+
+.guide-sidebar-col {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.guide-section {
+  background-color: var(--color-background);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.guide-section h2 {
+  font-size: 1.75rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.guide-video {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.guide-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .thumbnail-wrapper {
   width: 100%;
   position: relative;
-  margin-bottom: 2rem;
 }
 
 .thumbnail-card {
@@ -28,10 +77,9 @@
 .thumbnail-img {
   width: 100%;
   height: auto;
-  max-height: 350px;
+  max-height: 400px;
   object-fit: cover;
   display: block;
-  border-radius: 0.75rem;
 }
 
 .thumbnail-overlay-box {
@@ -103,126 +151,13 @@
   color: inherit;
 }
 
-/* REMOVED: Old .guide-tags-container, .guide-tags-inline, and related hover/fade styles */
-
-.thumbnail-topright {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: #1e293b;
-  color: #f8fafc;
-  padding: 0.5rem 1rem;
-  border-radius: 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.thumbnail-bottomright {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.4rem;
-}
-
-.info-box {
-  background-color: #1e293b;
-  padding: 0.25rem 0.6rem;
-  border-radius: 0.4rem;
-  font-size: 0.85rem;
-  color: #f8fafc;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.info-box .label {
-  font-weight: bold;
-  opacity: 0.8;
-}
-
-.info-box .value {
-  font-weight: normal;
-}
-
-.guide-layout {
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  align-items: flex-start;
-}
-
-.guide-content {
-  width: 100%;
-}
-
-.guide-right-panel {
-  width: 320px;
-  flex-shrink: 0;
-}
-
-.map-section {
-  background-color: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-}
-
-.map-section::before,
-.map-section::after,
-.guide-right-panel::before,
-.guide-right-panel::after {
-  content: none !important;
-  background: none !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-.map-notes-box {
-  background-color: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: #f1f5f9;
-  margin-top: 1rem;
-}
-
-.map-notes-box h4 {
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-
-.map-notes-box ul {
-  padding-left: 1.2rem;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* START OF FIX: Tags Show More/Less Feature - Applied to thumbnail tags */
 .thumbnail-overlay-content .tag-list-wrapper {
-  max-height: 2.5rem; /* Show approx 2 lines of tags */
+  max-height: 2.5rem;
   overflow: hidden;
   position: relative;
   transition: max-height 0.3s ease-out;
-  margin-top: 0.75rem; /* Space from expansion */
-  padding-bottom: 0.5rem; /* Give some room before fade */
+  margin-top: 0.75rem;
+  padding-bottom: 0.5rem;
 }
 
 .thumbnail-overlay-content .tag-list-wrapper.expanded {
@@ -232,19 +167,19 @@
 }
 
 .thumbnail-overlay-content .tags-display {
-  /* Inherits display:flex, flex-wrap:wrap, gap:0.5rem from globals.css */
-  /* Override any specific inline styles if necessary */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
-/* Specific styling for tag pills inside the thumbnail overlay */
 .thumbnail-overlay-content .tag-pill {
-  background-color: #334155; /* Darker background for visibility on overlay */
+  background-color: #334155;
   color: #fff;
   padding: 0.25rem 0.5rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
-  font-weight: 600; /* Slightly less bold than global .tag-pill */
-  white-space: nowrap; /* Keep tags from breaking words */
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .thumbnail-overlay-content .tags-fade-overlay {
@@ -252,7 +187,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 1rem; /* Smaller fade height */
+  height: 1rem;
   background: linear-gradient(
     to top,
     rgba(15, 23, 42, 0.75) 0%,
@@ -264,20 +199,19 @@
 .thumbnail-overlay-content .tags-toggle-button {
   background: none;
   border: none;
-  color: var(--color-text-secondary); /* Match other subtle text */
+  color: var(--color-text-secondary);
   cursor: pointer;
-  font-size: 0.7rem; /* Smaller font size for button */
+  font-size: 0.7rem;
   font-weight: 500;
-  padding: 0.2rem 0; /* Minimal padding */
+  padding: 0.2rem 0;
   transition: all 0.2s ease;
-  text-align: left; /* Align to left within the overlay box */
-  margin-left: 0; /* Reset any default button margin */
-  display: block; /* Make it a block element to take full width and handle text-align */
+  text-align: left;
+  margin-left: 0;
+  display: block;
 }
 
 .thumbnail-overlay-content .tags-toggle-button:hover {
   color: var(--color-primary);
   text-shadow: var(--shadow-glow-sm);
-  background-color: transparent; /* Ensure no background on hover */
+  background-color: transparent;
 }
-/* END OF FIX */

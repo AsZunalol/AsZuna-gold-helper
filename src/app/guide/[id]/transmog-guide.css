@@ -1,48 +1,70 @@
 /* src/app/guide/[id]/transmog-guide.css */
 
-/* Main container to establish the max-width and center the layout on large screens */
+/* Main container for the guide with a solid background */
 .guide-container-redesigned {
-  /* REMOVED: background, backdrop-filter, border-radius, padding, box-shadow, border */
-  /* These properties are now handled by .main-content-card-wrapper */
   width: 100%;
-  max-width: 1600px; /* Keep max-width for internal layout responsiveness */
-  margin: 0 auto; /* Keep for internal centering within the wrapper */
-  color: #fff;
+  color: #e0e0e0;
+  background-color: #0d1117; /* Deep, solid dark background */
+  padding: 2rem;
+  border-radius: 1rem;
 }
 
 /* Styling for individual cards/widgets in both columns */
-/* These should still have their backgrounds and glass effects as internal sections */
 .content-bg-redesigned,
 .sidebar-widget-redesigned {
-  background: rgba(10, 10, 15, 0.75);
-  backdrop-filter: blur(5px);
+  background-color: #1a2027; /* Solid, slightly lighter dark color */
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Titles within widgets/sections */
+/* Updated title colors to a blue accent */
 .widget-title-redesigned,
-.route-container-redesigned h2,
-.steps-container-redesigned h2 {
-  font-size: 1.5em;
-  color: #00ffaa;
+.content-bg-redesigned h2 {
+  font-size: 1.75rem;
+  color: #60a5fa; /* Vibrant Blue Accent */
   margin-top: 0;
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(0, 255, 170, 0.3);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.3);
 }
 
-/* --- Main Content Specifics --- */
+/* Main Content Area */
+.guide-layout-redesigned {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .guide-layout-redesigned {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.main-content-redesigned {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar-redesigned {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
 .guide-video-redesigned {
   position: relative;
   width: 100%;
-  padding-top: 56.25%; /* 16:9 Aspect Ratio */
-  border-radius: 8px;
+  padding-top: 56.25%;
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .guide-video-redesigned iframe {
@@ -59,26 +81,12 @@
 
 .guide-content-redesigned h2,
 .guide-content-redesigned h3 {
-  color: #00ffaa;
+  color: #60a5fa; /* Blue Accent */
   margin-top: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.steps-container-redesigned .step-card-redesigned {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 15px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  border-left: 3px solid #00ffaa;
-}
-
-.step-card-redesigned h3 {
-  margin-top: 0;
-  color: #fff;
-}
-
-/* --- Sidebar Specifics --- */
-
+/* Sidebar Specifics */
 .author-info-redesigned {
   display: flex;
   align-items: center;
@@ -88,7 +96,7 @@
 
 .author-avatar-redesigned {
   border-radius: 50%;
-  border: 2px solid #00ffaa;
+  border: 2px solid #60a5fa; /* Blue Accent */
 }
 
 .author-name-redesigned {
@@ -98,8 +106,9 @@
 
 .author-name-redesigned span {
   font-size: 0.9em;
-  color: #ccc;
+  color: #9ca3af;
 }
+
 .author-name-redesigned strong {
   font-size: 1.2em;
   font-weight: bold;
@@ -111,8 +120,8 @@
   flex-direction: column;
   gap: 0.75rem;
   font-size: 0.95em;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .guide-meta-redesigned div {
@@ -121,126 +130,20 @@
 }
 
 .guide-meta-redesigned strong {
-  color: #ccc;
+  color: #9ca3af;
   font-weight: normal;
 }
 
-.items-of-note-redesigned {
-  /* Container for the ItemPrices component */
+.guide-footer-redesigned {
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-border);
+  grid-column: 1 / -1;
 }
 
-.calculator-container-redesigned {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Responsive adjustments for smaller screens */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .guide-title-redesigned {
-    font-size: 2.5em;
-  }
   .guide-container-redesigned {
     padding: 1rem;
   }
 }
-
-/* START OF FIX: Additions for thumbnail elements positioning and styling */
-.thumbnail-topleft {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 10;
-  background-color: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(4px);
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #00ffaa;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 255, 170, 0.2);
-}
-
-.thumbnail-bottomright {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 10;
-  background-color: rgba(30, 41, 59, 0.75);
-  backdrop-filter: blur(4px);
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffb800; /* Gold color for GPH */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 184, 0, 0.2);
-}
-
-/* Tags Show More/Less Feature - Applied to thumbnail tags */
-.thumbnail-overlay-content .tag-list-wrapper {
-  max-height: 2.5rem; /* Show approx 2 lines of tags */
-  overflow: hidden;
-  position: relative;
-  transition: max-height 0.3s ease-out;
-  margin-top: 0.75rem; /* Space from expansion */
-  padding-bottom: 0.5rem; /* Give some room before fade */
-}
-
-.thumbnail-overlay-content .tag-list-wrapper.expanded {
-  max-height: none;
-  overflow: visible;
-  padding-bottom: 0;
-}
-
-.thumbnail-overlay-content .tags-display {
-  /* Inherits display:flex, flex-wrap:wrap, gap:0.5rem from globals.css */
-  /* Override any specific inline styles if necessary */
-}
-
-/* Specific styling for tag pills inside the thumbnail overlay */
-.thumbnail-overlay-content .tag-pill {
-  background-color: #334155; /* Darker background for visibility on overlay */
-  color: #fff;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600; /* Slightly less bold than global .tag-pill */
-  white-space: nowrap; /* Keep tags from breaking words */
-}
-
-.thumbnail-overlay-content .tags-fade-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1rem; /* Smaller fade height */
-  background: linear-gradient(
-    to top,
-    rgba(15, 23, 42, 0.75) 0%,
-    transparent 100%
-  );
-  pointer-events: none;
-}
-
-.thumbnail-overlay-content .tags-toggle-button {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary); /* Match other subtle text */
-  cursor: pointer;
-  font-size: 0.7rem; /* Smaller font size for button */
-  font-weight: 500;
-  padding: 0.2rem 0; /* Minimal padding */
-  transition: all 0.2s ease;
-  text-align: left; /* Align to left within the overlay box */
-  margin-left: 0; /* Reset any default button margin */
-  display: block; /* Make it a block element to take full width and handle text-align */
-}
-
-.thumbnail-overlay-content .tags-toggle-button:hover {
-  color: var(--color-primary);
-  text-shadow: var(--shadow-glow-sm);
-  background-color: transparent; /* Ensure no background on hover */
-}
-/* END OF FIX */
