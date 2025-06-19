@@ -24,37 +24,18 @@ export default function ItemPrices({ items }) {
       return;
     }
 
-    async function fetchPricesAndIcons() {
+    async function fetchPrices() {
       setLoading(true);
       const updatedItems = await Promise.all(
         items.map(async (item) => {
-          let iconUrl = item.icon;
-
-          if (!iconUrl || !iconUrl.startsWith("http")) {
-            try {
-              const iconResponse = await fetch(
-                `/api/blizzard/search?query=${item.id}`
-              );
-              if (iconResponse.ok) {
-                const searchResult = await iconResponse.json();
-                if (searchResult && searchResult.length > 0) {
-                  const iconFromApi = searchResult[0].icon;
-                  iconUrl = iconFromApi?.startsWith("http")
-                    ? iconFromApi
-                    : `https://render.worldofwarcraft.com/us/icons/56/${iconFromApi}`;
-                }
-              }
-            } catch (error) {
-              console.error(
-                `Failed to fetch icon for item ID ${item.id}:`,
-                error
-              );
-            }
-          }
-
+          // --- START OF FIX ---
+          // The component will now trust the item.icon URL from the database.
+          // If the URL is invalid or missing, we use a default placeholder.
+          // We no longer re-fetch the icon here.
           const finalIconUrl =
-            iconUrl ||
+            item.icon ||
             "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
+          // --- END OF FIX ---
 
           try {
             const priceRes = await fetch(
@@ -82,7 +63,7 @@ export default function ItemPrices({ items }) {
       setLoading(false);
     }
 
-    fetchPricesAndIcons();
+    fetchPrices();
   }, [items]);
 
   if (loading) {
