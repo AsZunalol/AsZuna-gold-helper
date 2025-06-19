@@ -4,13 +4,16 @@ import GoldInput from "@/components/GoldInput/GoldInput";
 import TimeInput from "@/components/TimeInput/TimeInput";
 import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Spinner from "@/components/ui/spinner";
 import "./guide.css"; // Imports the original CSS for normal guides
 import { WOW_EXPANSIONS } from "@/lib/constants"; // Import for expansion color
 import Image from "next/image"; // Import Image component
 
 export default function NormalGuide({ guide }) {
+  // Added state for tag visibility
+  const [showAllTags, setShowAllTags] = useState(false);
+
   // Helper to safely parse JSON or return empty array/object
   const parseJsonField = (fieldValue, defaultValue = []) => {
     if (typeof fieldValue === "string") {
@@ -61,6 +64,12 @@ export default function NormalGuide({ guide }) {
     (exp) => exp.name === guide.expansion
   );
 
+  const allTags =
+    typeof guide.tags === "string"
+      ? guide.tags.split(",").map((tag) => tag.trim())
+      : guide.tags || [];
+  const displayedTags = showAllTags ? allTags : allTags.slice(0, 3);
+
   return (
     // The outermost div now relies on the global .main-content-card-wrapper for background/shadow
     <div className="guide-container">
@@ -98,6 +107,37 @@ export default function NormalGuide({ guide }) {
                   Expansion – {guide.expansion}
                 </p>
               )}
+              {/* START OF FIX: Tag drop-out feature */}
+              {allTags.length > 0 && (
+                <div
+                  className={`tag-list-wrapper ${
+                    showAllTags ? "expanded" : ""
+                  }`}
+                >
+                  <div className="tags-display">
+                    {displayedTags.map((tag) => (
+                      <span key={tag} className="tag-pill">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  {!showAllTags && allTags.length > 3 && (
+                    <div className="tags-fade-overlay"></div>
+                  )}
+                </div>
+              )}
+              {allTags.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllTags(!showAllTags)}
+                  className="tags-toggle-button"
+                >
+                  {showAllTags
+                    ? "Show Less Tags"
+                    : `Show All ${allTags.length} Tags`}
+                </button>
+              )}
+              {/* END OF FIX */}
             </div>
           </div>
         </div>
@@ -242,18 +282,7 @@ export default function NormalGuide({ guide }) {
           <pre className="code-block">{guide.tsm_import_string}</pre>
         </div>
       )}
-      <div className="calculator-container">
-        <h3>Gold/Hour Calculator</h3>
-        <GoldInput label="Gold Earned" />
-        <TimeInput label="Time Spent (minutes)" />
-        {/* Display calculated average GPH if goldSessions available */}
-        {goldSessions.length > 0 && (
-          <p>
-            Estimated GPH from sessions:{" "}
-            <strong>{averageGph.toLocaleString()} GPH</strong>
-          </p>
-        )}
-      </div>
+      {/* Removed the Gold/Hour Calculator section as requested */}
     </div>
   );
 }

@@ -123,6 +123,13 @@ const GuidePreview = ({ guide, onClose, averageGph }) => {
     (exp) => exp.name === guide.expansion
   );
 
+  // Added state for tag visibility in preview
+  const [showAllPreviewTags, setShowAllPreviewTags] = useState(false);
+  const allPreviewTags = guide.tags || [];
+  const displayedPreviewTags = showAllPreviewTags
+    ? allPreviewTags
+    : allPreviewTags.slice(0, 3);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -160,6 +167,36 @@ const GuidePreview = ({ guide, onClose, averageGph }) => {
                     >
                       Expansion – {guide.expansion}
                     </p>
+                  )}
+                  {/* Tags with drop-out in preview thumbnail */}
+                  {allPreviewTags.length > 0 && (
+                    <div
+                      className={`tag-list-wrapper ${
+                        showAllPreviewTags ? "expanded" : ""
+                      }`}
+                    >
+                      <div className="tags-display">
+                        {displayedPreviewTags.map((tag) => (
+                          <span key={tag} className="tag-pill">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      {!showAllPreviewTags && allPreviewTags.length > 3 && (
+                        <div className="tags-fade-overlay"></div>
+                      )}
+                    </div>
+                  )}
+                  {allPreviewTags.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllPreviewTags(!showAllPreviewTags)}
+                      className="tags-toggle-button"
+                    >
+                      {showAllPreviewTags
+                        ? "Show Less Tags"
+                        : `Show All ${allPreviewTags.length} Tags`}
+                    </button>
                   )}
                 </div>
               </div>
@@ -224,6 +261,7 @@ const GuidePreview = ({ guide, onClose, averageGph }) => {
                 </p>
                 <div style={{ marginTop: "1rem" }}>
                   <strong>Tags:</strong>
+                  {/* Tags in sidebar are not truncated in preview */}
                   <div className="tags-display" style={{ marginTop: "0.5rem" }}>
                     {guide.tags.map((tag) => (
                       <span key={tag} className="tag-pill">

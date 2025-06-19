@@ -144,3 +144,103 @@
     padding: 1rem;
   }
 }
+
+/* START OF FIX: Additions for thumbnail elements positioning and styling */
+.thumbnail-topleft {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background-color: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #00ffaa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 170, 0.2);
+}
+
+.thumbnail-bottomright {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 10;
+  background-color: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffb800; /* Gold color for GPH */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 184, 0, 0.2);
+}
+
+/* Tags Show More/Less Feature - Applied to thumbnail tags */
+.thumbnail-overlay-content .tag-list-wrapper {
+  max-height: 2.5rem; /* Show approx 2 lines of tags */
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.3s ease-out;
+  margin-top: 0.75rem; /* Space from expansion */
+  padding-bottom: 0.5rem; /* Give some room before fade */
+}
+
+.thumbnail-overlay-content .tag-list-wrapper.expanded {
+  max-height: none;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.thumbnail-overlay-content .tags-display {
+  /* Inherits display:flex, flex-wrap:wrap, gap:0.5rem from globals.css */
+  /* Override any specific inline styles if necessary */
+}
+
+/* Specific styling for tag pills inside the thumbnail overlay */
+.thumbnail-overlay-content .tag-pill {
+  background-color: #334155; /* Darker background for visibility on overlay */
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600; /* Slightly less bold than global .tag-pill */
+  white-space: nowrap; /* Keep tags from breaking words */
+}
+
+.thumbnail-overlay-content .tags-fade-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1rem; /* Smaller fade height */
+  background: linear-gradient(
+    to top,
+    rgba(15, 23, 42, 0.75) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.thumbnail-overlay-content .tags-toggle-button {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary); /* Match other subtle text */
+  cursor: pointer;
+  font-size: 0.7rem; /* Smaller font size for button */
+  font-weight: 500;
+  padding: 0.2rem 0; /* Minimal padding */
+  transition: all 0.2s ease;
+  text-align: left; /* Align to left within the overlay box */
+  margin-left: 0; /* Reset any default button margin */
+  display: block; /* Make it a block element to take full width and handle text-align */
+}
+
+.thumbnail-overlay-content .tags-toggle-button:hover {
+  color: var(--color-primary);
+  text-shadow: var(--shadow-glow-sm);
+  background-color: transparent; /* Ensure no background on hover */
+}
+/* END OF FIX */
