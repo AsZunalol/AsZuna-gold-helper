@@ -22,7 +22,7 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       return;
     }
     if (safeItems.some((item) => item.id === newItem.id)) {
-      return;
+      return; // Item already in the list
     }
 
     setLoadingPrices((prev) => ({ ...prev, [newItem.id]: true }));
@@ -92,8 +92,10 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
                 height="24"
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {/* --- THIS IS THE FIX --- */}
-                {/* We can now safely render item.name because the API guarantees it's a string. */}
+                {/*
+                    This is now safe because the API at `/api/blizzard/search`
+                    guarantees that `item.name` will always be a string.
+                  */}
                 <span className="item-name">{item.name}</span>
                 {loadingPrices[item.id] ? (
                   <LoaderCircle size={14} className="spinner" />
