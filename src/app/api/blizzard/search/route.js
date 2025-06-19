@@ -24,30 +24,27 @@ async function searchById(accessToken, region, itemId) {
   if (!response.ok) throw new Error("Failed to find item by ID.");
   const itemData = await response.json();
 
+  // --- START OF FIX ---
+  // The API response for a direct item lookup has a slightly different structure.
+  // We now correctly package it to match the structure of a name search.
   return {
     results: [
       {
         data: {
           id: itemData.id,
-          // --- START OF FIX ---
-          // The name from this API endpoint is a direct string, but the rest of the code
-          // expects it to be a localized object. This change wraps the name in an object
-          // to make the data structure consistent with a name search.
-          name: {
-            en_US: itemData.name,
-          },
-          // --- END OF FIX ---
-          media: { href: itemData.media?.href }, // Use optional chaining for safety
+          name: itemData.name, // The name is already a localization object here.
+          media: { href: itemData.media?.href },
         },
       },
     ],
   };
+  // --- END OF FIX ---
 }
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
-  const region = "us"; // Defaulting to US, can be parameterized later if needed
+  const region = "us"; // Defaulting to US
 
   if (!query) {
     return NextResponse.json(
@@ -60,12 +57,14 @@ export async function GET(request) {
     const accessToken = await getAccessToken(region);
     let searchData;
 
+    // Determine search type based on query
     if (!isNaN(query) && parseInt(query) > 0) {
       searchData = await searchById(accessToken, region, query);
     } else {
       searchData = await searchByName(accessToken, region, query);
     }
 
+    // Process results to be consistent
     const formattedResults = await Promise.all(
       (searchData.results || []).map(async (item) => {
         let iconUrl =
@@ -76,7 +75,6 @@ export async function GET(request) {
             const mediaResponse = await fetch(item.data.media.href, {
               headers: { Authorization: `Bearer ${accessToken}` },
             });
-
             if (mediaResponse.ok) {
               const mediaData = await mediaResponse.json();
               const iconAsset = mediaData.assets?.find(
@@ -94,9 +92,16 @@ export async function GET(request) {
           }
         }
 
+        // --- THIS IS THE KEY ---
+        // We now guarantee that the `name` property sent to the client is a simple string.
+        const itemName =
+          typeof item.data.name === "object" && item.data.name !== null
+            ? item.data.name.en_US
+            : item.data.name;
+
         return {
           id: item.data.id,
-          name: item.data.name.en_US,
+          name: itemName,
           icon: iconUrl,
         };
       })

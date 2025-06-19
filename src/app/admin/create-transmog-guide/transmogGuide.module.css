@@ -1,39 +1,13 @@
 /* src/app/admin/create-transmog-guide/transmogGuide.module.css */
 
 .pageWrapper {
-  padding: 0;
-  max-width: 100%;
-  margin: 0;
-  width: 100%;
+  padding: 2rem 3rem;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .formContainer {
-  background: var(--color-surface);
-  border-radius: 0;
-  padding: 2.5rem 4rem;
-  border: none;
-  box-shadow: none;
   width: 100%;
-  min-height: calc(100vh - 80px);
-}
-
-.mainLayout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2.5rem;
-}
-
-@media (min-width: 1024px) {
-  .mainLayout {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  }
-}
-
-.mainColumn,
-.sidebarColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }
 
 .header {
@@ -46,23 +20,27 @@
 }
 
 .header h1 {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   margin: 0;
-  color: white;
+  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
-/* --- START OF CHANGES --- */
+.headerTitle {
+  color: white;
+  font-weight: 700;
+}
+
 .headerActions {
   display: flex;
   gap: 1rem;
 }
 
 .publishButton,
-.draftButton,
-.previewButton {
+.draftButton {
   background: var(--color-primary);
   color: var(--color-background);
-  border: none;
+  border: 1px solid var(--color-primary);
   padding: 0.8rem 1.5rem;
   border-radius: 8px;
   font-weight: 700;
@@ -73,72 +51,101 @@
   gap: 0.5rem;
 }
 
-.draftButton,
-.previewButton {
-  background: var(--color-surface);
+.draftButton {
+  background: transparent;
   color: var(--color-primary);
-  border: 1px solid var(--color-primary);
 }
 
 .publishButton:hover,
-.draftButton:hover,
-.previewButton:hover {
+.draftButton:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-glow-sm);
 }
 
 .publishButton:disabled,
-.draftButton:disabled,
-.previewButton:disabled {
-  background: var(--color-text-secondary);
-  color: var(--color-background);
-  border-color: var(--color-text-secondary);
+.draftButton:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
-/* --- END OF CHANGES --- */
+
+/* --- Hero Section --- */
+.heroSection {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  border: 1px solid var(--color-border);
+}
+
+@media (min-width: 1024px) {
+  .heroSection {
+    grid-template-columns: 400px 1fr;
+  }
+}
+
+.heroImageUpload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.heroDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.titleInput {
+  font-size: 2rem !important;
+  font-weight: bold;
+  padding: 1rem !important;
+}
+
+.heroMetaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* --- Main Layout --- */
+.mainLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .mainLayout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+.mainContent,
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formSection {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+}
 
 .sectionHeader {
-  font-size: 1.8rem;
-  color: var(--color-primary);
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
+  font-size: 1.25rem;
+  color: white;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
-}
-
-.sectionHeader:first-of-type {
-  margin-top: 0;
-}
-
-.formGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .formGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-}
-
-.detailsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 1200px) {
-  .detailsGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.fullWidth {
-  grid-column: 1 / -1;
+  font-weight: 600;
 }
 
 .gphInputs {
@@ -148,34 +155,34 @@
 }
 
 .addSessionButton {
-  background-color: var(--color-primary);
-  color: var(--color-background);
-  border: none;
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
-  padding: 0.85rem 1rem;
+  padding: 0.65rem 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .addSessionButton:hover {
-  background-color: var(--color-primary-light);
+  background-color: var(--color-primary);
+  color: var(--color-background);
 }
 
 .gphDisplay {
   margin-top: 1rem;
   padding: 1rem;
   background-color: var(--color-background);
-  border: 1px solid var(--color-primary);
   border-radius: 8px;
   text-align: center;
   font-family: var(--font-heading);
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-main);
 }
 
 .gphDisplay span {

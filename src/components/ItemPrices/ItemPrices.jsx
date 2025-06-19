@@ -19,6 +19,7 @@ export default function ItemPrices({ items }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // If there are no items, no need to do anything.
     if (!items || items.length === 0) {
       setLoading(false);
       return;
@@ -26,23 +27,33 @@ export default function ItemPrices({ items }) {
 
     async function fetchPrices() {
       setLoading(true);
+
+      // Create the final list of items by mapping over the initial `items` prop.
       const updatedItems = await Promise.all(
         items.map(async (item) => {
-          // --- START OF FIX ---
+          // --- THIS IS THE FIX ---
           // The component will now trust the item.icon URL from the database.
           // If the URL is invalid or missing, we use a default placeholder.
           // We no longer re-fetch the icon here.
           const finalIconUrl =
             item.icon ||
             "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
-          // --- END OF FIX ---
 
           try {
+            // Only fetch the prices for the item.
             const priceRes = await fetch(
               `/api/blizzard/item-price?itemId=${item.id}&region=us&realmSlug=illidan`
             );
-            if (!priceRes.ok) throw new Error("Price fetch failed");
+
+            if (!priceRes.ok) {
+              // If fetching the price fails, we still return the item with its original data.
+              // This ensures the name and icon are still displayed.
+              throw new Error("Price fetch failed");
+            }
+
             const priceData = await priceRes.json();
+
+            // Return the item with its original data, plus the new price information.
             return {
               ...item,
               icon: finalIconUrl,
@@ -50,6 +61,8 @@ export default function ItemPrices({ items }) {
               regionalAveragePrice: priceData?.regionalAveragePrice ?? "N/A",
             };
           } catch {
+            // If any error occurs (including network issues), return the item with its icon
+            // and "N/A" for the prices. This keeps the UI consistent.
             return {
               ...item,
               icon: finalIconUrl,
@@ -59,13 +72,16 @@ export default function ItemPrices({ items }) {
           }
         })
       );
+
+      // Update the state with the final list of items.
       setPricedItems(updatedItems);
       setLoading(false);
     }
 
     fetchPrices();
-  }, [items]);
+  }, [items]); // This effect will only re-run if the `items` prop changes.
 
+  // Display a loading spinner only if the component is in a loading state.
   if (loading) {
     return (
       <div className="item-prices-loading">

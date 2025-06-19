@@ -7,7 +7,25 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
-// ... (GET handler remains the same)
+// --- START OF FIX ---
+// This new GET function will handle requests to fetch all guides.
+export async function GET(request) {
+  try {
+    const guides = await prisma.guide.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return NextResponse.json(guides, { status: 200 });
+  } catch (error) {
+    console.error("Failed to fetch guides:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch guides", error: error.message },
+      { status: 500 }
+    );
+  }
+}
+// --- END OF FIX ---
 
 // POST handler to create a new guide
 export async function POST(request) {
