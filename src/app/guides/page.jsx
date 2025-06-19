@@ -8,9 +8,11 @@ import cardStyles from "./GuideCard.module.css";
 import GuidesSortDropdown from "./GuidesSortDropdown";
 
 export default async function GuidesPage({ searchParams }) {
-  const category = searchParams.get("category") || null;
-  const type = searchParams.get("type") || "gold";
-  const sort = searchParams.get("sort") || "latest";
+  // Corrected lines: Directly access properties from searchParams object
+  // This resolves the error by using the correct access pattern for server components.
+  const category = searchParams.category ?? null;
+  const type = searchParams.type ?? "gold";
+  const sort = searchParams.sort ?? "latest";
 
   async function getGuides(type, category, sort) {
     const orderBy = sort === "title" ? { title: "asc" } : { createdAt: "desc" };
