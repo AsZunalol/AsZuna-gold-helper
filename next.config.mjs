@@ -9,10 +9,16 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
-      // This pattern is now simplified to allow any path from this hostname
       {
         protocol: "https",
         hostname: "wow.zamimg.com",
+        port: "",
+        pathname: "/**",
+      },
+      // THIS IS THE CRITICAL LINE THAT MUST BE INCLUDED
+      {
+        protocol: "https",
+        hostname: "render.worldofwarcraft.com",
         port: "",
         pathname: "/**",
       },

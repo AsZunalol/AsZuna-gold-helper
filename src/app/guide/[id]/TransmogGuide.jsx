@@ -6,27 +6,53 @@ import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import { Suspense, useState } from "react";
 import Spinner from "@/components/ui/spinner";
-import "./transmog-guide.css";
 import { WOW_EXPANSIONS } from "@/lib/constants";
+// NEW: Import icons for the copy button
+import { ClipboardCopy, Check } from "lucide-react";
+import "./transmog-guide.css";
+
+// Helper function to ensure a URL is absolute
+const ensureAbsoluteUrl = (url) => {
+  if (!url || url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `https://${url}`;
+};
 
 export default function TransmogGuide({ guide }) {
   const [showAllTags, setShowAllTags] = useState(false);
+  // NEW: State for the copy button icon
+  const [isCopied, setIsCopied] = useState(false);
 
+  // Helper to safely parse JSON or return empty array/object
   const parseJsonField = (fieldValue, defaultValue = []) => {
     if (typeof fieldValue === "string") {
       try {
         const parsed = JSON.parse(fieldValue);
         return Array.isArray(parsed) ? parsed : defaultValue;
       } catch (e) {
-        console.error(`Error parsing JSON field: ${fieldValue}`, e);
         return defaultValue;
       }
     }
     return fieldValue || defaultValue;
   };
 
-  const itemsOfNote = parseJsonField(guide.itemsOfNote);
-  const steps = parseJsonField(guide.steps);
+  // NEW: Updated function to handle copying and icon state change
+  const handleCopyMacro = () => {
+    if (guide.macro_string && !isCopied) {
+      navigator.clipboard
+        .writeText(guide.macro_string)
+        .then(() => {
+          setIsCopied(true);
+          setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+        })
+        .catch((err) => {
+          console.error("Failed to copy macro: ", err);
+        });
+    }
+  };
+
+  const itemsOfNote = parseJsonField(guide.items_of_note);
   const recommendedAddons = parseJsonField(guide.recommended_addons);
   const requiredItems = parseJsonField(guide.required_items);
   const goldSessions = parseJsonField(guide.gold_sessions, []);
@@ -36,8 +62,8 @@ export default function TransmogGuide({ guide }) {
   const averageGph =
     goldSessions.length > 0
       ? Math.round(
-          (goldSessions.reduce((sum, s) => sum + s.gold, 0) /
-            goldSessions.reduce((sum, s) => sum + s.minutes, 0)) *
+          (goldSessions.reduce((sum, s) => sum + (s.gold || 0), 0) /
+            goldSessions.reduce((sum, s) => sum + (s.minutes || 0), 0)) *
             60
         )
       : 0;
@@ -138,35 +164,6 @@ export default function TransmogGuide({ guide }) {
               dangerouslySetInnerHTML={{ __html: guide.description || "" }}
             />
           </div>
-
-          {sliderImages.length > 0 && (
-            <div className="content-bg-redesigned">
-              <h2 className="widget-title-redesigned">Gallery</h2>
-              <div className="guide-image-slider">
-                {sliderImages.map((src, index) => (
-                  <div key={index} className="slider-image-wrapper">
-                    <Image
-                      src={src}
-                      alt={`Guide image ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      style={{ objectFit: "contain" }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {guide.map_image_url && mapCoordinates.length > 0 && (
-            <div className="route-container-redesigned content-bg-redesigned">
-              <h2>Farming Route</h2>
-              <MapImageModal
-                imageUrl={guide.map_image_url}
-                coordinates={mapCoordinates}
-              />
-            </div>
-          )}
         </div>
 
         {/* Sidebar Area */}
@@ -194,10 +191,9 @@ export default function TransmogGuide({ guide }) {
               <ul className="list-text-only">
                 {recommendedAddons.map((addon, index) => (
                   <li key={index}>
-                    {/* THIS IS THE FIX: The addon name is now a clickable link */}
-                    {addon.link ? (
+                    {addon.url ? (
                       <a
-                        href={addon.link}
+                        href={ensureAbsoluteUrl(addon.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -220,7 +216,7 @@ export default function TransmogGuide({ guide }) {
                   <li key={index}>
                     {item.url ? (
                       <a
-                        href={item.url}
+                        href={ensureAbsoluteUrl(item.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -236,8 +232,19 @@ export default function TransmogGuide({ guide }) {
           )}
 
           {guide.macro_string && (
-            <div className="sidebar-widget-redesigned">
+            <div
+              className="sidebar-widget-redesigned"
+              style={{ position: "relative" }}
+            >
               <h2 className="widget-title-redesigned">Helpful Macro</h2>
+              <button
+                onClick={handleCopyMacro}
+                className={`copy-macro-button ${isCopied ? "copied" : ""}`}
+                title={isCopied ? "Copied!" : "Copy macro"}
+                disabled={isCopied}
+              >
+                {isCopied ? <Check size={16} /> : <ClipboardCopy size={16} />}
+              </button>
               <pre className="code-block">{guide.macro_string}</pre>
             </div>
           )}

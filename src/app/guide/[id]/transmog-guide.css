@@ -144,17 +144,19 @@
 }
 
 /*
-  FIX: This new rule ensures that links within the list
-  are styled correctly to look and function as hyperlinks.
+  THIS IS THE DEFINITIVE FIX:
+  This new, highly specific rule targets links inside the addon and item lists.
+  It forcibly restores the underline and proper link colors, overriding the
+  global style from `globals.css`.
 */
-.list-text-only a {
-  color: var(--color-primary);
-  text-decoration: underline;
+.sidebar-widget-redesigned .list-text-only li a {
+  color: var(--color-primary) !important;
+  text-decoration: underline !important;
   transition: color 0.2s ease;
 }
 
-.list-text-only a:hover {
-  color: var(--color-primary-light);
+.sidebar-widget-redesigned .list-text-only li a:hover {
+  color: var(--color-primary-light) !important;
 }
 
 /* Responsive adjustments */
