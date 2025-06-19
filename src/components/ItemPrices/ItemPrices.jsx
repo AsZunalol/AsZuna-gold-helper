@@ -1,12 +1,11 @@
-// src/components/ItemPrices/ItemPrices.jsx
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Spinner from "@/components/ui/spinner";
-import "./ItemPrices.css";
+import Spinner from "@/components/ui/spinner"; // Assuming spinner is available
+import "./ItemPrices.css"; // Import the new CSS file
 
+// Helper to format gold from copper values
 function formatGold(copper) {
   if (copper === null || copper === undefined || copper === "N/A") return "N/A";
   const gold = Math.floor(copper / 10000);
@@ -26,33 +25,39 @@ export default function ItemPrices({ items }) {
     }
 
     async function fetchPricesAndIcons() {
+      // Renamed for clarity
       setLoading(true);
       const updatedItems = await Promise.all(
         items.map(async (item) => {
           let iconUrl = item.icon;
+
           // --- START OF FIX ---
-          // If the icon is missing, fetch it from the search API.
+          // If the icon URL is missing from the item data, fetch it.
           if (!iconUrl) {
             try {
-              const iconRes = await fetch(
+              const iconResponse = await fetch(
                 `/api/blizzard/search?query=${item.id}`
               );
-              if (iconRes.ok) {
-                const iconData = await iconRes.json();
-                if (iconData.length > 0) {
-                  iconUrl = iconData[0].icon;
+              if (iconResponse.ok) {
+                const searchResult = await iconResponse.json();
+                // The search returns an array, so we take the first result's icon.
+                if (searchResult && searchResult.length > 0) {
+                  iconUrl = searchResult[0].icon;
                 }
               }
-            } catch (iconError) {
-              console.error("Failed to fetch icon:", iconError);
+            } catch (error) {
+              console.error(
+                `Failed to fetch icon for item ID ${item.id}:`,
+                error
+              );
             }
           }
-          // Fallback if the fetch fails
-          if (!iconUrl) {
-            iconUrl =
-              "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
-          }
           // --- END OF FIX ---
+
+          // Fallback if the icon is still missing after the fetch attempt
+          const finalIconUrl =
+            iconUrl ||
+            "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
 
           try {
             const priceRes = await fetch(
@@ -62,14 +67,14 @@ export default function ItemPrices({ items }) {
             const priceData = await priceRes.json();
             return {
               ...item,
-              icon: iconUrl,
+              icon: finalIconUrl, // Use the fetched or fallback icon
               serverPrice: priceData?.serverPrice ?? "N/A",
               regionalAveragePrice: priceData?.regionalAveragePrice ?? "N/A",
             };
           } catch {
             return {
               ...item,
-              icon: iconUrl,
+              icon: finalIconUrl, // Also use it in the catch block
               serverPrice: "N/A",
               regionalAveragePrice: "N/A",
             };

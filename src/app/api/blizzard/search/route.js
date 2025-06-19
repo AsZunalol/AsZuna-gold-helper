@@ -29,14 +29,15 @@ async function searchById(accessToken, region, itemId) {
       {
         data: {
           id: itemData.id,
-          // --- THIS IS THE FIX ---
-          // The name from this endpoint is a direct string, but the rest of the code
-          // expects it to be an object. This wraps it to ensure consistency.
+          // --- START OF FIX ---
+          // The name from this API endpoint is a direct string, but the rest of the code
+          // expects it to be a localized object. This change wraps the name in an object
+          // to make the data structure consistent with a name search.
           name: {
             en_US: itemData.name,
           },
-          // -----------------------
-          media: { href: itemData.media?.href },
+          // --- END OF FIX ---
+          media: { href: itemData.media?.href }, // Use optional chaining for safety
         },
       },
     ],
@@ -46,7 +47,7 @@ async function searchById(accessToken, region, itemId) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
-  const region = "us";
+  const region = "us"; // Defaulting to US, can be parameterized later if needed
 
   if (!query) {
     return NextResponse.json(
@@ -66,7 +67,7 @@ export async function GET(request) {
     }
 
     const formattedResults = await Promise.all(
-      searchData.results.map(async (item) => {
+      (searchData.results || []).map(async (item) => {
         let iconUrl =
           "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
 
