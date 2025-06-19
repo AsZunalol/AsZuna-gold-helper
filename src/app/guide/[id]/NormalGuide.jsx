@@ -1,6 +1,5 @@
 // src/app/guide/[id]/NormalGuide.jsx
 
-import Image from "next/image";
 import GoldInput from "@/components/GoldInput/GoldInput";
 import TimeInput from "@/components/TimeInput/TimeInput";
 import MapImageModal from "@/components/map-image-modal/MapImageModal";
@@ -9,6 +8,7 @@ import { Suspense } from "react";
 import Spinner from "@/components/ui/spinner";
 import "./guide.css"; // Imports the original CSS for normal guides
 import { WOW_EXPANSIONS } from "@/lib/constants"; // Import for expansion color
+import Image from "next/image"; // Import Image component
 
 export default function NormalGuide({ guide }) {
   // Helper to safely parse JSON or return empty array/object
@@ -77,6 +77,14 @@ export default function NormalGuide({ guide }) {
             className="thumbnail-img"
             priority // Prioritize loading the main image
           />
+          {/* NEW: Category in top-left */}
+          <div className="thumbnail-topleft">
+            <span>{guide.category}</span>
+          </div>
+          {/* NEW: Gold per Hour in bottom-right */}
+          <div className="thumbnail-bottomright">
+            <span>{guide.gold_pr_hour || "N/A"} GPH</span>
+          </div>
           <div className="thumbnail-overlay-box">
             <div className="thumbnail-overlay-content">
               <h1 className="guide-title-overlay">

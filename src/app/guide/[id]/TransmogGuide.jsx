@@ -8,6 +8,7 @@ import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import { Suspense } from "react";
 import Spinner from "@/components/ui/spinner";
 import "./transmog-guide.css";
+import { WOW_EXPANSIONS } from "@/lib/constants"; // Import for expansion color
 
 export default function TransmogGuide({ guide }) {
   // Helper to safely parse JSON or return empty array/object
@@ -56,12 +57,67 @@ export default function TransmogGuide({ guide }) {
         )
       : 0;
 
+  const expansionInfo = WOW_EXPANSIONS.find(
+    (exp) => exp.name === guide.expansion
+  );
+
   return (
     // The outermost div now relies on the global .main-content-card-wrapper for background/shadow
-    // So, remove redundant styling from .guide-container-redesigned via CSS change.
     <div className="guide-container-redesigned">
-      <div className="guide-header-redesigned">
-        <h1 className="guide-title-redesigned">{guide.title}</h1>
+      {/* NEW: Thumbnail as a Header Card, consistent with NormalGuide and Preview */}
+      <div className="thumbnail-wrapper">
+        <div className="thumbnail-card">
+          <Image
+            src={guide.thumbnail_url || "/images/default-thumb.jpg"}
+            alt="Guide Thumbnail"
+            width={1200} // A wide width for initial load, objectFit will handle scaling
+            height={300} // A height that creates an aspect ratio, objectFit will cover
+            className="thumbnail-img"
+            priority // Prioritize loading the main image
+          />
+          <div className="thumbnail-overlay-box">
+            <div className="thumbnail-overlay-content">
+              <h1 className="guide-title-overlay">
+                {guide.title || "Untitled Guide"}
+              </h1>
+              {expansionInfo && (
+                <p
+                  className="guide-expansion"
+                  style={{ color: expansionInfo.color }}
+                >
+                  Expansion – {guide.expansion}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* END NEW Thumbnail as a Header Card */}
+
+      {/* NEW: Author Info below thumbnail header, consistent with NormalGuide */}
+      <div
+        className="author-info"
+        style={{
+          padding: "0.5rem 0",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          marginBottom: "1rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.75rem",
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        <Image
+          src={guide.author.imageUrl || "/default-avatar.png"}
+          alt={guide.author.username || "Author"}
+          width={32}
+          height={32}
+          className="author-avatar"
+        />
+        <span>
+          By <strong>{guide.author.username}</strong> on{" "}
+          {new Date(guide.createdAt).toLocaleDateString()}
+        </span>
       </div>
 
       <div className="guide-layout-redesigned">
@@ -73,7 +129,7 @@ export default function TransmogGuide({ guide }) {
                 src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
                 title="YouTube video player"
                 frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-embed; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
             </div>
@@ -132,6 +188,8 @@ export default function TransmogGuide({ guide }) {
         <div className="sidebar-redesigned">
           <div className="sidebar-widget-redesigned">
             <h2 className="widget-title-redesigned">Guide Details</h2>
+            {/* The author-info-redesigned below is now redundant and can be removed or kept for specific sidebar styling */}
+            {/* Keeping it for now as it's separate from the main author line above */}
             <div className="author-info-redesigned">
               <Image
                 src={guide.author.imageUrl || "/default-avatar.png"}
