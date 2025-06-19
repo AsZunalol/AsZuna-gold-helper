@@ -7,7 +7,7 @@ import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import { Suspense, useState } from "react";
 import Spinner from "@/components/ui/spinner";
 import "./transmog-guide.css";
-import { WOW_EXPANSIONS } from "@/lib/constants"; // Import for expansion color
+import { WOW_EXPANSIONS } from "@/lib/constants";
 
 export default function TransmogGuide({ guide }) {
   const [showAllTags, setShowAllTags] = useState(false);
@@ -117,8 +117,6 @@ export default function TransmogGuide({ guide }) {
         </div>
       </div>
 
-      {/* The author info that was here has been removed */}
-
       <div className="guide-layout-redesigned">
         {/* Main Content Area */}
         <div className="main-content-redesigned">
@@ -173,8 +171,6 @@ export default function TransmogGuide({ guide }) {
 
         {/* Sidebar Area */}
         <div className="sidebar-redesigned">
-          {/* Guide Details widget has been moved from here to the footer */}
-
           {itemsOfNote && itemsOfNote.length > 0 && (
             <div className="sidebar-widget-redesigned">
               <h2 className="widget-title-redesigned">Items of Note</h2>
@@ -198,15 +194,17 @@ export default function TransmogGuide({ guide }) {
               <ul className="list-text-only">
                 {recommendedAddons.map((addon, index) => (
                   <li key={index}>
-                    {addon.name}
-                    {addon.link && (
+                    {/* THIS IS THE FIX: The addon name is now a clickable link */}
+                    {addon.link ? (
                       <a
                         href={addon.link}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        (Link)
+                        {addon.name}
                       </a>
+                    ) : (
+                      addon.name
                     )}
                   </li>
                 ))}
@@ -220,15 +218,16 @@ export default function TransmogGuide({ guide }) {
               <ul className="list-text-only">
                 {requiredItems.map((item, index) => (
                   <li key={index}>
-                    {item.name}
-                    {item.url && (
+                    {item.url ? (
                       <a
                         href={item.url}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        (Link)
+                        {item.name}
                       </a>
+                    ) : (
+                      item.name
                     )}
                   </li>
                 ))}
@@ -245,7 +244,7 @@ export default function TransmogGuide({ guide }) {
         </div>
       </div>
 
-      {/* NEW: Guide Footer Section */}
+      {/* Guide Footer Section */}
       <div className="guide-footer-redesigned">
         <div className="sidebar-widget-redesigned">
           <h2 className="widget-title-redesigned">Guide Details</h2>
@@ -273,11 +272,6 @@ export default function TransmogGuide({ guide }) {
               <strong>Updated:</strong>{" "}
               {new Date(guide.updatedAt).toLocaleDateString()}
             </div>
-            {goldSessions.length > 0 && (
-              <div>
-                <strong>Avg GPH:</strong> {averageGph.toLocaleString()}
-              </div>
-            )}
           </div>
         </div>
       </div>

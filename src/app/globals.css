@@ -137,6 +137,8 @@ main {
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 nav {
@@ -204,13 +206,12 @@ footer {
   gap: 1.25rem;
 }
 
-/* --- FIX STARTS HERE --- */
 .footer-socials a {
   display: inline-block;
   width: 24px;
   height: 24px;
   transition: transform 0.2s ease;
-  position: relative; /* Needed for the Image fill to work correctly */
+  position: relative;
 }
 
 .footer-socials a:hover {
@@ -227,9 +228,7 @@ footer {
   opacity: 1;
   filter: brightness(0) invert(1) drop-shadow(0 0 6px var(--color-primary));
 }
-/* --- FIX ENDS HERE --- */
 
-/* --- User & Admin Menu Dropdown --- */
 .header-right {
   display: flex;
   align-items: center;
@@ -907,11 +906,14 @@ footer {
 .guide-description-html li {
   margin-bottom: 0.5em;
 }
+
+/*
+  FIX: This rule specifically targets links within the main description
+  to ensure they are styled as links, without affecting other lists.
+*/
 .guide-description-html a {
   text-decoration: underline;
-}
-.guide-description-html strong {
-  color: white;
+  color: var(--color-primary-light);
 }
 
 .guide-steps {
@@ -1124,12 +1126,12 @@ footer {
 .main-content-card-wrapper {
   max-width: 1400px;
   width: 100%;
-  margin: 2rem auto; /* Centers the content and adds space top/bottom */
-  padding: 2.5rem; /* Generous padding inside the card */
-  background-color: #111827; /* Solid dark background */
-  border-radius: 1rem; /* Rounded corners */
-  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Deep shadow for a floating effect */
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: #111827;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 768px) {

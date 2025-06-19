@@ -62,7 +62,8 @@ export default function RootLayout({ children }) {
               <NotificationHandler />
             </Suspense>
             <ParticlesComponent />
-            <div className="background-overlay"></div>
+            {/* THIS IS THE FIX: The problematic overlay has been removed. */}
+            {/* <div className="background-overlay"></div> */}
             <Header />
             <main>{children}</main>
             <footer>
