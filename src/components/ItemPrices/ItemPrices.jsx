@@ -1,11 +1,12 @@
+// src/components/ItemPrices/ItemPrices.jsx
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Spinner from "@/components/ui/spinner"; // Assuming spinner is available
-import "./ItemPrices.css"; // Import the new CSS file
+import Spinner from "@/components/ui/spinner";
+import "./ItemPrices.css";
 
-// Helper to format gold from copper values
 function formatGold(copper) {
   if (copper === null || copper === undefined || copper === "N/A") return "N/A";
   const gold = Math.floor(copper / 10000);
@@ -24,25 +25,46 @@ export default function ItemPrices({ items }) {
       return;
     }
 
-    async function fetchPrices() {
+    async function fetchPricesAndIcons() {
       setLoading(true);
-      const updated = await Promise.all(
+      const updatedItems = await Promise.all(
         items.map(async (item) => {
-          // Fallback for item icon if not provided
-          const iconUrl =
-            item.icon ||
-            "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
+          let iconUrl = item.icon;
+          // --- START OF FIX ---
+          // If the icon is missing, fetch it from the search API.
+          if (!iconUrl) {
+            try {
+              const iconRes = await fetch(
+                `/api/blizzard/search?query=${item.id}`
+              );
+              if (iconRes.ok) {
+                const iconData = await iconRes.json();
+                if (iconData.length > 0) {
+                  iconUrl = iconData[0].icon;
+                }
+              }
+            } catch (iconError) {
+              console.error("Failed to fetch icon:", iconError);
+            }
+          }
+          // Fallback if the fetch fails
+          if (!iconUrl) {
+            iconUrl =
+              "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
+          }
+          // --- END OF FIX ---
+
           try {
-            const res = await fetch(
+            const priceRes = await fetch(
               `/api/blizzard/item-price?itemId=${item.id}&region=us&realmSlug=illidan`
             );
-            if (!res.ok) throw new Error("Price fetch failed");
-            const data = await res.json();
+            if (!priceRes.ok) throw new Error("Price fetch failed");
+            const priceData = await priceRes.json();
             return {
               ...item,
               icon: iconUrl,
-              serverPrice: data?.serverPrice ?? "N/A",
-              regionalAveragePrice: data?.regionalAveragePrice ?? "N/A",
+              serverPrice: priceData?.serverPrice ?? "N/A",
+              regionalAveragePrice: priceData?.regionalAveragePrice ?? "N/A",
             };
           } catch {
             return {
@@ -54,11 +76,11 @@ export default function ItemPrices({ items }) {
           }
         })
       );
-      setPricedItems(updated);
+      setPricedItems(updatedItems);
       setLoading(false);
     }
 
-    fetchPrices();
+    fetchPricesAndIcons();
   }, [items]);
 
   if (loading) {

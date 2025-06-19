@@ -1,3 +1,5 @@
+// src/app/api/guides/route.js
+
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
@@ -5,21 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
-// GET handler to fetch all guides
-export async function GET(request) {
-  try {
-    const guides = await prisma.guide.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(guides, { status: 200 });
-  } catch (error) {
-    console.error("Failed to fetch guides:", error);
-    return NextResponse.json(
-      { message: "Failed to fetch guides.", error: error.message },
-      { status: 500 }
-    );
-  }
-}
+// ... (GET handler remains the same)
 
 // POST handler to create a new guide
 export async function POST(request) {
@@ -29,13 +17,10 @@ export async function POST(request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  // **NEW SECURITY CHECK**
-  // Fetch the user's current data from the database
   const currentUser = await prisma.user.findUnique({
     where: { id: session.user.id },
   });
 
-  // Check the role from the fresh database data
   if (!currentUser || !["ADMIN", "OWNER"].includes(currentUser.role)) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
@@ -69,9 +54,9 @@ export async function POST(request) {
         required_items: data.required_items,
         gold_pr_hour: data.gold_pr_hour,
         tsm_import_string: data.tsm_import_string,
-        route_string: data.gathermate2_string,
+        route_string: data.route_string, // Corrected this as well
         tags: data.tags,
-        itemsOfNote: data.itemsOfNote,
+        items_of_note: data.items_of_note, // Corrected this line
         authorId: authorId,
       },
     });

@@ -29,8 +29,14 @@ async function searchById(accessToken, region, itemId) {
       {
         data: {
           id: itemData.id,
-          name: itemData.name,
-          media: { href: itemData.media?.href }, // Use optional chaining for safety
+          // --- THIS IS THE FIX ---
+          // The name from this endpoint is a direct string, but the rest of the code
+          // expects it to be an object. This wraps it to ensure consistency.
+          name: {
+            en_US: itemData.name,
+          },
+          // -----------------------
+          media: { href: itemData.media?.href },
         },
       },
     ],
@@ -59,14 +65,11 @@ export async function GET(request) {
       searchData = await searchByName(accessToken, region, query);
     }
 
-    // --- START OF FIX ---
-    // This mapping is now more robust and checks for missing data before processing.
     const formattedResults = await Promise.all(
       searchData.results.map(async (item) => {
         let iconUrl =
           "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
 
-        // Check if media and href exist before trying to fetch
         if (item.data.media && item.data.media.href) {
           try {
             const mediaResponse = await fetch(item.data.media.href, {
@@ -97,7 +100,6 @@ export async function GET(request) {
         };
       })
     );
-    // --- END OF FIX ---
 
     return NextResponse.json(formattedResults);
   } catch (error) {
