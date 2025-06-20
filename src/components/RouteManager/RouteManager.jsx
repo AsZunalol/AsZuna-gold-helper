@@ -6,23 +6,28 @@ import RouteImportModal from "../RouteImportModal/RouteImportModal";
 export default function RouteManager({ routes, setRoutes }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // This ensures `routes` is always an array, even if null or undefined is passed.
+  const safeRoutes = Array.isArray(routes) ? routes : [];
+
   const handleRouteSave = (newRoute) => {
-    setRoutes([...routes, newRoute]);
+    // Use the safeRoutes array to ensure we're adding to a valid array
+    setRoutes([...safeRoutes, newRoute]);
     setIsModalOpen(false);
   };
 
   const removeRoute = (index) => {
-    setRoutes(routes.filter((_, i) => i !== index));
+    // Use the safeRoutes array for filtering
+    setRoutes(safeRoutes.filter((_, i) => i !== index));
   };
 
   return (
     <div className="list-manager">
       <label>Route Import Strings</label>
       <div className="managed-list">
-        {routes.length === 0 ? (
+        {safeRoutes.length === 0 ? (
           <p className="empty-list-text">No route strings added yet.</p>
         ) : (
-          routes.map((route, index) => (
+          safeRoutes.map((route, index) => (
             <div key={index} className="managed-list-item">
               <div className="item-content">
                 <span className="item-name">{route.name}</span>

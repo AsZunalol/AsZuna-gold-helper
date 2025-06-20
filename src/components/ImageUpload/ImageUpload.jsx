@@ -43,6 +43,25 @@ export default function ImageUpload({
     setImageUrl("");
   };
 
+  // Styles for the remove button to ensure it's always visible
+  const removeButtonStyles = {
+    position: "absolute",
+    top: "0.5rem",
+    right: "0.5rem",
+    zIndex: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    color: "white",
+    borderRadius: "50%",
+    width: "28px",
+    height: "28px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  };
+
   return (
     <div className="image-upload-container">
       <label>{label}</label>
@@ -53,7 +72,8 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={removeImage}
-              className="remove-image-button"
+              style={removeButtonStyles}
+              title="Remove image"
             >
               <XCircle size={20} />
             </button>

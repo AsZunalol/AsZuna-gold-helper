@@ -4,19 +4,24 @@ import { PlusCircle, Trash2, GripVertical } from "lucide-react";
 import StepEditor from "../StepEditor/StepEditor";
 
 export default function StepManager({ steps, setSteps }) {
+  // This ensures `steps` is always an array, even if null or undefined is passed.
+  const safeSteps = Array.isArray(steps) ? steps : [];
+
   const handleStepChange = (index, newContent) => {
-    const updatedSteps = [...steps];
+    // Use the safeSteps array for updating
+    const updatedSteps = [...safeSteps];
     updatedSteps[index].content = newContent;
     setSteps(updatedSteps);
   };
 
   const addStep = () => {
-    setSteps([...steps, { id: Date.now(), content: "" }]);
+    // Use the safeSteps array to ensure we're adding to a valid array
+    setSteps([...safeSteps, { id: Date.now(), content: "" }]);
   };
 
   const removeStep = (index) => {
-    // Create a new array without the step at the specified index
-    const updatedSteps = steps.filter((_, i) => i !== index);
+    // Use the safeSteps array for filtering
+    const updatedSteps = safeSteps.filter((_, i) => i !== index);
     setSteps(updatedSteps);
   };
 
@@ -24,8 +29,8 @@ export default function StepManager({ steps, setSteps }) {
     <div className="step-manager">
       <label>Guide Steps</label>
       <div className="steps-container">
-        {steps.map((step, index) => (
-          <div key={step.id} className="step-item">
+        {safeSteps.map((step, index) => (
+          <div key={step.id || index} className="step-item">
             <GripVertical className="step-drag-handle" size={20} />
             <div className="step-number">{index + 1}</div>
 

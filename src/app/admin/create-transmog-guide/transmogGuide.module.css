@@ -1,13 +1,52 @@
 /* src/app/admin/create-transmog-guide/transmogGuide.module.css */
 
 .pageWrapper {
+  position: relative;
+  z-index: 1;
   padding: 2rem 3rem;
   max-width: 1800px;
   margin: 0 auto;
+  overflow: hidden;
+  border-radius: 1rem;
+  min-height: 100vh;
+}
+
+.pageWrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("/images/hero-background.jpg") center center / cover;
+  filter: blur(8px) brightness(0.5);
+  z-index: -2;
+  transform: scale(1.1);
+}
+
+.pageWrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle,
+    rgba(13, 17, 23, 0.4) 0%,
+    rgba(13, 17, 23, 0.8) 100%
+  );
+  z-index: -1;
 }
 
 .formContainer {
   width: 100%;
+  background-color: rgba(13, 17, 23, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  padding: 2rem;
+  border-radius: 1rem;
 }
 
 .header {
@@ -109,8 +148,36 @@
   object-fit: cover;
 }
 
-/* --- START OF DEFINITIVE FIX --- */
-/* This updated rule makes the overlay transparent to clicks AND changes its layout */
+.editorHero .image-preview {
+  position: relative;
+}
+
+.editorHero .remove-image-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(13, 17, 23, 0.8);
+  color: #ef4444;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+.editorHero .remove-image-button:hover {
+  background-color: #ef4444;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px #ef4444;
+}
+
 .editorHeroContent {
   position: absolute;
   bottom: 0;
@@ -129,7 +196,6 @@
 .editorHeroContent > * {
   pointer-events: auto;
 }
-/* --- END OF DEFINITIVE FIX --- */
 
 .editorTitleInput {
   font-size: 2.5rem !important;
@@ -144,6 +210,7 @@
   box-shadow: none !important;
   transition: all 0.2s ease-in-out;
   width: 100%;
+  max-width: 700px; /* Constrain the width */
 }
 
 .editorTitleInput:focus {

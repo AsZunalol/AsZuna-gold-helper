@@ -1140,3 +1140,83 @@ footer {
     padding: 1.5rem;
   }
 }
+
+/* ==========================================================================
+   6. Tiptap Editor & Content Management
+   ========================================================================== */
+
+.rich-text-editor-container {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  transition: all 0.2s ease-in-out;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.rich-text-editor-container:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.prose-mirror-editor {
+  padding: 0.85rem 1rem;
+  min-height: 300px;
+  line-height: 1.6;
+}
+
+.prose-mirror-editor:focus {
+  outline: none;
+}
+
+.prose-mirror-editor p {
+  margin-bottom: 1em;
+}
+
+.prose-mirror-editor h2,
+.prose-mirror-editor h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+/* --- START OF NEW STYLES FOR IMAGES IN EDITOR --- */
+.prose-mirror-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+}
+
+/* Style for when an image is selected in the editor */
+.prose-mirror-editor img.ProseMirror-selectednode {
+  outline: 3px solid var(--color-primary);
+}
+/* --- END OF NEW STYLES --- */
+
+.editor-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.editor-toolbar button {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editor-toolbar button:hover {
+  background-color: var(--color-surface);
+  color: white;
+}
+
+.editor-toolbar button.is-active {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}

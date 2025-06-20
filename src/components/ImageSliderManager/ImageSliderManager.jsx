@@ -2,11 +2,13 @@
 import React, { useState, useRef } from "react";
 import { Upload, XCircle, PlusSquare } from "lucide-react";
 
-export default function ImageSliderManager({ images = [], setImages }) {
-  // Default to an empty array
+export default function ImageSliderManager({ images, setImages }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
+
+  // This ensures `images` is always an array, even if null or undefined is passed.
+  const safeImages = Array.isArray(images) ? images : [];
 
   const handleFileUpload = async (file) => {
     if (!file) return;
@@ -28,7 +30,8 @@ export default function ImageSliderManager({ images = [], setImages }) {
       }
 
       const newBlob = await response.json();
-      setImages([...images, newBlob.url]); // Add the new URL to the list
+      // Use the safeImages array to ensure we're adding to a valid array
+      setImages([...safeImages, newBlob.url]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -45,15 +48,15 @@ export default function ImageSliderManager({ images = [], setImages }) {
   };
 
   const removeImage = (urlToRemove) => {
-    setImages(images.filter((url) => url !== urlToRemove));
+    setImages(safeImages.filter((url) => url !== urlToRemove));
   };
 
   return (
     <div className="image-slider-manager">
       <label>Image Slider</label>
       <div className="image-grid">
-        {/* This map call is now safe */}
-        {images.map((url, index) => (
+        {/* This map call is now safe because it uses `safeImages` */}
+        {safeImages.map((url, index) => (
           <div key={index} className="image-grid-item">
             <img src={url} alt={`Slider image ${index + 1}`} />
             <button
