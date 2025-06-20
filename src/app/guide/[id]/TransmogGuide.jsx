@@ -1,14 +1,12 @@
 "use client";
-// src/app/guide/[id]/TransmogGuide.jsx
 
 import Image from "next/image";
-import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import { Suspense, useState } from "react";
 import Spinner from "@/components/ui/spinner";
 import { WOW_EXPANSIONS } from "@/lib/constants";
-// NEW: Import icons for the copy button
 import { ClipboardCopy, Check } from "lucide-react";
+import GuideMapImage from "@/components/GuideMapImage/GuideMapImage";
 import "./transmog-guide.css";
 
 // Helper function to ensure a URL is absolute
@@ -21,7 +19,6 @@ const ensureAbsoluteUrl = (url) => {
 
 export default function TransmogGuide({ guide }) {
   const [showAllTags, setShowAllTags] = useState(false);
-  // NEW: State for the copy button icon
   const [isCopied, setIsCopied] = useState(false);
 
   // Helper to safely parse JSON or return empty array/object
@@ -37,14 +34,13 @@ export default function TransmogGuide({ guide }) {
     return fieldValue || defaultValue;
   };
 
-  // NEW: Updated function to handle copying and icon state change
   const handleCopyMacro = () => {
     if (guide.macro_string && !isCopied) {
       navigator.clipboard
         .writeText(guide.macro_string)
         .then(() => {
           setIsCopied(true);
-          setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+          setTimeout(() => setIsCopied(false), 2000);
         })
         .catch((err) => {
           console.error("Failed to copy macro: ", err);
@@ -54,10 +50,7 @@ export default function TransmogGuide({ guide }) {
 
   const itemsOfNote = parseJsonField(guide.items_of_note);
   const recommendedAddons = parseJsonField(guide.recommended_addons);
-  const requiredItems = parseJsonField(guide.required_items);
   const goldSessions = parseJsonField(guide.gold_sessions, []);
-  const sliderImages = parseJsonField(guide.slider_images);
-  const mapCoordinates = parseJsonField(guide.route_string);
 
   const averageGph =
     goldSessions.length > 0
@@ -144,7 +137,6 @@ export default function TransmogGuide({ guide }) {
       </div>
 
       <div className="guide-layout-redesigned">
-        {/* Main Content Area */}
         <div className="main-content-redesigned">
           {guide.youtube_video_id && (
             <div className="guide-video-redesigned">
@@ -166,7 +158,6 @@ export default function TransmogGuide({ guide }) {
           </div>
         </div>
 
-        {/* Sidebar Area */}
         <div className="sidebar-redesigned">
           {itemsOfNote && itemsOfNote.length > 0 && (
             <div className="sidebar-widget-redesigned">
@@ -182,6 +173,13 @@ export default function TransmogGuide({ guide }) {
                   <ItemPrices items={itemsOfNote} />
                 </Suspense>
               </div>
+            </div>
+          )}
+
+          {guide.map_image_url && (
+            <div className="sidebar-widget-redesigned">
+              <h2 className="widget-title-redesigned">Route Map</h2>
+              <GuideMapImage imageUrl={guide.map_image_url} />
             </div>
           )}
 
@@ -201,29 +199,6 @@ export default function TransmogGuide({ guide }) {
                       </a>
                     ) : (
                       addon.name
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {requiredItems.length > 0 && (
-            <div className="sidebar-widget-redesigned">
-              <h2 className="widget-title-redesigned">Required Items</h2>
-              <ul className="list-text-only">
-                {requiredItems.map((item, index) => (
-                  <li key={index}>
-                    {item.url ? (
-                      <a
-                        href={ensureAbsoluteUrl(item.url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {item.name}
-                      </a>
-                    ) : (
-                      item.name
                     )}
                   </li>
                 ))}
@@ -251,21 +226,20 @@ export default function TransmogGuide({ guide }) {
         </div>
       </div>
 
-      {/* Guide Footer Section */}
       <div className="guide-footer-redesigned">
         <div className="sidebar-widget-redesigned">
           <h2 className="widget-title-redesigned">Guide Details</h2>
           <div className="author-info-redesigned">
             <Image
-              src={guide.author.imageUrl || "/images/default-avatar.png"}
-              alt={guide.author.username || "Author"}
+              src={guide.author?.imageUrl || "/images/default-avatar.png"}
+              alt={guide.author?.username || "Author"}
               width={50}
               height={50}
               className="author-avatar-redesigned"
             />
             <div className="author-name-redesigned">
               <span>By</span>
-              <strong>{guide.author.username}</strong>
+              <strong>{guide.author?.username}</strong>
             </div>
           </div>
           <div className="guide-meta-redesigned">

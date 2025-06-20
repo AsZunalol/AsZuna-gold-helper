@@ -71,45 +71,98 @@
 }
 
 /* --- Hero Section --- */
-.heroSection {
-  background: var(--color-surface);
+.editorHero {
+  position: relative;
   border-radius: 12px;
-  padding: 2rem;
+  overflow: hidden;
   margin-bottom: 2rem;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
   border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  max-height: 400px;
 }
 
-@media (min-width: 1024px) {
-  .heroSection {
-    grid-template-columns: 400px 1fr;
-  }
+.editorHeroBackground {
+  width: 100%;
+  min-height: 300px;
+  max-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.heroImageUpload {
+.editorHeroBackground .image-upload-container {
+  width: 100%;
+  height: 100%;
+}
+
+.editorHeroBackground .image-upload-box,
+.editorHeroBackground .image-preview,
+.editorHeroBackground .upload-label {
+  height: 100%;
+  min-height: 300px;
+  max-height: 400px;
+}
+
+.editorHeroBackground .image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- START OF FIX --- */
+/* This updated rule constrains the overlay's size and uses flexbox
+   to ensure content stays at the bottom, leaving the area above it clear for clicks. */
+.editorHeroContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 280px; /* Give the overlay a max height */
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(13, 17, 23, 0.95) 40%, transparent);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  justify-content: flex-end; /* Push content to the bottom */
+}
+/* --- END OF FIX --- */
+
+.editorTitleInput {
+  font-size: 2.5rem !important;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  color: white !important;
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: none !important;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
 }
 
-.heroDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.editorTitleInput:focus {
+  border-color: var(--color-primary) !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2) !important;
 }
 
-.titleInput {
-  font-size: 2rem !important;
-  font-weight: bold;
-  padding: 1rem !important;
-}
-
-.heroMetaGrid {
+.editorMetaGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
+  margin-top: 1rem;
+  max-width: 700px;
+}
+
+.editorMetaGrid label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.editorMetaGrid .select-field {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 /* --- Main Layout --- */
@@ -146,6 +199,13 @@
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--color-border);
   font-weight: 600;
+}
+
+.sectionDescription {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
 }
 
 .gphInputs {
@@ -198,4 +258,47 @@
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
+}
+
+/* --- STYLING FOR FORM ELEMENTS --- */
+.formContainer input[type="text"],
+.formContainer input[type="number"],
+.formContainer input[type="url"],
+.formContainer textarea,
+.formContainer select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-main);
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.formContainer input[type="text"]:focus,
+.formContainer input[type="number"]:focus,
+.formContainer input[type="url"]:focus,
+.formContainer textarea:focus,
+.formContainer select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.formContainer select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300ffaa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.2em 1.2em;
+  padding-right: 2.5rem;
+}
+
+/* Special override for dropdowns in the hero section for semi-transparent look */
+.editorMetaGrid select {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }

@@ -40,33 +40,38 @@ export async function GET(request) {
 
   try {
     const accessToken = await getAccessToken(region);
-    let items = [];
+    let itemsToProcess = [];
 
-    // Determine search type and fetch data
+    // --- START OF THE DEFINITIVE FIX ---
+    // This block correctly handles both search types and ensures
+    // `itemsToProcess` is always an array of item data objects.
     if (!isNaN(query) && parseInt(query) > 0) {
       const itemData = await searchById(accessToken, region, query);
-      // The result of a search-by-ID is a single item object
       if (itemData) {
-        items.push(itemData);
+        // If we search by ID, we get a single item object. We put it in an array.
+        itemsToProcess.push(itemData);
       }
     } else {
       const searchData = await searchByName(accessToken, region, query);
-      // The result of a search-by-name is an object with a 'results' array
       if (searchData && searchData.results) {
-        items = searchData.results.map((result) => result.data);
+        // If we search by name, we get an array of results. We extract the data from each.
+        itemsToProcess = searchData.results.map((result) => result.data);
       }
     }
+    // --- END OF THE DEFINITIVE FIX ---
 
     // Process all found items consistently
     const formattedResults = await Promise.all(
-      items.map(async (item) => {
+      itemsToProcess.map(async (item) => {
         let iconUrl =
           "https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg";
 
-        // The media property is not always present, so we fetch it if available
-        if (item.media && item.media.href) {
+        // Handle inconsistent media property structure between search types
+        const mediaHref = item.media?.key?.href || item.media?.href;
+
+        if (mediaHref) {
           try {
-            const mediaResponse = await fetch(item.media.href, {
+            const mediaResponse = await fetch(mediaHref, {
               headers: { Authorization: `Bearer ${accessToken}` },
             });
             if (mediaResponse.ok) {
@@ -86,9 +91,7 @@ export async function GET(request) {
           }
         }
 
-        // --- THIS IS THE KEY FIX ---
         // We now guarantee that the `name` property sent to the client is a simple string
-        // by checking if it's an object and extracting the English name if so.
         const itemName =
           typeof item.name === "object" && item.name !== null
             ? item.name.en_US
@@ -97,7 +100,7 @@ export async function GET(request) {
         return {
           id: item.id,
           name: itemName,
-          icon: iconUrl,
+          icon: iconUrl, // This will be the full URL
         };
       })
     );
