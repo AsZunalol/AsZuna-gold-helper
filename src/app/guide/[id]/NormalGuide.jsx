@@ -2,17 +2,14 @@
 
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Image from "next/image";
 import MapImageModal from "@/components/map-image-modal/MapImageModal";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import Spinner from "@/components/ui/spinner";
-import { WOW_EXPANSIONS } from "@/lib/constants";
-import "./guide.css"; // Styles have been updated for this layout
+import "./guide.css";
 
 export default function NormalGuide({ guide }) {
-  const [showAllTags, setShowAllTags] = useState(false);
-
   const parseJsonField = (fieldValue, defaultValue = []) => {
     if (typeof fieldValue === "string") {
       try {
@@ -30,79 +27,9 @@ export default function NormalGuide({ guide }) {
   const recommendedAddons = parseJsonField(guide.recommended_addons);
   const sliderImages = parseJsonField(guide.slider_images);
   const mapCoordinates = parseJsonField(guide.route_string);
-  const expansionInfo = WOW_EXPANSIONS.find(
-    (exp) => exp.name === guide.expansion
-  );
-
-  const allTags =
-    typeof guide.tags === "string"
-      ? guide.tags.split(",").map((tag) => tag.trim())
-      : guide.tags || [];
-  const displayedTags = showAllTags ? allTags : allTags.slice(0, 3);
 
   return (
     <div className="guide-container">
-      <div className="thumbnail-wrapper">
-        <div className="thumbnail-card">
-          <Image
-            src={guide.thumbnail_url || "/images/default-thumb.jpg"}
-            alt="Guide Thumbnail"
-            width={1200}
-            height={300}
-            className="thumbnail-img"
-            priority
-          />
-          <div className="thumbnail-topleft">
-            <span>{guide.category}</span>
-          </div>
-          <div className="thumbnail-bottomright">
-            <span>{guide.gold_pr_hour || "N/A"}</span>
-          </div>
-          <div className="thumbnail-overlay-box">
-            <div className="thumbnail-overlay-content">
-              <h1 className="guide-title-overlay">{guide.title}</h1>
-              {expansionInfo && (
-                <p
-                  className="guide-expansion"
-                  style={{ color: expansionInfo.color }}
-                >
-                  Expansion – {guide.expansion}
-                </p>
-              )}
-              {allTags.length > 0 && (
-                <div
-                  className={`tag-list-wrapper ${
-                    showAllTags ? "expanded" : ""
-                  }`}
-                >
-                  <div className="tags-display">
-                    {displayedTags.map((tag) => (
-                      <span key={tag} className="tag-pill">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  {!showAllTags && allTags.length > 3 && (
-                    <div className="tags-fade-overlay"></div>
-                  )}
-                </div>
-              )}
-              {allTags.length > 3 && (
-                <button
-                  type="button"
-                  onClick={() => setShowAllTags(!showAllTags)}
-                  className="tags-toggle-button"
-                >
-                  {showAllTags
-                    ? "Show Less Tags"
-                    : `Show All ${allTags.length} Tags`}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="author-info">
         <Image
           src={guide.author.imageUrl || "/images/default-avatar.png"}

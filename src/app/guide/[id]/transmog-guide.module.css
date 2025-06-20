@@ -1,79 +1,71 @@
-/* src/app/guide/[id]/transmog-guide.css */
+/* src/app/guide/[id]/transmog-guide.module.css */
 
-/* Main container for the guide */
-.guide-container-redesigned {
+.guideContainerRedesigned {
   width: 100%;
   color: #e0e0e0;
-  background-color: #111827; /* Solid dark background */
-  padding: 2rem;
-  border-radius: 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-/* Styling for individual cards/widgets in both columns */
-.content-bg-redesigned,
-.sidebar-widget-redesigned {
-  background-color: #1f2937; /* Solid, slightly lighter dark color */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Updated title colors to a blue accent */
-.widget-title-redesigned,
-.content-bg-redesigned h2 {
-  font-size: 1.75rem;
-  color: #60a5fa; /* Vibrant Blue Accent (text-blue-400) */
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(96, 165, 250, 0.3); /* Blue border bottom */
 }
 
 /* --- Layout & Structure --- */
-.guide-layout-redesigned {
+/* Use CSS Grid for a robust two-column layout on larger screens */
+.guideLayoutRedesigned {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; /* Single column on mobile */
   gap: 2.5rem;
   margin-top: 2rem;
 }
 
 @media (min-width: 1024px) {
-  .guide-layout-redesigned {
+  .guideLayoutRedesigned {
+    /* Two columns on desktop: 2/3 for main content, 1/3 for sidebar */
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   }
 }
 
-.main-content-redesigned {
+.mainContentRedesigned {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  min-width: 0;
 }
 
-/* --- START OF FIX --- */
-/* The z-index here elevates the entire sidebar's stacking context */
-.sidebar-redesigned {
+.sidebarRedesigned {
   position: sticky;
   top: 100px;
   align-self: start;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  z-index: 10; /* This ensures the sidebar and its children appear on top */
 }
-/* --- END OF FIX --- */
 
-.guide-footer-redesigned {
-  margin-top: 2.5rem;
-  padding-top: 2.5rem;
+/* This is now a separate block, outside the grid/flex layout of the main content */
+.guideFooterRedesigned {
+  margin-top: 3rem;
+  padding-top: 2rem;
   border-top: 1px solid var(--color-border);
-  grid-column: 1 / -1;
+  width: 100%; /* Ensure it spans the full width */
 }
 
-/* --- Content Elements --- */
-.guide-video-redesigned {
+/* --- Widget & Content Styling (Mostly unchanged) --- */
+.contentBgRedesigned,
+.sidebarWidgetRedesigned {
+  background-color: #1f2937;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.widgetTitleRedesigned,
+.contentBgRedesigned h2 {
+  font-size: 1.75rem;
+  color: #60a5fa;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+.guideVideoRedesigned {
   position: relative;
   width: 100%;
   padding-top: 56.25%;
@@ -81,7 +73,7 @@
   overflow: hidden;
 }
 
-.guide-video-redesigned iframe {
+.guideVideoRedesigned iframe {
   position: absolute;
   top: 0;
   left: 0;
@@ -89,46 +81,46 @@
   height: 100%;
 }
 
-.guide-content-redesigned {
+.guideContentRedesigned {
   line-height: 1.7;
 }
 
-.guide-content-redesigned h2,
-.guide-content-redesigned h3 {
+.guideContentRedesigned h2,
+.guideContentRedesigned h3 {
   color: #60a5fa;
   margin-top: 1.5rem;
   margin-bottom: 1rem;
 }
 
-.author-info-redesigned {
+.authorInfoRedesigned {
   display: flex;
   align-items: center;
   gap: 15px;
   margin-bottom: 1.5rem;
 }
 
-.author-avatar-redesigned {
+.authorAvatarRedesigned {
   border-radius: 50%;
   border: 2px solid #60a5fa;
 }
 
-.author-name-redesigned {
+.authorNameRedesigned {
   display: flex;
   flex-direction: column;
 }
 
-.author-name-redesigned span {
+.authorNameRedesigned span {
   font-size: 0.9em;
   color: #9ca3af;
 }
 
-.author-name-redesigned strong {
+.authorNameRedesigned strong {
   font-size: 1.2em;
   font-weight: bold;
   color: #fff;
 }
 
-.guide-meta-redesigned {
+.guideMetaRedesigned {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -137,29 +129,71 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.guide-meta-redesigned div {
+.guideMetaRedesigned div {
   display: flex;
   justify-content: space-between;
 }
 
-.guide-meta-redesigned strong {
+.guideMetaRedesigned strong {
   color: #9ca3af;
   font-weight: normal;
 }
 
-.sidebar-widget-redesigned .list-text-only li a {
+.sidebarWidgetRedesigned .listTextOnly {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebarWidgetRedesigned .listTextOnly li {
+  margin-bottom: 0.5rem;
+}
+
+.sidebarWidgetRedesigned .listTextOnly li a {
   color: var(--color-primary) !important;
   text-decoration: underline !important;
   transition: color 0.2s ease;
 }
 
-.sidebar-widget-redesigned .list-text-only li a:hover {
+.sidebarWidgetRedesigned .listTextOnly li a:hover {
   color: var(--color-primary-light) !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .guide-container-redesigned {
-    padding: 1rem;
-  }
+.codeBlock {
+  background-color: #0a0a0a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.9em;
+  color: var(--color-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.copyMacroButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyMacroButton:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.copyMacroButton.copied {
+  color: var(--color-primary);
+  background-color: rgba(0, 255, 170, 0.1);
 }
