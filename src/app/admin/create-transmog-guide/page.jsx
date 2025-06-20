@@ -30,8 +30,8 @@ import ImageUpload from "@/components/ImageUpload/ImageUpload";
 import ItemsOfNoteManager from "@/components/ItemsOfNoteManager/ItemsOfNoteManager";
 import StringImportManager from "@/components/StringImportManager/StringImportManager";
 import ListManager from "@/components/ListManager/ListManager";
-import GoldSessionManager from "@/components/GoldSessionManager/GoldSessionManager"; // Assuming this is now created
-import MapImageUploader from "@/components/MapImageUploader/MapImageUploader"; // Assuming this is now created
+import GoldSessionManager from "@/components/GoldSessionManager/GoldSessionManager";
+import MapImageUploader from "@/components/MapImageUploader/MapImageUploader";
 
 // --- Main Page Component ---
 export default function CreateTransmogGuidePage() {
@@ -46,6 +46,7 @@ export default function CreateTransmogGuidePage() {
     gold_sessions: [],
     thumbnail_url: "",
     map_image_url: "",
+    youtube_video_id: "", // Added for the video
     recommended_addons: [],
     items_of_note: [],
     macro_string: "",
@@ -101,7 +102,6 @@ export default function CreateTransmogGuidePage() {
       tags: formState.tags.join(","),
       // Ensure default empty values for other guide types
       steps: "[]",
-      youtube_video_id: "",
       time_to_complete: "",
       required_items: "[]",
       tsm_import_string: "",
@@ -221,6 +221,21 @@ export default function CreateTransmogGuidePage() {
                 value={formState.description}
                 onChange={(val) => handleStateChange("description", val)}
               />
+            </div>
+            {/* YouTube Video Section */}
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Media</h3>
+              <div className="form-group">
+                <label>YouTube Video ID</label>
+                <input
+                  type="text"
+                  placeholder="e.g., dQw4w9WgXcQ"
+                  value={formState.youtube_video_id}
+                  onChange={(e) =>
+                    handleStateChange("youtube_video_id", e.target.value)
+                  }
+                />
+              </div>
             </div>
           </div>
           <div className={styles.sidebar}>

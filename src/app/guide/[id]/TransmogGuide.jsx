@@ -7,7 +7,7 @@ import Spinner from "@/components/ui/spinner";
 import { WOW_EXPANSIONS } from "@/lib/constants";
 import { ClipboardCopy, Check } from "lucide-react";
 import GuideMapImage from "@/components/GuideMapImage/GuideMapImage";
-import "./transmog-guide.css";
+import styles from "./transmog-guide.module.css";
 
 // Helper function to ensure a URL is absolute
 const ensureAbsoluteUrl = (url) => {
@@ -72,31 +72,31 @@ export default function TransmogGuide({ guide }) {
   const displayedTags = showAllTags ? allTags : allTags.slice(0, 3);
 
   return (
-    <div className="guide-container-redesigned">
-      <div className="thumbnail-wrapper">
-        <div className="thumbnail-card">
+    <div className={styles.guideContainerRedesigned}>
+      <div className={styles.thumbnailWrapper}>
+        <div className={styles.thumbnailCard}>
           <Image
             src={guide.thumbnail_url || "/images/default-thumb.jpg"}
             alt="Guide Thumbnail"
             width={1200}
             height={300}
-            className="thumbnail-img"
+            className={styles.thumbnailImg}
             priority
           />
-          <div className="thumbnail-topleft">
+          <div className={styles.thumbnailTopleft}>
             <span>{guide.category}</span>
           </div>
-          <div className="thumbnail-bottomright">
+          <div className={styles.thumbnailBottomright}>
             <span>{averageGph.toLocaleString()} GPH</span>
           </div>
-          <div className="thumbnail-overlay-box">
-            <div className="thumbnail-overlay-content">
-              <h1 className="guide-title-overlay">
+          <div className={styles.thumbnailOverlayBox}>
+            <div className={styles.thumbnailOverlayContent}>
+              <h1 className={styles.guideTitleOverlay}>
                 {guide.title || "Untitled Guide"}
               </h1>
               {expansionInfo && (
                 <p
-                  className="guide-expansion"
+                  className={styles.guideExpansion}
                   style={{ color: expansionInfo.color }}
                 >
                   Expansion – {guide.expansion}
@@ -104,19 +104,19 @@ export default function TransmogGuide({ guide }) {
               )}
               {allTags.length > 0 && (
                 <div
-                  className={`tag-list-wrapper ${
-                    showAllTags ? "expanded" : ""
+                  className={`${styles.tagListWrapper} ${
+                    showAllTags ? styles.expanded : ""
                   }`}
                 >
-                  <div className="tags-display">
+                  <div className={styles.tagsDisplay}>
                     {displayedTags.map((tag) => (
-                      <span key={tag} className="tag-pill">
+                      <span key={tag} className={styles.tagPill}>
                         {tag}
                       </span>
                     ))}
                   </div>
                   {!showAllTags && allTags.length > 3 && (
-                    <div className="tags-fade-overlay"></div>
+                    <div className={styles.tagsFadeOverlay}></div>
                   )}
                 </div>
               )}
@@ -124,7 +124,7 @@ export default function TransmogGuide({ guide }) {
                 <button
                   type="button"
                   onClick={() => setShowAllTags(!showAllTags)}
-                  className="tags-toggle-button"
+                  className={styles.tagsToggleButton}
                 >
                   {showAllTags
                     ? "Show Less Tags"
@@ -136,10 +136,10 @@ export default function TransmogGuide({ guide }) {
         </div>
       </div>
 
-      <div className="guide-layout-redesigned">
-        <div className="main-content-redesigned">
+      <div className={styles.guideLayoutRedesigned}>
+        <div className={styles.mainContentRedesigned}>
           {guide.youtube_video_id && (
-            <div className="guide-video-redesigned">
+            <div className={styles.guideVideoRedesigned}>
               <iframe
                 src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
                 title="YouTube video player"
@@ -150,19 +150,19 @@ export default function TransmogGuide({ guide }) {
             </div>
           )}
 
-          <div className="content-bg-redesigned">
+          <div className={styles.contentBgRedesigned}>
             <div
-              className="guide-content-redesigned"
+              className={styles.guideContentRedesigned}
               dangerouslySetInnerHTML={{ __html: guide.description || "" }}
             />
           </div>
         </div>
 
-        <div className="sidebar-redesigned">
+        <div className={styles.sidebarRedesigned}>
           {itemsOfNote && itemsOfNote.length > 0 && (
-            <div className="sidebar-widget-redesigned">
-              <h2 className="widget-title-redesigned">Items of Note</h2>
-              <div className="items-of-note-redesigned">
+            <div className={styles.sidebarWidgetRedesigned}>
+              <h2 className={styles.widgetTitleRedesigned}>Items of Note</h2>
+              <div className={styles.itemsOfNoteRedesigned}>
                 <Suspense
                   fallback={
                     <div className="flex justify-center">
@@ -177,16 +177,18 @@ export default function TransmogGuide({ guide }) {
           )}
 
           {guide.map_image_url && (
-            <div className="sidebar-widget-redesigned">
-              <h2 className="widget-title-redesigned">Route Map</h2>
+            <div className={styles.sidebarWidgetRedesigned}>
+              <h2 className={styles.widgetTitleRedesigned}>Route Map</h2>
               <GuideMapImage imageUrl={guide.map_image_url} />
             </div>
           )}
 
           {recommendedAddons.length > 0 && (
-            <div className="sidebar-widget-redesigned">
-              <h2 className="widget-title-redesigned">Recommended Addons</h2>
-              <ul className="list-text-only">
+            <div className={styles.sidebarWidgetRedesigned}>
+              <h2 className={styles.widgetTitleRedesigned}>
+                Recommended Addons
+              </h2>
+              <ul className={styles.listTextOnly}>
                 {recommendedAddons.map((addon, index) => (
                   <li key={index}>
                     {addon.url ? (
@@ -208,41 +210,43 @@ export default function TransmogGuide({ guide }) {
 
           {guide.macro_string && (
             <div
-              className="sidebar-widget-redesigned"
+              className={styles.sidebarWidgetRedesigned}
               style={{ position: "relative" }}
             >
-              <h2 className="widget-title-redesigned">Helpful Macro</h2>
+              <h2 className={styles.widgetTitleRedesigned}>Helpful Macro</h2>
               <button
                 onClick={handleCopyMacro}
-                className={`copy-macro-button ${isCopied ? "copied" : ""}`}
+                className={`${styles.copyMacroButton} ${
+                  isCopied ? styles.copied : ""
+                }`}
                 title={isCopied ? "Copied!" : "Copy macro"}
                 disabled={isCopied}
               >
                 {isCopied ? <Check size={16} /> : <ClipboardCopy size={16} />}
               </button>
-              <pre className="code-block">{guide.macro_string}</pre>
+              <pre className={styles.codeBlock}>{guide.macro_string}</pre>
             </div>
           )}
         </div>
       </div>
 
-      <div className="guide-footer-redesigned">
-        <div className="sidebar-widget-redesigned">
-          <h2 className="widget-title-redesigned">Guide Details</h2>
-          <div className="author-info-redesigned">
+      <div className={styles.guideFooterRedesigned}>
+        <div className={styles.sidebarWidgetRedesigned}>
+          <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
+          <div className={styles.authorInfoRedesigned}>
             <Image
               src={guide.author?.imageUrl || "/images/default-avatar.png"}
               alt={guide.author?.username || "Author"}
               width={50}
               height={50}
-              className="author-avatar-redesigned"
+              className={styles.authorAvatarRedesigned}
             />
-            <div className="author-name-redesigned">
+            <div className={styles.authorNameRedesigned}>
               <span>By</span>
               <strong>{guide.author?.username}</strong>
             </div>
           </div>
-          <div className="guide-meta-redesigned">
+          <div className={styles.guideMetaRedesigned}>
             <div>
               <strong>Category:</strong> {guide.category}
             </div>
