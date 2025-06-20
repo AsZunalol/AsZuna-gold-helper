@@ -1,0 +1,81 @@
+/* src/components/ItemPrices/ItemPrices.css */
+
+.item-prices-container {
+  width: 100%;
+}
+
+.item-prices-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* 12px */
+}
+
+.item-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.item-price-row:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  border-color: rgba(96, 165, 250, 0.5); /* Blue accent on hover */
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* 16px */
+}
+
+.item-icon {
+  border-radius: 6px;
+  border: 1px solid #4b5563; /* gray-600 */
+  object-fit: cover;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #e5e7eb; /* gray-200 */
+}
+
+.item-values {
+  display: flex;
+  gap: 1.5rem; /* 24px */
+  text-align: right;
+}
+
+.price-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-label {
+  font-size: 0.75rem; /* 12px */
+  color: #9ca3af; /* gray-400 */
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.price-value {
+  font-size: 0.9rem; /* 14px */
+  color: #f3f4f6; /* gray-100 */
+  font-family: monospace;
+}
+
+.item-prices-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: #9ca3af; /* gray-400 */
+}
