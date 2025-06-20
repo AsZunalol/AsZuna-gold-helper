@@ -6,6 +6,7 @@ import Image from "next/image"; // Import the Image component
 import TransmogGuide from "./TransmogGuide";
 import NormalGuide from "./NormalGuide";
 import { WOW_EXPANSIONS } from "@/lib/constants"; // Import expansions for color coding
+import styles from "./transmog-guide.module.css";
 
 // Reusable GuideHeader component
 const GuideHeader = ({ guide }) => {

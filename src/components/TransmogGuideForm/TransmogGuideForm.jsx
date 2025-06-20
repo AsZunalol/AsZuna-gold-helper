@@ -1,183 +1,258 @@
 "use client";
 
-import Image from "next/image";
-import ItemPrices from "@/components/ItemPrices/ItemPrices";
-import { Suspense, useState } from "react";
-import Spinner from "@/components/ui/spinner";
-import { ClipboardCopy, Check } from "lucide-react";
-import GuideMapImage from "@/components/GuideMapImage/GuideMapImage";
-import styles from "./transmog-guide.module.css";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
+import styles from "@/app/admin/create-transmog-guide/transmogGuide.module.css";
+import { Save } from "lucide-react";
 
-// Helper function to ensure a URL is absolute
-const ensureAbsoluteUrl = (url) => {
-  if (!url || url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  return `https://${url}`;
-};
+// Dynamic imports
+const TiptapEditor = dynamic(
+  () => import("@/components/TiptapEditor/TiptapEditor"),
+  { ssr: false }
+);
+const StepManager = dynamic(
+  () => import("@/components/StepManager/StepManager"),
+  { ssr: false }
+);
+import TagInput from "@/components/TagInput/TagInput";
+import ExpansionSelect from "@/components/ExpansionSelect/ExpansionSelect";
+import CategorySelect from "@/components/CategorySelect/CategorySelect";
+import GoldInput from "@/components/GoldInput/GoldInput";
+import TimeInput from "@/components/TimeInput/TimeInput";
+import ImageUpload from "@/components/ImageUpload/ImageUpload";
+import ImageSliderManager from "@/components/ImageSliderManager/ImageSliderManager";
+import ListManager from "@/components/ListManager/ListManager";
+import ItemsOfNoteManager from "@/components/ItemsOfNoteManager/ItemsOfNoteManager";
+import StringImportManager from "@/components/StringImportManager/StringImportManager";
+import RouteManager from "@/components/RouteManager/RouteManager";
 
-export default function TransmogGuide({ guide }) {
-  const [isCopied, setIsCopied] = useState(false);
+export default function GuideForm({
+  initialData,
+  onSave,
+  isEditing,
+  submitting,
+}) {
+  const { data: session } = useSession();
+  const [formState, setFormState] = useState(initialData);
 
-  // Helper to safely parse JSON or return empty array/object
-  const parseJsonField = (fieldValue, defaultValue = []) => {
-    if (typeof fieldValue === "string") {
-      try {
-        const parsed = JSON.parse(fieldValue);
-        return Array.isArray(parsed) ? parsed : defaultValue;
-      } catch (e) {
-        return defaultValue;
-      }
-    }
-    return fieldValue || defaultValue;
+  useEffect(() => {
+    setFormState(initialData);
+  }, [initialData]);
+
+  const handleStateChange = (field, value) => {
+    setFormState((prev) => ({
+      ...prev,
+      [field]: typeof value === "function" ? value(prev[field]) : value,
+    }));
   };
 
-  const handleCopyMacro = () => {
-    if (guide.macro_string && !isCopied) {
-      navigator.clipboard
-        .writeText(guide.macro_string)
-        .then(() => {
-          setIsCopied(true);
-          setTimeout(() => setIsCopied(false), 2000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy macro: ", err);
-        });
-    }
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    onSave(formState, "PUBLISHED");
   };
 
-  const itemsOfNote = parseJsonField(guide.items_of_note);
-  const recommendedAddons = parseJsonField(guide.recommended_addons);
+  const handleDraftSave = () => {
+    onSave(formState, "DRAFT");
+  };
 
   return (
-    <div className={styles.guideContainerRedesigned}>
-      <div className={styles.guideLayoutRedesigned}>
-        {/* Main Content (Left Column) */}
-        <div className={styles.mainContentRedesigned}>
-          {guide.youtube_video_id && (
-            <div className={styles.guideVideoRedesigned}>
-              <iframe
-                src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
+    <form onSubmit={handleFormSubmit} className={styles.formContainer}>
+      <div className={styles.header}>
+        <h1>
+          {isEditing ? "Editing Guide: " : "Create New Farming/Gold Guide"}
+          {isEditing && (
+            <span className={styles.headerTitle}>
+              {formState.title || "..."}
+            </span>
           )}
-
-          <div className={styles.contentBgRedesigned}>
-            <div
-              className={styles.guideContentRedesigned}
-              dangerouslySetInnerHTML={{ __html: guide.description || "" }}
-            />
-          </div>
-        </div>
-
-        {/* Sidebar (Right Column) */}
-        <div className={styles.sidebarRedesigned}>
-          {itemsOfNote && itemsOfNote.length > 0 && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>Items of Note</h2>
-              <div className={styles.itemsOfNoteRedesigned}>
-                <Suspense
-                  fallback={
-                    <div className="flex justify-center">
-                      <Spinner />
-                    </div>
-                  }
-                >
-                  <ItemPrices items={itemsOfNote} />
-                </Suspense>
-              </div>
-            </div>
-          )}
-
-          {guide.map_image_url && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>Route Map</h2>
-              <GuideMapImage imageUrl={guide.map_image_url} />
-            </div>
-          )}
-
-          {recommendedAddons.length > 0 && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>
-                Recommended Addons
-              </h2>
-              <ul className={styles.listTextOnly}>
-                {recommendedAddons.map((addon, index) => (
-                  <li key={index}>
-                    {addon.url ? (
-                      <a
-                        href={ensureAbsoluteUrl(addon.url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {addon.name}
-                      </a>
-                    ) : (
-                      addon.name
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {guide.macro_string && (
-            <div
-              className={styles.sidebarWidgetRedesigned}
-              style={{ position: "relative" }}
-            >
-              <h2 className={styles.widgetTitleRedesigned}>Helpful Macro</h2>
-              <button
-                onClick={handleCopyMacro}
-                className={`${styles.copyMacroButton} ${
-                  isCopied ? styles.copied : ""
-                }`}
-                title={isCopied ? "Copied!" : "Copy macro"}
-                disabled={isCopied}
-              >
-                {isCopied ? <Check size={16} /> : <ClipboardCopy size={16} />}
-              </button>
-              <pre className={styles.codeBlock}>{guide.macro_string}</pre>
-            </div>
-          )}
+        </h1>
+        <div className={styles.headerActions}>
+          <button
+            type="button"
+            onClick={handleDraftSave}
+            className={styles.draftButton}
+            disabled={submitting}
+          >
+            <Save size={16} /> Save as Draft
+          </button>
+          <button
+            type="submit"
+            className={styles.publishButton}
+            disabled={submitting}
+          >
+            {submitting
+              ? "Saving..."
+              : isEditing
+              ? "Publish Changes"
+              : "Publish Guide"}
+          </button>
         </div>
       </div>
 
-      {/* Footer Section */}
-      <footer className={styles.guideFooterRedesigned}>
-        <div className={styles.contentBgRedesigned}>
-          <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
-          <div className={styles.authorInfoRedesigned}>
-            <Image
-              src={guide.author?.imageUrl || "/images/default-avatar.png"}
-              alt={guide.author?.username || "Author"}
-              width={50}
-              height={50}
-              className={styles.authorAvatarRedesigned}
-            />
-            <div className={styles.authorNameRedesigned}>
-              <span>By</span>
-              <strong>{guide.author?.username}</strong>
+      <div className={styles.mainLayout}>
+        <div className={styles.mainContent}>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Basic Information</h3>
+            <div className="form-group">
+              <label>Guide Title</label>
+              <input
+                type="text"
+                value={formState.title}
+                onChange={(e) => handleStateChange("title", e.target.value)}
+                required
+              />
+            </div>
+            <div
+              className={styles.heroMetaGrid}
+              style={{ maxWidth: "100%", marginTop: "1.5rem" }}
+            >
+              <div className="form-group">
+                <label>Category</label>
+                <CategorySelect
+                  selectedCategory={formState.category}
+                  setSelectedCategory={(val) =>
+                    handleStateChange("category", val)
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>Expansion</label>
+                <ExpansionSelect
+                  selectedExpansion={formState.expansion}
+                  setSelectedExpansion={(val) =>
+                    handleStateChange("expansion", val)
+                  }
+                />
+              </div>
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Tags</label>
+              <TagInput
+                tags={formState.tags}
+                setTags={(val) => handleStateChange("tags", val)}
+              />
             </div>
           </div>
-          <div className={styles.guideMetaRedesigned}>
-            <div>
-              <strong>Category:</strong> {guide.category}
+
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Guide Content</h3>
+            <div className="form-group">
+              <label>Description</label>
+              <TiptapEditor
+                value={formState.description}
+                onChange={(val) => handleStateChange("description", val)}
+              />
             </div>
-            <div>
-              <strong>Expansion:</strong> {guide.expansion}
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Guide Steps</label>
+              <StepManager
+                steps={formState.steps}
+                setSteps={(val) => handleStateChange("steps", val)}
+              />
             </div>
-            <div>
-              <strong>Updated:</strong>{" "}
-              {new Date(guide.updatedAt).toLocaleDateString()}
+          </div>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Media</h3>
+            <div className={styles.heroMetaGrid}>
+              <div className="form-group">
+                <label>Guide Thumbnail</label>
+                <ImageUpload
+                  imageUrl={formState.thumbnail_url}
+                  setImageUrl={(val) => handleStateChange("thumbnail_url", val)}
+                />
+              </div>
+              <div className="form-group">
+                <label>YouTube Video ID</label>
+                <input
+                  type="text"
+                  placeholder="e.g., dQw4w9WgXcQ"
+                  value={formState.youtube_video_id}
+                  onChange={(e) =>
+                    handleStateChange("youtube_video_id", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Image Slider</label>
+              <ImageSliderManager
+                images={formState.slider_images}
+                setImages={(val) => handleStateChange("slider_images", val)}
+              />
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+        <div className={styles.sidebar}>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Performance</h3>
+            <div className="form-group">
+              <label>Gold Per Hour</label>
+              <GoldInput
+                value={formState.gold_pr_hour}
+                onChange={(val) => handleStateChange("gold_pr_hour", val)}
+              />
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Time to Complete</label>
+              <TimeInput
+                value={formState.time_to_complete}
+                onChange={(val) => handleStateChange("time_to_complete", val)}
+              />
+            </div>
+          </div>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Items & Addons</h3>
+            <div className="form-group">
+              <label>Items of Note</label>
+              <ItemsOfNoteManager
+                items={formState.items_of_note}
+                setItems={(val) => handleStateChange("items_of_note", val)}
+                region={session?.user?.region || "us"}
+                realm={session?.user?.realm || "stormrage"}
+              />
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Required Items</label>
+              <ListManager
+                title=""
+                noun="Item"
+                items={formState.required_items}
+                setItems={(val) => handleStateChange("required_items", val)}
+              />
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>Recommended Addons</label>
+              <ListManager
+                title=""
+                noun="Addon"
+                items={formState.recommended_addons}
+                setItems={(val) => handleStateChange("recommended_addons", val)}
+              />
+            </div>
+          </div>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Import Strings</h3>
+            <div className="form-group">
+              <label>Routes (Routes Addon)</label>
+              <RouteManager
+                routes={formState.route_strings}
+                setRoutes={(val) => handleStateChange("route_strings", val)}
+              />
+            </div>
+            <div className="form-group" style={{ marginTop: "1.5rem" }}>
+              <label>TSM Group String</label>
+              <StringImportManager
+                title=""
+                stringValue={formState.tsm_import_string}
+                setStringValue={(val) =>
+                  handleStateChange("tsm_import_string", val)
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }
