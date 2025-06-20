@@ -52,6 +52,8 @@
   gap: 2rem;
 }
 
+/* --- START OF FIX --- */
+/* The z-index here elevates the entire sidebar's stacking context */
 .sidebar-redesigned {
   position: sticky;
   top: 100px;
@@ -59,7 +61,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  z-index: 10; /* This ensures the sidebar and its children appear on top */
 }
+/* --- END OF FIX --- */
 
 .guide-footer-redesigned {
   margin-top: 2.5rem;
@@ -143,12 +147,6 @@
   font-weight: normal;
 }
 
-/*
-  THIS IS THE DEFINITIVE FIX:
-  This new, highly specific rule targets links inside the addon and item lists.
-  It forcibly restores the underline and proper link colors, overriding the
-  global style from `globals.css`.
-*/
 .sidebar-widget-redesigned .list-text-only li a {
   color: var(--color-primary) !important;
   text-decoration: underline !important;

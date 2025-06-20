@@ -2,7 +2,8 @@
 import React, { useState, useRef } from "react";
 import { Upload, XCircle, PlusSquare } from "lucide-react";
 
-export default function ImageSliderManager({ images, setImages }) {
+export default function ImageSliderManager({ images = [], setImages }) {
+  // Default to an empty array
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
@@ -38,7 +39,6 @@ export default function ImageSliderManager({ images, setImages }) {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     handleFileUpload(file);
-    // Reset the file input to allow uploading the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -52,6 +52,7 @@ export default function ImageSliderManager({ images, setImages }) {
     <div className="image-slider-manager">
       <label>Image Slider</label>
       <div className="image-grid">
+        {/* This map call is now safe */}
         {images.map((url, index) => (
           <div key={index} className="image-grid-item">
             <img src={url} alt={`Slider image ${index + 1}`} />

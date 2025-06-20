@@ -109,22 +109,27 @@
   object-fit: cover;
 }
 
-/* --- START OF FIX --- */
-/* This updated rule constrains the overlay's size and uses flexbox
-   to ensure content stays at the bottom, leaving the area above it clear for clicks. */
+/* --- START OF DEFINITIVE FIX --- */
+/* This updated rule makes the overlay transparent to clicks AND changes its layout */
 .editorHeroContent {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: 280px; /* Give the overlay a max height */
+  right: 0;
+  height: 280px; /* Give the overlay a fixed height */
   padding: 2rem;
   background: linear-gradient(to top, rgba(13, 17, 23, 0.95) 40%, transparent);
+  pointer-events: none; /* Make the overlay itself non-interactive */
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* Push content to the bottom */
+  justify-content: flex-end; /* Push content to the bottom of the overlay */
 }
-/* --- END OF FIX --- */
+
+/* Re-enable interaction ONLY for the elements inside the content container */
+.editorHeroContent > * {
+  pointer-events: auto;
+}
+/* --- END OF DEFINITIVE FIX --- */
 
 .editorTitleInput {
   font-size: 2.5rem !important;

@@ -31,8 +31,6 @@
   font-size: 0.9rem;
 }
 
-/* --- START OF FIX --- */
-/* These updated styles ensure the modal appears on top and is smaller. */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -73,7 +71,6 @@
   z-index: 10000; /* Must be higher than the overlay */
   transition: all 0.2s ease;
 }
-/* --- END OF FIX --- */
 
 .closeModalButton:hover {
   background: white;
