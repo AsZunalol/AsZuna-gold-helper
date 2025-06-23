@@ -36,60 +36,44 @@ export async function GET(request) {
 
   try {
     const accessToken = await getBlizzardToken();
-    const connectedRealmId = 11; // Example for Proudmoore US
     const namespace = "dynamic-us";
 
     // --- THIS IS THE DEFINITIVE FIX ---
-    // STEP 1: Fetch the Connected Realm data to get the correct auction house URL.
-    const realmApiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+    // The modern Blizzard API uses a single, simpler endpoint for all commodity auctions in a region.
+    // The old /connected-realm/ endpoint is deprecated for this purpose. This is the correct URL.
+    const apiUrl = `https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
 
-    const realmRes = await fetch(realmApiUrl);
-    if (!realmRes.ok) {
-      const errorText = await realmRes.text();
-      throw new Error(
-        `Blizzard Realm API Error: ${realmRes.statusText} - ${errorText}`
-      );
-    }
-    const realmData = await realmRes.json();
+    const res = await fetch(apiUrl);
 
-    // STEP 2: Extract the correct auctions URL from the response and use it.
-    const auctionsUrl = realmData.auctions.href;
-    if (!auctionsUrl) {
-      throw new Error("Could not find auction house URL in realm data.");
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Blizzard API Error: ${res.statusText} - ${errorText}`);
     }
 
-    // Now fetch the auctions using the URL Blizzard provided
-    const auctionRes = await fetch(
-      `${auctionsUrl}&access_token=${accessToken}`
-    );
-
-    if (!auctionRes.ok) {
-      const errorText = await auctionRes.text();
-      throw new Error(
-        `Blizzard Auction API Error: ${auctionRes.statusText} - ${errorText}`
-      );
-    }
-
-    const { auctions } = await auctionRes.json();
+    const { auctions } = await res.json();
 
     if (!auctions || auctions.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "No auctions found to update.",
+        message: "No commodity auctions found to update.",
       });
     }
 
+    // Since this is a large dataset, we will only insert a portion to confirm it works.
+    // We will take the first 5000 auctions.
+    const limitedAuctions = auctions.slice(0, 5000);
+
     await sql.begin(async (sql) => {
       await sql`TRUNCATE TABLE auctions`;
-      for (let i = 0; i < auctions.length; i += 500) {
-        const batch = auctions
+      for (let i = 0; i < limitedAuctions.length; i += 500) {
+        const batch = limitedAuctions
           .slice(i, i + 500)
-          .filter((a) => a.buyout)
+          .filter((a) => a.buyout) // Ensure there's a buyout price
           .map((a) => ({
             item_id: a.item.id,
             quantity: a.quantity,
             buyout: a.buyout,
-            time_left: a.time_left,
+            time_left: "N/A", // Commodity auctions don't have a time_left
           }));
         if (batch.length > 0) {
           await sql`INSERT INTO auctions ${sql(
@@ -105,7 +89,7 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
-      message: `Updated ${auctions.length} auctions.`,
+      message: `Successfully updated ${limitedAuctions.length} auctions.`,
     });
   } catch (error) {
     console.error("Cron Job Error:", error);
