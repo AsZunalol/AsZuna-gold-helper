@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
 import postgres from "postgres";
 
+// Helper function to decode the JWT access token
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    throw new Error("Could not decode access token.");
+  }
+}
+
 // Helper function to get an access token from Blizzard
 async function getBlizzardToken() {
   const credentials = Buffer.from(
@@ -19,8 +38,7 @@ async function getBlizzardToken() {
       `Failed to get Blizzard token: ${response.statusText} - ${errorText}`
     );
   }
-  const data = await response.json();
-  return data.access_token;
+  return await response.json();
 }
 
 export async function GET(request) {
@@ -35,23 +53,32 @@ export async function GET(request) {
   });
 
   try {
-    const accessToken = await getBlizzardToken();
-    const region = "us";
-    const namespace = "dynamic-us";
-    const locale = "en_US";
-    const realmName = "Proudmoore"; // The server you want to track
-
     // --- THIS IS THE DEFINITIVE FIX ---
 
-    // STEP 1: Search for the Connected Realm to get its dynamic ID.
-    // This removes all guesswork and hardcoded IDs.
-    const searchUrl = `https://${region}.api.blizzard.com/data/wow/search/connected-realm?namespace=${namespace}&realms.name.en_US=${encodeURIComponent(
+    // STEP 1: Get the token and decode it to find the correct API endpoint
+    const tokenResponse = await getBlizzardToken();
+    const accessToken = tokenResponse.access_token;
+    const decodedToken = decodeJwt(accessToken);
+    const blizzardApiEndpoint = decodedToken.iss; // This is the correct base URL!
+
+    if (!blizzardApiEndpoint) {
+      throw new Error("Could not determine API endpoint from token.");
+    }
+
+    const namespace = "dynamic-us";
+    const locale = "en_US";
+    const realmName = "Proudmoore";
+
+    // STEP 2: Use the discovered endpoint to search for the Connected Realm ID
+    const searchUrl = `${blizzardApiEndpoint}/data/wow/search/connected-realm?namespace=${namespace}&realms.name.en_US=${encodeURIComponent(
       realmName
     )}&access_token=${accessToken}`;
 
     const searchRes = await fetch(searchUrl);
     if (!searchRes.ok) {
-      throw new Error(`Blizzard Search API Error: ${searchRes.statusText}`);
+      throw new Error(
+        `Blizzard Search API Error: ${searchRes.statusText} at URL: ${searchUrl}`
+      );
     }
     const searchData = await searchRes.json();
 
@@ -61,19 +88,22 @@ export async function GET(request) {
       );
     }
 
-    // Extract the href from the first result, which contains the correct URL.
-    const realmUrl = searchData.results[0].data.realms[0].href;
-    const urlParts = realmUrl.split("/");
-    const connectedRealmId = urlParts[urlParts.indexOf("connected-realm") + 1];
+    const realmDataUrl = searchData.results[0].key.href;
+    const realmRes = await fetch(`${realmDataUrl}&access_token=${accessToken}`);
+    if (!realmRes.ok) {
+      throw new Error(`Blizzard Realm API Error: ${realmRes.statusText}`);
+    }
+    const realmData = await realmRes.json();
 
-    if (!connectedRealmId) {
-      throw new Error("Failed to parse connectedRealmId from search result.");
+    // STEP 3: Extract the correct auctions URL and fetch the data
+    const auctionsUrl = realmData.auctions.href;
+    if (!auctionsUrl) {
+      throw new Error("Could not find auction house URL in realm data.");
     }
 
-    // STEP 2: Use the discovered ID to fetch the auctions for that realm.
-    const auctionsUrl = `https://${region}.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
-
-    const auctionRes = await fetch(auctionsUrl);
+    const auctionRes = await fetch(
+      `${auctionsUrl}&access_token=${accessToken}`
+    );
 
     if (!auctionRes.ok) {
       const errorText = await auctionRes.text();
