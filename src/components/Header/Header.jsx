@@ -102,12 +102,6 @@ export default function Header() {
           Guides
         </Link>
         {/* Corrected Link for Transmog */}
-        <Link
-          href="/guides?category=Transmog"
-          className={isActive("/guides?category=Transmog") ? "nav-active" : ""}
-        >
-          Transmog
-        </Link>
       </nav>
 
       <div className="header-right">
