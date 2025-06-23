@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPool } from "@vercel/postgres";
+import { Pool } from "pg";
 
 // Helper function to get an access token from Blizzard
 async function getBlizzardToken() {
@@ -30,12 +30,15 @@ export async function GET(request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // Connect to our NEW auction-specific database
-  const db = createPool({
+  // Connect to Supabase using the standard 'pg' library
+  const pool = new Pool({
     connectionString: process.env.POSTGRES_AUCTION_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   });
 
-  const client = await db.connect();
+  const client = await pool.connect();
 
   try {
     const accessToken = await getBlizzardToken();
@@ -45,15 +48,19 @@ export async function GET(request) {
 
     const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${realmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
     const res = await fetch(apiUrl);
+
     if (!res.ok) {
-      throw new Error(`Failed to fetch auction data: ${res.statusText}`);
+      const errorText = await res.text();
+      throw new Error(
+        `Failed to fetch auction data: ${res.statusText} - ${errorText}`
+      );
     }
+
     const { auctions } = await res.json();
 
     await client.query("BEGIN");
     await client.query("TRUNCATE TABLE auctions");
 
-    // Process auctions in batches for better performance
     const batchSize = 500;
     for (let i = 0; i < auctions.length; i += batchSize) {
       const batch = auctions.slice(i, i + batchSize);
@@ -97,5 +104,6 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
     client.release();
+    await pool.end();
   }
 }

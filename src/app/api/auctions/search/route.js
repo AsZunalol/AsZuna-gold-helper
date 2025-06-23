@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPool } from "@vercel/postgres";
+import { Pool } from "pg";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -12,16 +12,18 @@ export async function GET(request) {
     );
   }
 
-  // Connect to our NEW auction-specific database
-  const db = createPool({
+  // Connect to Supabase using the standard 'pg' library
+  const pool = new Pool({
     connectionString: process.env.POSTGRES_AUCTION_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   });
 
+  const client = await pool.connect();
+
   try {
-    // This query now needs to join with your items table to get names
-    // For now, let's assume item names are not in the auction data.
-    // We will search by item ID if the user provides one.
-    const { rows } = await db.query(
+    const { rows } = await client.query(
       `SELECT 
          item_id, 
          MIN(buyout) as min_buyout, 
@@ -30,12 +32,14 @@ export async function GET(request) {
        WHERE item_id::text ILIKE $1 
        GROUP BY item_id 
        ORDER BY min_buyout ASC`,
-      [`%${itemName}%`] // A better search would be on an items table
+      [`%${itemName}%`]
     );
-
     return NextResponse.json(rows);
   } catch (error) {
     console.error("Search API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  } finally {
+    client.release();
+    await pool.end();
   }
 }
