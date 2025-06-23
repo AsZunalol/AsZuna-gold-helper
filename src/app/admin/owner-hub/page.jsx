@@ -7,7 +7,9 @@ import ApiHealthStatus from "@/components/ApiHealthStatus/ApiHealthStatus";
 import UserManagementTable from "@/components/UserManagementTable/UserManagementTable";
 import MonitoringGrid from "@/components/MonitoringGrid/MonitoringGrid";
 import { LayoutDashboard, Users, BarChart2 } from "lucide-react";
-import Button from "@/components/ui/Button";
+// --- THIS IS THE FIX ---
+// The path is now all lowercase to match your file system
+import Button from "@/components/ui/button";
 import styles from "./ownerHub.module.css";
 
 const tabs = [
