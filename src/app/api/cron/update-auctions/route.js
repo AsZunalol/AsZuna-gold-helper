@@ -36,13 +36,38 @@ export async function GET(request) {
 
   try {
     const accessToken = await getBlizzardToken();
+    const region = "us";
     const namespace = "dynamic-us";
-    const connectedRealmId = 11; // Proudmoore - US. This is a known, valid ID.
+    const locale = "en_US";
+    const realmName = "Proudmoore"; // The server you want to track
 
-    // --- THIS IS THE FINAL, SIMPLIFIED URL ---
-    // Reverting to the most basic, standard endpoint. The previous errors
-    // were caused by other issues that have now been fixed.
-    const auctionsUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+    // --- THIS IS THE DEFINITIVE FIX ---
+
+    // STEP 1: Search for the Connected Realm to get its dynamic ID.
+    const searchUrl = `https://${region}.api.blizzard.com/data/wow/search/connected-realm?namespace=${namespace}&realms.name.en_US=${encodeURIComponent(
+      realmName
+    )}&orderby=id&_page=1&access_token=${accessToken}`;
+
+    const searchRes = await fetch(searchUrl);
+    if (!searchRes.ok) {
+      throw new Error(`Blizzard Search API Error: ${searchRes.statusText}`);
+    }
+    const searchData = await searchRes.json();
+
+    if (!searchData.results || searchData.results.length === 0) {
+      throw new Error(
+        `Could not find connected realm ID for server: ${realmName}`
+      );
+    }
+
+    const realmId = searchData.results[0].data.id;
+
+    if (!realmId) {
+      throw new Error("Failed to parse connectedRealmId from search result.");
+    }
+
+    // STEP 2: Use the discovered ID to fetch the auctions for that realm.
+    const auctionsUrl = `https://${region}.api.blizzard.com/data/wow/connected-realm/${realmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
 
     const auctionRes = await fetch(auctionsUrl);
 
