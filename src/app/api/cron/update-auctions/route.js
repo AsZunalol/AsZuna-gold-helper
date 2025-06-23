@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
+import postgres from "postgres";
 
 // Helper function to get an access token from Blizzard
 async function getBlizzardToken() {
@@ -26,16 +26,14 @@ export async function GET(request) {
   }
 
   // --- THIS IS THE FIX ---
-  // We are removing the explicit SSL configuration from the code.
-  // The connection string in your Vercel environment variables
-  // (with '?sslmode=require' at the end) will now handle everything.
-  const pool = new Pool({
-    connectionString: process.env.POSTGRES_AUCTION_URL,
+  // We are using the 'postgres' library which has a more robust SSL/Auth implementation.
+  // The '?sslmode=require' in your connection string is still important.
+  const sql = postgres(process.env.POSTGRES_AUCTION_URL, {
+    // This library recommends explicit SSL settings for serverless environments.
+    ssl: "require",
   });
 
-  let client;
   try {
-    client = await pool.connect();
     const accessToken = await getBlizzardToken();
     const realmId = 4728; // Proudmoore US
     const namespace = "dynamic-us";
@@ -50,51 +48,44 @@ export async function GET(request) {
     }
 
     const { auctions } = await res.json();
-    await client.query("BEGIN");
-    await client.query("TRUNCATE TABLE auctions");
 
-    const batchSize = 500;
-    for (let i = 0; i < auctions.length; i += batchSize) {
-      const batch = auctions.slice(i, i + batchSize);
-      const values = [];
-      const queryParams = [];
+    // Use a transaction for database operations
+    await sql.begin(async (sql) => {
+      await sql`TRUNCATE TABLE auctions`;
 
-      batch.forEach((auction) => {
-        if (auction.buyout) {
-          const valueIndex = values.length * 4;
-          queryParams.push(
-            `($${valueIndex + 1}, $${valueIndex + 2}, $${valueIndex + 3}, $${
-              valueIndex + 4
-            })`
-          );
-          values.push(
-            auction.item.id,
-            auction.quantity,
-            auction.buyout,
-            auction.time_left
-          );
+      // Batch insert for performance
+      for (let i = 0; i < auctions.length; i += 500) {
+        const batch = auctions
+          .slice(i, i + 500)
+          .filter((a) => a.buyout)
+          .map((a) => ({
+            item_id: a.item.id,
+            quantity: a.quantity,
+            buyout: a.buyout,
+            time_left: a.time_left,
+          }));
+
+        if (batch.length > 0) {
+          await sql`INSERT INTO auctions ${sql(
+            batch,
+            "item_id",
+            "quantity",
+            "buyout",
+            "time_left"
+          )}`;
         }
-      });
-
-      if (queryParams.length > 0) {
-        const queryText = `INSERT INTO auctions(item_id, quantity, buyout, time_left) VALUES ${queryParams.join(
-          ", "
-        )}`;
-        await client.query(queryText, values);
       }
-    }
+    });
 
-    await client.query("COMMIT");
     return NextResponse.json({
       success: true,
       message: `Updated ${auctions.length} auctions.`,
     });
   } catch (error) {
     console.error("Cron Job Error:", error);
-    if (client) await client.query("ROLLBACK");
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    if (client) client.release();
-    await pool.end();
+    // The library handles connection closing automatically.
+    await sql.end();
   }
 }
