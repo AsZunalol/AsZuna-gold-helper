@@ -39,19 +39,38 @@ export async function GET(request) {
     const connectedRealmId = 11; // Example for Proudmoore US
     const namespace = "dynamic-us";
 
-    // --- THIS IS THE CORRECTED URL ---
-    // The correct endpoint for retail WoW auctions does not need an auctionHouseId.
-    // This is the official structure from the Blizzard API documentation.
-    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+    // --- THIS IS THE DEFINITIVE FIX ---
+    // STEP 1: Fetch the Connected Realm data to get the correct auction house URL.
+    const realmApiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
 
-    const res = await fetch(apiUrl);
+    const realmRes = await fetch(realmApiUrl);
+    if (!realmRes.ok) {
+      const errorText = await realmRes.text();
+      throw new Error(
+        `Blizzard Realm API Error: ${realmRes.statusText} - ${errorText}`
+      );
+    }
+    const realmData = await realmRes.json();
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Blizzard API Error: ${res.statusText} - ${errorText}`);
+    // STEP 2: Extract the correct auctions URL from the response and use it.
+    const auctionsUrl = realmData.auctions.href;
+    if (!auctionsUrl) {
+      throw new Error("Could not find auction house URL in realm data.");
     }
 
-    const { auctions } = await res.json();
+    // Now fetch the auctions using the URL Blizzard provided
+    const auctionRes = await fetch(
+      `${auctionsUrl}&access_token=${accessToken}`
+    );
+
+    if (!auctionRes.ok) {
+      const errorText = await auctionRes.text();
+      throw new Error(
+        `Blizzard Auction API Error: ${auctionRes.statusText} - ${errorText}`
+      );
+    }
+
+    const { auctions } = await auctionRes.json();
 
     if (!auctions || auctions.length === 0) {
       return NextResponse.json({
