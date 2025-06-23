@@ -36,44 +36,72 @@ export async function GET(request) {
 
   try {
     const accessToken = await getBlizzardToken();
+    const region = "us";
     const namespace = "dynamic-us";
+    const locale = "en_US";
+    const realmName = "Proudmoore"; // The server you want to track
 
     // --- THIS IS THE DEFINITIVE FIX ---
-    // The modern Blizzard API uses a single, simpler endpoint for all commodity auctions in a region.
-    // The old /connected-realm/ endpoint is deprecated for this purpose. This is the correct URL.
-    const apiUrl = `https://us.api.blizzard.com/data/wow/auctions/commodities?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
 
-    const res = await fetch(apiUrl);
+    // STEP 1: Search for the Connected Realm to get its dynamic ID.
+    // This removes all guesswork and hardcoded IDs.
+    const searchUrl = `https://${region}.api.blizzard.com/data/wow/search/connected-realm?namespace=${namespace}&realms.name.en_US=${encodeURIComponent(
+      realmName
+    )}&access_token=${accessToken}`;
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`Blizzard API Error: ${res.statusText} - ${errorText}`);
+    const searchRes = await fetch(searchUrl);
+    if (!searchRes.ok) {
+      throw new Error(`Blizzard Search API Error: ${searchRes.statusText}`);
+    }
+    const searchData = await searchRes.json();
+
+    if (!searchData.results || searchData.results.length === 0) {
+      throw new Error(
+        `Could not find connected realm ID for server: ${realmName}`
+      );
     }
 
-    const { auctions } = await res.json();
+    // Extract the href from the first result, which contains the correct URL.
+    const realmUrl = searchData.results[0].data.realms[0].href;
+    const urlParts = realmUrl.split("/");
+    const connectedRealmId = urlParts[urlParts.indexOf("connected-realm") + 1];
+
+    if (!connectedRealmId) {
+      throw new Error("Failed to parse connectedRealmId from search result.");
+    }
+
+    // STEP 2: Use the discovered ID to fetch the auctions for that realm.
+    const auctionsUrl = `https://${region}.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
+
+    const auctionRes = await fetch(auctionsUrl);
+
+    if (!auctionRes.ok) {
+      const errorText = await auctionRes.text();
+      throw new Error(
+        `Blizzard Auction API Error: ${auctionRes.statusText} - ${errorText}`
+      );
+    }
+
+    const { auctions } = await auctionRes.json();
 
     if (!auctions || auctions.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "No commodity auctions found to update.",
+        message: "No auctions found to update.",
       });
     }
 
-    // Since this is a large dataset, we will only insert a portion to confirm it works.
-    // We will take the first 5000 auctions.
-    const limitedAuctions = auctions.slice(0, 5000);
-
     await sql.begin(async (sql) => {
       await sql`TRUNCATE TABLE auctions`;
-      for (let i = 0; i < limitedAuctions.length; i += 500) {
-        const batch = limitedAuctions
+      for (let i = 0; i < auctions.length; i += 500) {
+        const batch = auctions
           .slice(i, i + 500)
-          .filter((a) => a.buyout) // Ensure there's a buyout price
+          .filter((a) => a.buyout)
           .map((a) => ({
             item_id: a.item.id,
             quantity: a.quantity,
             buyout: a.buyout,
-            time_left: "N/A", // Commodity auctions don't have a time_left
+            time_left: a.time_left,
           }));
         if (batch.length > 0) {
           await sql`INSERT INTO auctions ${sql(
@@ -89,7 +117,7 @@ export async function GET(request) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully updated ${limitedAuctions.length} auctions.`,
+      message: `Updated ${auctions.length} auctions.`,
     });
   } catch (error) {
     console.error("Cron Job Error:", error);
