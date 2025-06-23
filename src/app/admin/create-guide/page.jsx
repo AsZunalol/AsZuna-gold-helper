@@ -1,3 +1,5 @@
+// src/app/admin/create-guide/page.jsx
+
 "use client";
 
 import { useState } from "react";

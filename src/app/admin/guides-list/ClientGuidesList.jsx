@@ -5,11 +5,11 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FilePenLine, Trash2, User, Calendar } from "lucide-react";
+import { FilePenLine, Trash2, User, Calendar, PlusCircle } from "lucide-react";
 import styles from "./guides-list.module.css";
+import AddGoldSessionModal from "@/components/AddGoldSessionModal/AddGoldSessionModal"; // Import the new modal
 
-const GuideCard = ({ guide, onSelectDelete }) => {
-  // Use the same robust logic for determining the edit link
+const GuideCard = ({ guide, onSelectDelete, onAddSession }) => {
   const isTransmogGuide = guide.is_transmog || guide.category === "Transmog";
   const editLink = isTransmogGuide
     ? `/admin/edit-transmog-guide/${guide.id}`
@@ -51,6 +51,14 @@ const GuideCard = ({ guide, onSelectDelete }) => {
           </div>
         </div>
         <div className={styles.cardFooter}>
+          {isTransmogGuide && (
+            <button
+              onClick={() => onAddSession(guide)}
+              className={styles.addSessionButton}
+            >
+              <PlusCircle size={16} /> Add Session
+            </button>
+          )}
           <Link href={editLink} className={styles.actionButton}>
             <FilePenLine size={16} /> Edit
           </Link>
@@ -66,7 +74,6 @@ const GuideCard = ({ guide, onSelectDelete }) => {
   );
 };
 
-// FIX: Accept initialPublished and initialDrafts as props
 export default function ClientGuidesList({ initialPublished, initialDrafts }) {
   const [activeTab, setActiveTab] = useState("published");
   const [guideTypeFilter, setGuideTypeFilter] = useState("all");
@@ -74,16 +81,27 @@ export default function ClientGuidesList({ initialPublished, initialDrafts }) {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [isPending, startTransition] = useTransition();
 
-  // FIX: Initialize allGuides by combining initialPublished and initialDrafts
-  // This ensures allGuides is an array from the start.
   const [allGuides, setAllGuides] = useState(() => [
     ...initialPublished,
     ...initialDrafts,
   ]);
 
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [selectedGuide, setSelectedGuide] = useState(null);
+
+  const handleOpenSessionModal = (guide) => {
+    setSelectedGuide(guide);
+    setIsSessionModalOpen(true);
+  };
+
+  const handleUpdateGuideInList = (updatedGuide) => {
+    setAllGuides((currentGuides) =>
+      currentGuides.map((g) => (g.id === updatedGuide.id ? updatedGuide : g))
+    );
+  };
+
   const handleDelete = async (id) => {
     try {
-      // Corrected to use the proper RESTful endpoint and method
       const res = await fetch(`/api/guides/${id}`, { method: "DELETE" });
       if (!res.ok) {
         const result = await res.json();
@@ -196,6 +214,7 @@ export default function ClientGuidesList({ initialPublished, initialDrafts }) {
                 key={guide.id}
                 guide={guide}
                 onSelectDelete={setPendingDeleteId}
+                onAddSession={handleOpenSessionModal}
               />
             ))}
           </div>
@@ -227,6 +246,14 @@ export default function ClientGuidesList({ initialPublished, initialDrafts }) {
             </div>
           </div>
         </div>
+      )}
+
+      {isSessionModalOpen && (
+        <AddGoldSessionModal
+          guide={selectedGuide}
+          onClose={() => setIsSessionModalOpen(false)}
+          onUpdate={handleUpdateGuideInList}
+        />
       )}
     </div>
   );

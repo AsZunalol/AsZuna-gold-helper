@@ -1,8 +1,11 @@
+// src/app/guide/[id]/TransmogGuide.jsx
+
 "use client";
 
 import Image from "next/image";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
 import { Suspense, useState, useRef } from "react";
+import { useSession } from "next-auth/react"; // Import useSession hook
 import Spinner from "@/components/ui/spinner";
 import { ClipboardCopy, Check, Eye } from "lucide-react";
 import GuideMapImage from "@/components/GuideMapImage/GuideMapImage";
@@ -24,7 +27,6 @@ const StringModal = ({ title, stringValue, onClose }) => {
   const handleCopy = () => {
     if (textareaRef.current) {
       textareaRef.current.select();
-      // Using execCommand for better compatibility within iframes
       try {
         document.execCommand("copy");
         setIsCopied(true);
@@ -70,6 +72,7 @@ const StringModal = ({ title, stringValue, onClose }) => {
 };
 
 export default function TransmogGuide({ guide }) {
+  const { data: session } = useSession(); // Get the session data
   const [tsmModalOpen, setTsmModalOpen] = useState(false);
   const [macroModalOpen, setMacroModalOpen] = useState(false);
 
@@ -102,7 +105,7 @@ export default function TransmogGuide({ guide }) {
           {guide.youtube_video_id && (
             <div className={styles.guideVideoRedesigned}>
               <iframe
-                src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
+                src={`https://www.youtube-nocookie.com/embed/${guide.youtube_video_id}`}
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -124,7 +127,7 @@ export default function TransmogGuide({ guide }) {
                   </div>
                 }
               >
-                <ItemPrices items={itemsOfNote} />
+                <ItemPrices items={itemsOfNote} realm={session?.user?.realm} />
               </Suspense>
             </div>
           )}

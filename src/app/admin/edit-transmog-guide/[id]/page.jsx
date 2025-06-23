@@ -1,265 +1,350 @@
+// src/app/admin/edit-transmog-guide/[id]/page.jsx
+
 "use client";
 
-import Image from "next/image";
-import ItemPrices from "@/components/ItemPrices/ItemPrices";
-import { Suspense, useState } from "react";
-import Spinner from "@/components/ui/spinner";
-import { WOW_EXPANSIONS } from "@/lib/constants";
-import { ClipboardCopy, Check } from "lucide-react";
-import GuideMapImage from "@/components/GuideMapImage/GuideMapImage";
-import styles from "./transmog-guide.module.css";
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import dynamic from "next/dynamic";
+import styles from "../../create-transmog-guide/transmogGuide.module.css";
+import { Save } from "lucide-react";
 
-// Helper function to ensure a URL is absolute
-const ensureAbsoluteUrl = (url) => {
-  if (!url || url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  return `https://${url}`;
+// Dynamic imports for client-side components
+const TiptapEditor = dynamic(
+  () => import("@/components/TiptapEditor/TiptapEditor"),
+  { ssr: false }
+);
+import TagInput from "@/components/TagInput/TagInput";
+import ExpansionSelect from "@/components/ExpansionSelect/ExpansionSelect";
+import ImageUpload from "@/components/ImageUpload/ImageUpload";
+import ItemsOfNoteManager from "@/components/ItemsOfNoteManager/ItemsOfNoteManager";
+import StringImportManager from "@/components/StringImportManager/StringImportManager";
+import ListManager from "@/components/ListManager/ListManager";
+import GoldSessionManager from "@/components/GoldSessionManager/GoldSessionManager";
+import MapImageUploader from "@/components/MapImageUploader/MapImageUploader";
+import Spinner from "@/components/ui/spinner";
+
+const initialFormState = {
+  title: "",
+  expansion: "",
+  guide_type: "Raid",
+  description: "",
+  gold_sessions: [],
+  thumbnail_url: "",
+  map_image_url: "",
+  youtube_video_id: "",
+  recommended_addons: [],
+  items_of_note: [],
+  macro_string: "",
+  tsm_import_string: "",
+  tags: ["transmog"],
+  status: "DRAFT",
 };
 
-export default function TransmogGuide({ guide }) {
-  const [showAllTags, setShowAllTags] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
+export default function EditTransmogGuidePage() {
+  const router = useRouter();
+  const { id } = useParams();
+  const { data: session, status } = useSession();
 
-  // Helper to safely parse JSON or return empty array/object
-  const parseJsonField = (fieldValue, defaultValue = []) => {
-    if (typeof fieldValue === "string") {
+  const [formState, setFormState] = useState(initialFormState);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (
+      status === "authenticated" &&
+      !["ADMIN", "OWNER"].includes(session.user.role)
+    ) {
+      router.push("/");
+    }
+  }, [status, session, router]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchGuideData = async () => {
+      setLoading(true);
       try {
-        const parsed = JSON.parse(fieldValue);
-        return Array.isArray(parsed) ? parsed : defaultValue;
-      } catch (e) {
-        return defaultValue;
-      }
-    }
-    return fieldValue || defaultValue;
-  };
+        const response = await fetch(`/api/guides/${id}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch guide data.");
+        }
+        const data = await response.json();
 
-  const handleCopyMacro = () => {
-    if (guide.macro_string && !isCopied) {
-      navigator.clipboard
-        .writeText(guide.macro_string)
-        .then(() => {
-          setIsCopied(true);
-          setTimeout(() => setIsCopied(false), 2000);
-        })
-        .catch((err) => {
-          console.error("Failed to copy macro: ", err);
+        const parseJson = (jsonString, defaultValue = []) => {
+          if (!jsonString) return defaultValue;
+          try {
+            const parsed = JSON.parse(jsonString);
+            return parsed || defaultValue;
+          } catch {
+            return defaultValue;
+          }
+        };
+
+        setFormState({
+          title: data.title || "",
+          expansion: data.expansion || "",
+          guide_type: data.guide_type || "Raid",
+          description: data.description || "",
+          gold_sessions: parseJson(data.gold_sessions),
+          thumbnail_url: data.thumbnail_url || "",
+          map_image_url: data.map_image_url || "",
+          youtube_video_id: data.youtube_video_id || "",
+          recommended_addons: parseJson(data.recommended_addons),
+          items_of_note: parseJson(data.items_of_note),
+          macro_string: data.macro_string || "",
+          tsm_import_string: data.tsm_import_string || "",
+          tags: data.tags ? data.tags.split(",") : ["transmog"],
+          status: data.status || "DRAFT",
         });
+      } catch (err) {
+        setError("Failed to load guide data. " + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGuideData();
+  }, [id]);
+
+  const handleStateChange = (field, value) => {
+    setFormState((prev) => ({
+      ...prev,
+      [field]: typeof value === "function" ? value(prev[field]) : value,
+    }));
+  };
+
+  const averageGph = useMemo(() => {
+    const sessions = formState.gold_sessions || [];
+    if (sessions.length === 0) return 0;
+    const totalGold = sessions.reduce((sum, s) => sum + (s.gold || 0), 0);
+    const totalMinutes = sessions.reduce((sum, s) => sum + (s.minutes || 0), 0);
+    return totalMinutes > 0 ? Math.round((totalGold / totalMinutes) * 60) : 0;
+  }, [formState.gold_sessions]);
+
+  const handleSave = async (guideStatus) => {
+    if (!formState.title) {
+      setError("A title is required.");
+      return;
+    }
+    setSubmitting(true);
+    setError("");
+
+    const guideData = {
+      ...formState,
+      status: guideStatus,
+      gold_pr_hour: `${averageGph.toLocaleString()} g/hr`,
+      items_of_note: JSON.stringify(formState.items_of_note),
+      gold_sessions: JSON.stringify(formState.gold_sessions),
+      recommended_addons: JSON.stringify(formState.recommended_addons),
+      tags: formState.tags.join(","),
+    };
+
+    try {
+      const response = await fetch(`/api/guides/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(guideData),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          (await response.json()).message || "Failed to update guide."
+        );
+      }
+
+      router.push("/admin/guides-list");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const itemsOfNote = parseJsonField(guide.items_of_note);
-  const recommendedAddons = parseJsonField(guide.recommended_addons);
-  const goldSessions = parseJsonField(guide.gold_sessions, []);
-
-  const averageGph =
-    goldSessions.length > 0
-      ? Math.round(
-          (goldSessions.reduce((sum, s) => sum + (s.gold || 0), 0) /
-            goldSessions.reduce((sum, s) => sum + (s.minutes || 0), 0)) *
-            60
-        )
-      : 0;
-
-  const expansionInfo = WOW_EXPANSIONS.find(
-    (exp) => exp.name === guide.expansion
-  );
-
-  const allTags =
-    typeof guide.tags === "string"
-      ? guide.tags.split(",").map((tag) => tag.trim())
-      : guide.tags || [];
-  const displayedTags = showAllTags ? allTags : allTags.slice(0, 3);
+  if (loading || status === "loading") {
+    return (
+      <div className={styles.pageWrapper}>
+        <div className="flex justify-center items-center h-full">
+          <Spinner />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={styles.guideContainerRedesigned}>
-      <div className={styles.thumbnailWrapper}>
-        <div className={styles.thumbnailCard}>
-          <Image
-            src={guide.thumbnail_url || "/images/default-thumb.jpg"}
-            alt="Guide Thumbnail"
-            width={1200}
-            height={300}
-            className={styles.thumbnailImg}
-            priority
-          />
-          <div className={styles.thumbnailTopleft}>
-            <span>{guide.category}</span>
-          </div>
-          <div className={styles.thumbnailBottomright}>
-            <span>{averageGph.toLocaleString()} GPH</span>
-          </div>
-          <div className={styles.thumbnailOverlayBox}>
-            <div className={styles.thumbnailOverlayContent}>
-              <h1 className={styles.guideTitleOverlay}>
-                {guide.title || "Untitled Guide"}
-              </h1>
-              {expansionInfo && (
-                <p
-                  className={styles.guideExpansion}
-                  style={{ color: expansionInfo.color }}
-                >
-                  Expansion – {guide.expansion}
-                </p>
-              )}
-              {allTags.length > 0 && (
-                <div
-                  className={`${styles.tagListWrapper} ${
-                    showAllTags ? styles.expanded : ""
-                  }`}
-                >
-                  <div className={styles.tagsDisplay}>
-                    {displayedTags.map((tag) => (
-                      <span key={tag} className={styles.tagPill}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  {!showAllTags && allTags.length > 3 && (
-                    <div className={styles.tagsFadeOverlay}></div>
-                  )}
-                </div>
-              )}
-              {allTags.length > 3 && (
-                <button
-                  type="button"
-                  onClick={() => setShowAllTags(!showAllTags)}
-                  className={styles.tagsToggleButton}
-                >
-                  {showAllTags
-                    ? "Show Less Tags"
-                    : `Show All ${allTags.length} Tags`}
-                </button>
-              )}
-            </div>
+    <div className={styles.pageWrapper}>
+      {error && <p className={styles.error}>{error}</p>}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSave("PUBLISHED");
+        }}
+        className={styles.formContainer}
+      >
+        <div className={styles.header}>
+          <h1>
+            Editing Transmog Guide:{" "}
+            <span className={styles.headerTitle}>{formState.title}</span>
+          </h1>
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              onClick={() => handleSave("DRAFT")}
+              className={styles.draftButton}
+              disabled={submitting}
+            >
+              <Save size={16} /> Save Changes to Draft
+            </button>
+            <button
+              type="submit"
+              className={styles.publishButton}
+              disabled={submitting}
+            >
+              {submitting ? "Saving..." : "Publish Changes"}
+            </button>
           </div>
         </div>
-      </div>
 
-      <div className={styles.guideLayoutRedesigned}>
-        <div className={styles.mainContentRedesigned}>
-          {guide.youtube_video_id && (
-            <div className={styles.guideVideoRedesigned}>
-              <iframe
-                src={`https://www.youtube.com/embed/${guide.youtube_video_id}`}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          )}
-
-          <div className={styles.contentBgRedesigned}>
-            <div
-              className={styles.guideContentRedesigned}
-              dangerouslySetInnerHTML={{ __html: guide.description || "" }}
+        <div className={styles.editorHero}>
+          <div className={styles.editorHeroBackground}>
+            <ImageUpload
+              imageUrl={formState.thumbnail_url}
+              setImageUrl={(val) => handleStateChange("thumbnail_url", val)}
             />
           </div>
-        </div>
-
-        <div className={styles.sidebarRedesigned}>
-          {itemsOfNote && itemsOfNote.length > 0 && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>Items of Note</h2>
-              <div className={styles.itemsOfNoteRedesigned}>
-                <Suspense
-                  fallback={
-                    <div className="flex justify-center">
-                      <Spinner />
-                    </div>
+          <div className={styles.editorHeroContent}>
+            <div className="form-group">
+              <label>Guide Title</label>
+              <input
+                type="text"
+                className={styles.editorTitleInput}
+                value={formState.title}
+                onChange={(e) => handleStateChange("title", e.target.value)}
+                required
+              />
+            </div>
+            <div className={styles.editorMetaGrid}>
+              <div className="form-group">
+                <label>Expansion</label>
+                <ExpansionSelect
+                  selectedExpansion={formState.expansion}
+                  setSelectedExpansion={(val) =>
+                    handleStateChange("expansion", val)
                   }
+                />
+              </div>
+              <div className="form-group">
+                <label>Content Type</label>
+                <select
+                  value={formState.guide_type}
+                  onChange={(e) =>
+                    handleStateChange("guide_type", e.target.value)
+                  }
+                  className="select-field"
                 >
-                  <ItemPrices items={itemsOfNote} />
-                </Suspense>
+                  <option>Raid</option>
+                  <option>Dungeon</option>
+                  <option>Open World</option>
+                  <option>Crafting</option>
+                </select>
               </div>
             </div>
-          )}
-
-          {guide.map_image_url && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>Route Map</h2>
-              <GuideMapImage imageUrl={guide.map_image_url} />
-            </div>
-          )}
-
-          {recommendedAddons.length > 0 && (
-            <div className={styles.sidebarWidgetRedesigned}>
-              <h2 className={styles.widgetTitleRedesigned}>
-                Recommended Addons
-              </h2>
-              <ul className={styles.listTextOnly}>
-                {recommendedAddons.map((addon, index) => (
-                  <li key={index}>
-                    {addon.url ? (
-                      <a
-                        href={ensureAbsoluteUrl(addon.url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {addon.name}
-                      </a>
-                    ) : (
-                      addon.name
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {guide.macro_string && (
-            <div
-              className={styles.sidebarWidgetRedesigned}
-              style={{ position: "relative" }}
-            >
-              <h2 className={styles.widgetTitleRedesigned}>Helpful Macro</h2>
-              <button
-                onClick={handleCopyMacro}
-                className={`${styles.copyMacroButton} ${
-                  isCopied ? styles.copied : ""
-                }`}
-                title={isCopied ? "Copied!" : "Copy macro"}
-                disabled={isCopied}
-              >
-                {isCopied ? <Check size={16} /> : <ClipboardCopy size={16} />}
-              </button>
-              <pre className={styles.codeBlock}>{guide.macro_string}</pre>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.guideFooterRedesigned}>
-        <div className={styles.sidebarWidgetRedesigned}>
-          <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
-          <div className={styles.authorInfoRedesigned}>
-            <Image
-              src={guide.author?.imageUrl || "/images/default-avatar.png"}
-              alt={guide.author?.username || "Author"}
-              width={50}
-              height={50}
-              className={styles.authorAvatarRedesigned}
-            />
-            <div className={styles.authorNameRedesigned}>
-              <span>By</span>
-              <strong>{guide.author?.username}</strong>
-            </div>
-          </div>
-          <div className={styles.guideMetaRedesigned}>
-            <div>
-              <strong>Category:</strong> {guide.category}
-            </div>
-            <div>
-              <strong>Expansion:</strong> {guide.expansion}
-            </div>
-            <div>
-              <strong>Updated:</strong>{" "}
-              {new Date(guide.updatedAt).toLocaleDateString()}
-            </div>
           </div>
         </div>
-      </div>
+
+        <div className={styles.mainLayout}>
+          <div className={styles.mainContent}>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Guide Description</h3>
+              <TiptapEditor
+                value={formState.description}
+                onChange={(val) => handleStateChange("description", val)}
+              />
+            </div>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Media</h3>
+              <div className="form-group">
+                <label>YouTube Video ID</label>
+                <input
+                  type="text"
+                  placeholder="e.g., dQw4w9WgXcQ"
+                  value={formState.youtube_video_id}
+                  onChange={(e) =>
+                    handleStateChange("youtube_video_id", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <div className={styles.sidebar}>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Valuable Items</h3>
+              <ItemsOfNoteManager
+                items={formState.items_of_note}
+                setItems={(val) => handleStateChange("items_of_note", val)}
+                region={session?.user?.region || "us"}
+                realm={session?.user?.realm || "stormrage"}
+              />
+            </div>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Route Map</h3>
+              <MapImageUploader
+                imageUrl={formState.map_image_url}
+                setImageUrl={(val) => handleStateChange("map_image_url", val)}
+              />
+            </div>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Farming Tools</h3>
+              <div className="form-group">
+                <label>Recommended Addons</label>
+                <ListManager
+                  title=""
+                  noun="Addon"
+                  items={formState.recommended_addons}
+                  setItems={(val) =>
+                    handleStateChange("recommended_addons", val)
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label>Helpful Macro</label>
+                <StringImportManager
+                  title=""
+                  stringValue={formState.macro_string}
+                  setStringValue={(val) =>
+                    handleStateChange("macro_string", val)
+                  }
+                />
+              </div>
+              <div className="form-group" style={{ marginTop: "1.5rem" }}>
+                <label>TSM Group String</label>
+                <StringImportManager
+                  title=""
+                  stringValue={formState.tsm_import_string}
+                  setStringValue={(val) =>
+                    handleStateChange("tsm_import_string", val)
+                  }
+                />
+              </div>
+            </div>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Tags</h3>
+              <TagInput
+                tags={formState.tags}
+                setTags={(val) => handleStateChange("tags", val)}
+              />
+            </div>
+            <div className={styles.formSection}>
+              <h3 className={styles.sectionHeader}>Gold Per Hour</h3>
+              <GoldSessionManager
+                sessions={formState.gold_sessions}
+                setSessions={(val) => handleStateChange("gold_sessions", val)}
+              />
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

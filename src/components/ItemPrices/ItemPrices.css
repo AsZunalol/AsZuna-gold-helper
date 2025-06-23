@@ -25,6 +25,8 @@
   transition: background-color 0.2s ease, border-color 0.2s ease,
     transform 0.2s ease;
   box-shadow: var(--shadow-sm);
+  color: inherit; /* Prevent link from turning blue */
+  text-decoration: none; /* Remove link underline */
 }
 
 .item-price-row:hover {
@@ -33,20 +35,21 @@
   transform: translateY(-2px);
 }
 
-.item-info {
-  display: flex;
-  flex-direction: column; /* Stack name above prices */
-  align-items: flex-start; /* Align to the left */
-  gap: 0.25rem; /* Space between name and prices */
-  flex-grow: 1; /* Allow this section to take up available space */
-}
-
 .item-icon {
   border-radius: 6px;
   border: 1px solid #4b5563;
   object-fit: cover;
   box-shadow: var(--shadow-sm);
-  margin-right: 1rem; /* Space between icon and the name/price block */
+  margin-right: 1rem; /* Space between icon and the info block */
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column; /* Stack name and prices vertically */
+  align-items: flex-start; /* Align content to the left */
+  gap: 0.25rem; /* Space between name and prices */
+  flex-grow: 1; /* Allow this block to take up remaining space */
 }
 
 .item-name {
@@ -58,12 +61,10 @@
 .item-values {
   display: flex;
   gap: 1.5rem;
-  text-align: right;
-  margin-left: auto; /* Push the price values to the right */
 }
 
 .price-detail {
-  position: relative; /* Needed for tooltip positioning */
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -105,7 +106,7 @@
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 150%; /* Position above the icon */
+  bottom: 150%;
   left: 50%;
   margin-left: -60px;
   opacity: 0;

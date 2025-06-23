@@ -1,3 +1,5 @@
+// src/components/GuideForm/GuideForm.jsx
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -90,51 +92,51 @@ export default function GuideForm({
         </div>
       </div>
 
-      <div className={styles.mainLayout}>
-        <div className={styles.mainContent}>
-          <div className={styles.formSection}>
-            <h3 className={styles.sectionHeader}>Basic Information</h3>
+      {/* New Hero Section Layout */}
+      <div className={styles.editorHero}>
+        <div className={styles.editorHeroBackground}>
+          <ImageUpload
+            imageUrl={formState.thumbnail_url}
+            setImageUrl={(val) => handleStateChange("thumbnail_url", val)}
+          />
+        </div>
+        <div className={styles.editorHeroContent}>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Guide Title..."
+              className={styles.editorTitleInput}
+              value={formState.title}
+              onChange={(e) => handleStateChange("title", e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.editorMetaGrid}>
             <div className="form-group">
-              <label>Guide Title</label>
-              <input
-                type="text"
-                value={formState.title}
-                onChange={(e) => handleStateChange("title", e.target.value)}
-                required
+              <label>Category</label>
+              <CategorySelect
+                selectedCategory={formState.category}
+                setSelectedCategory={(val) =>
+                  handleStateChange("category", val)
+                }
               />
             </div>
-            <div
-              className={styles.heroMetaGrid}
-              style={{ maxWidth: "100%", marginTop: "1.5rem" }}
-            >
-              <div className="form-group">
-                <label>Category</label>
-                <CategorySelect
-                  selectedCategory={formState.category}
-                  setSelectedCategory={(val) =>
-                    handleStateChange("category", val)
-                  }
-                />
-              </div>
-              <div className="form-group">
-                <label>Expansion</label>
-                <ExpansionSelect
-                  selectedExpansion={formState.expansion}
-                  setSelectedExpansion={(val) =>
-                    handleStateChange("expansion", val)
-                  }
-                />
-              </div>
-            </div>
-            <div className="form-group" style={{ marginTop: "1.5rem" }}>
-              <label>Tags</label>
-              <TagInput
-                tags={formState.tags}
-                setTags={(val) => handleStateChange("tags", val)}
+            <div className="form-group">
+              <label>Expansion</label>
+              <ExpansionSelect
+                selectedExpansion={formState.expansion}
+                setSelectedExpansion={(val) =>
+                  handleStateChange("expansion", val)
+                }
               />
             </div>
           </div>
+        </div>
+      </div>
 
+      {/* New Two-Column Layout */}
+      <div className={styles.mainLayout}>
+        <div className={styles.mainContent}>
           <div className={styles.formSection}>
             <h3 className={styles.sectionHeader}>Guide Content</h3>
             <div className="form-group">
@@ -154,25 +156,16 @@ export default function GuideForm({
           </div>
           <div className={styles.formSection}>
             <h3 className={styles.sectionHeader}>Media</h3>
-            <div className={styles.heroMetaGrid}>
-              <div className="form-group">
-                <label>Guide Thumbnail</label>
-                <ImageUpload
-                  imageUrl={formState.thumbnail_url}
-                  setImageUrl={(val) => handleStateChange("thumbnail_url", val)}
-                />
-              </div>
-              <div className="form-group">
-                <label>YouTube Video ID</label>
-                <input
-                  type="text"
-                  placeholder="e.g., dQw4w9WgXcQ"
-                  value={formState.youtube_video_id}
-                  onChange={(e) =>
-                    handleStateChange("youtube_video_id", e.target.value)
-                  }
-                />
-              </div>
+            <div className="form-group">
+              <label>YouTube Video ID</label>
+              <input
+                type="text"
+                placeholder="e.g., dQw4w9WgXcQ"
+                value={formState.youtube_video_id}
+                onChange={(e) =>
+                  handleStateChange("youtube_video_id", e.target.value)
+                }
+              />
             </div>
             <div className="form-group" style={{ marginTop: "1.5rem" }}>
               <label>Image Slider</label>
@@ -183,6 +176,7 @@ export default function GuideForm({
             </div>
           </div>
         </div>
+
         <div className={styles.sidebar}>
           <div className={styles.formSection}>
             <h3 className={styles.sectionHeader}>Performance</h3>
@@ -250,6 +244,13 @@ export default function GuideForm({
                 }
               />
             </div>
+          </div>
+          <div className={styles.formSection}>
+            <h3 className={styles.sectionHeader}>Tags</h3>
+            <TagInput
+              tags={formState.tags}
+              setTags={(val) => handleStateChange("tags", val)}
+            />
           </div>
         </div>
       </div>

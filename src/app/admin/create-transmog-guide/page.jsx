@@ -50,6 +50,7 @@ export default function CreateTransmogGuidePage() {
     recommended_addons: [],
     items_of_note: [],
     macro_string: "",
+    tsm_import_string: "", // Added TSM string state
     tags: ["transmog"],
     status: "DRAFT",
   });
@@ -104,7 +105,6 @@ export default function CreateTransmogGuidePage() {
       steps: "[]",
       time_to_complete: "",
       required_items: "[]",
-      tsm_import_string: "",
       route_string: "",
       slider_images: "[]",
     };
@@ -275,6 +275,16 @@ export default function CreateTransmogGuidePage() {
                   stringValue={formState.macro_string}
                   setStringValue={(val) =>
                     handleStateChange("macro_string", val)
+                  }
+                />
+              </div>
+              <div className="form-group" style={{ marginTop: "1.5rem" }}>
+                <label>TSM Group String</label>
+                <StringImportManager
+                  title=""
+                  stringValue={formState.tsm_import_string}
+                  setStringValue={(val) =>
+                    handleStateChange("tsm_import_string", val)
                   }
                 />
               </div>

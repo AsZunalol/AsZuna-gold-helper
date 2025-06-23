@@ -1,13 +1,15 @@
+// src/components/ItemsOfNoteManager/ItemsOfNoteManager.jsx
+
 "use client";
 import React, { useState } from "react";
 import { Trash2, LoaderCircle, Server, Globe } from "lucide-react";
 import ItemSearch from "../ItemSearch/ItemSearch";
+import Image from "next/image"; // Import the Next.js Image component
 
 function formatGold(copper) {
   if (copper === null || copper === undefined) return "N/A";
   const gold = Math.floor(copper / 10000);
-  const silver = Math.floor((copper % 10000) / 100);
-  return `${gold.toLocaleString()}g ${silver}s`;
+  return `${gold.toLocaleString()}g`;
 }
 
 export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
@@ -25,12 +27,14 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       return; // Item already in the list
     }
 
-    setLoadingPrices((prev) => ({ ...prev, [newItem.id]: true }));
+    // Immediately add the new item with its icon to the UI
     setItems((prevItems) => [
       ...prevItems,
       { ...newItem, serverPrice: null, regionalAveragePrice: null },
     ]);
+    setLoadingPrices((prev) => ({ ...prev, [newItem.id]: true }));
 
+    // Fetch prices in the background
     try {
       const response = await fetch(
         `/api/blizzard/item-price?itemId=${
@@ -43,6 +47,8 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
       if (response.ok) {
         priceData = await response.json();
       }
+
+      // Update the item with the fetched prices
       setItems((currentItems) =>
         currentItems.map((item) =>
           item.id === newItem.id
@@ -84,18 +90,15 @@ export default function ItemsOfNoteManager({ items, setItems, region, realm }) {
                 gap: "0.75rem",
               }}
             >
-              <img
-                src={item.icon}
+              {/* FIX: Using Next/Image and providing a fallback src */}
+              <Image
+                src={item.icon || "/images/default-avatar.png"}
                 alt={item.name}
                 className="item-icon-small"
-                width="24"
-                height="24"
+                width={24}
+                height={24}
               />
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {/*
-                    This is now safe because the API at `/api/blizzard/search`
-                    guarantees that `item.name` will always be a string.
-                  */}
                 <span className="item-name">{item.name}</span>
                 {loadingPrices[item.id] ? (
                   <LoaderCircle size={14} className="spinner" />

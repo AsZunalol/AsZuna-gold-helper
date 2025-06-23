@@ -20,8 +20,21 @@ const GuideHeader = ({ guide }) => {
   // Helper to format the GPH string
   const formatGPH = (gphString) => {
     if (!gphString) return "N/A";
-    const numericPart = parseInt(gphString.replace(/[^0-9]/g, ""), 10);
-    return isNaN(numericPart) ? "N/A" : `${numericPart.toLocaleString()} GPH`;
+
+    // Standardize the string by removing commas and making it lowercase
+    const cleanString = gphString.toLowerCase().replace(/,/g, "");
+
+    let value = parseFloat(cleanString);
+
+    if (cleanString.includes("k")) {
+      value *= 1000;
+    }
+
+    if (isNaN(value)) {
+      return "N/A";
+    }
+
+    return `${Math.round(value).toLocaleString()} GPH`;
   };
 
   return (
@@ -40,8 +53,8 @@ const GuideHeader = ({ guide }) => {
           {guide.category}
         </span>
       </div>
-      <div className="absolute top-4 right-4">
-        <span className="px-4 py-2 text-base font-bold text-yellow-400 bg-black/30 backdrop-blur-md border border-white/10 rounded-lg">
+      <div className="absolute bottom-4 right-4">
+        <span className="px-4 py-2 text-base font-bold text-yellow-400 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg">
           {formatGPH(guide.gold_pr_hour)}
         </span>
       </div>
