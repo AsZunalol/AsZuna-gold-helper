@@ -19,27 +19,25 @@ async function getBlizzardToken() {
 }
 
 export async function GET(request) {
-  // Final check for security header
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // --- THIS IS THE FIX ---
-  // We are using the 'postgres' library which has a more robust SSL/Auth implementation.
-  // The '?sslmode=require' in your connection string is still important.
   const sql = postgres(process.env.POSTGRES_AUCTION_URL, {
-    // This library recommends explicit SSL settings for serverless environments.
     ssl: "require",
   });
 
   try {
     const accessToken = await getBlizzardToken();
-    const realmId = 4728; // Proudmoore US
+    // --- THIS IS THE FIX ---
+    // The Blizzard API endpoint for auctions has changed. We now use a simpler URL.
+    // We are targeting a specific connected realm (Proudmoore US, ID 11) as an example.
+    const connectedRealmId = 11;
     const namespace = "dynamic-us";
-    const locale = "en_US";
 
-    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${realmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
+    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+
     const res = await fetch(apiUrl);
 
     if (!res.ok) {
@@ -49,11 +47,8 @@ export async function GET(request) {
 
     const { auctions } = await res.json();
 
-    // Use a transaction for database operations
     await sql.begin(async (sql) => {
       await sql`TRUNCATE TABLE auctions`;
-
-      // Batch insert for performance
       for (let i = 0; i < auctions.length; i += 500) {
         const batch = auctions
           .slice(i, i + 500)
@@ -64,7 +59,6 @@ export async function GET(request) {
             buyout: a.buyout,
             time_left: a.time_left,
           }));
-
         if (batch.length > 0) {
           await sql`INSERT INTO auctions ${sql(
             batch,
@@ -85,7 +79,6 @@ export async function GET(request) {
     console.error("Cron Job Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    // The library handles connection closing automatically.
     await sql.end();
   }
 }
