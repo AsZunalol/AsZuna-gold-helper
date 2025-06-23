@@ -31,7 +31,7 @@ export async function GET(request) {
 
   const sql = postgres(process.env.POSTGRES_AUCTION_URL, {
     ssl: "require",
-    max: 1, // Recommended for serverless functions
+    max: 1,
   });
 
   try {
@@ -39,14 +39,10 @@ export async function GET(request) {
     const connectedRealmId = 11; // Example for Proudmoore US
     const namespace = "dynamic-us";
 
-    // --- THIS IS THE FIX ---
-    // STEP 1: Get the main Auction House ID.
-    // We are targeting the main cross-faction auction house (ID: 2)
-    // Other IDs are 6 (Horde) and 7 (Alliance), but 2 contains everything.
-    const auctionHouseId = 2;
-
-    // STEP 2: Use that ID to fetch the actual auction listings.
-    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions/${auctionHouseId}?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+    // --- THIS IS THE CORRECTED URL ---
+    // The correct endpoint for retail WoW auctions does not need an auctionHouseId.
+    // This is the official structure from the Blizzard API documentation.
+    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
 
     const res = await fetch(apiUrl);
 
