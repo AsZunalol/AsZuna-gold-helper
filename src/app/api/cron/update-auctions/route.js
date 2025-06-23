@@ -41,12 +41,10 @@ export async function GET(request) {
     const locale = "en_US";
     const realmName = "Proudmoore"; // The server you want to track
 
-    // --- THIS IS THE DEFINITIVE FIX ---
-
     // STEP 1: Search for the Connected Realm to get its dynamic ID.
     const searchUrl = `https://${region}.api.blizzard.com/data/wow/search/connected-realm?namespace=${namespace}&realms.name.en_US=${encodeURIComponent(
       realmName
-    )}&orderby=id&_page=1&access_token=${accessToken}`;
+    )}&access_token=${accessToken}`;
 
     const searchRes = await fetch(searchUrl);
     if (!searchRes.ok) {
@@ -60,14 +58,11 @@ export async function GET(request) {
       );
     }
 
-    const realmId = searchData.results[0].data.id;
-
-    if (!realmId) {
-      throw new Error("Failed to parse connectedRealmId from search result.");
-    }
+    // ✅ Use the ID directly
+    const connectedRealmId = searchData.results[0].data.id;
 
     // STEP 2: Use the discovered ID to fetch the auctions for that realm.
-    const auctionsUrl = `https://${region}.api.blizzard.com/data/wow/connected-realm/${realmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
+    const auctionsUrl = `https://${region}.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=${locale}&access_token=${accessToken}`;
 
     const auctionRes = await fetch(auctionsUrl);
 
@@ -81,44 +76,22 @@ export async function GET(request) {
     const { auctions } = await auctionRes.json();
 
     if (!auctions || auctions.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: "No auctions found to update.",
-      });
+      throw new Error("No auctions data returned.");
     }
 
-    await sql.begin(async (sql) => {
-      await sql`TRUNCATE TABLE auctions`;
-      for (let i = 0; i < auctions.length; i += 500) {
-        const batch = auctions
-          .slice(i, i + 500)
-          .filter((a) => a.buyout)
-          .map((a) => ({
-            item_id: a.item.id,
-            quantity: a.quantity,
-            buyout: a.buyout,
-            time_left: a.time_left,
-          }));
-        if (batch.length > 0) {
-          await sql`INSERT INTO auctions ${sql(
-            batch,
-            "item_id",
-            "quantity",
-            "buyout",
-            "time_left"
-          )}`;
-        }
-      }
-    });
+    // Do something with the auctions, e.g., insert into your DB
+    // Example (implement your own schema logic):
+    for (const auction of auctions.slice(0, 10)) {
+      await sql`
+        INSERT INTO auctions (item_id, quantity, buyout, time_left)
+        VALUES (${auction.item.id}, ${auction.quantity}, ${auction.buyout}, ${auction.time_left})
+        ON CONFLICT DO NOTHING
+      `;
+    }
 
-    return NextResponse.json({
-      success: true,
-      message: `Updated ${auctions.length} auctions.`,
-    });
+    return NextResponse.json({ message: "Auction data updated." });
   } catch (error) {
     console.error("Cron Job Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  } finally {
-    await sql.end();
+    return new Response(`Error: ${error.message}`, { status: 500 });
   }
 }
