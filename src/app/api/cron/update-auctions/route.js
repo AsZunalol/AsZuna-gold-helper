@@ -13,7 +13,12 @@ async function getBlizzardToken() {
       headers: { Authorization: `Basic ${credentials}` },
     }
   );
-  if (!response.ok) throw new Error("Failed to get Blizzard token");
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to get Blizzard token: ${response.statusText} - ${errorText}`
+    );
+  }
   const data = await response.json();
   return data.access_token;
 }
@@ -26,17 +31,22 @@ export async function GET(request) {
 
   const sql = postgres(process.env.POSTGRES_AUCTION_URL, {
     ssl: "require",
+    max: 1, // Recommended for serverless functions
   });
 
   try {
     const accessToken = await getBlizzardToken();
-    // --- THIS IS THE FIX ---
-    // The Blizzard API endpoint for auctions has changed. We now use a simpler URL.
-    // We are targeting a specific connected realm (Proudmoore US, ID 11) as an example.
-    const connectedRealmId = 11;
+    const connectedRealmId = 11; // Example for Proudmoore US
     const namespace = "dynamic-us";
 
-    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
+    // --- THIS IS THE FIX ---
+    // STEP 1: Get the main Auction House ID.
+    // We are targeting the main cross-faction auction house (ID: 2)
+    // Other IDs are 6 (Horde) and 7 (Alliance), but 2 contains everything.
+    const auctionHouseId = 2;
+
+    // STEP 2: Use that ID to fetch the actual auction listings.
+    const apiUrl = `https://us.api.blizzard.com/data/wow/connected-realm/${connectedRealmId}/auctions/${auctionHouseId}?namespace=${namespace}&locale=en_US&access_token=${accessToken}`;
 
     const res = await fetch(apiUrl);
 
@@ -46,6 +56,13 @@ export async function GET(request) {
     }
 
     const { auctions } = await res.json();
+
+    if (!auctions || auctions.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "No auctions found to update.",
+      });
+    }
 
     await sql.begin(async (sql) => {
       await sql`TRUNCATE TABLE auctions`;
