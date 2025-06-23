@@ -12,25 +12,20 @@ export async function GET(request) {
     );
   }
 
-  // Connect to Supabase using the standard 'pg' library
+  // --- THIS IS THE FIX ---
+  // Removing the explicit SSL configuration here as well.
   const pool = new Pool({
     connectionString: process.env.POSTGRES_AUCTION_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
   });
 
-  const client = await pool.connect();
-
+  let client;
   try {
+    client = await pool.connect();
     const { rows } = await client.query(
-      `SELECT 
-         item_id, 
-         MIN(buyout) as min_buyout, 
-         SUM(quantity) as total_quantity 
-       FROM auctions 
-       WHERE item_id::text ILIKE $1 
-       GROUP BY item_id 
+      `SELECT item_id, MIN(buyout) as min_buyout, SUM(quantity) as total_quantity
+       FROM auctions
+       WHERE item_id::text ILIKE $1
+       GROUP BY item_id
        ORDER BY min_buyout ASC`,
       [`%${itemName}%`]
     );
@@ -39,7 +34,7 @@ export async function GET(request) {
     console.error("Search API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    client.release();
+    if (client) client.release();
     await pool.end();
   }
 }

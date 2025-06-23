@@ -6,43 +6,38 @@ async function getBlizzardToken() {
   const credentials = Buffer.from(
     `${process.env.BLIZZARD_CLIENT_ID}:${process.env.BLIZZARD_CLIENT_SECRET}`
   ).toString("base64");
-
   const response = await fetch(
     "https://us.battle.net/oauth/token?grant_type=client_credentials",
     {
       method: "POST",
-      headers: {
-        Authorization: `Basic ${credentials}`,
-      },
+      headers: { Authorization: `Basic ${credentials}` },
     }
   );
-  if (!response.ok) {
-    throw new Error("Failed to get Blizzard token");
-  }
+  if (!response.ok) throw new Error("Failed to get Blizzard token");
   const data = await response.json();
   return data.access_token;
 }
 
 export async function GET(request) {
-  // Secure your cron job
+  // Final check for security header
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // Connect to Supabase using the standard 'pg' library
+  // --- THIS IS THE FIX ---
+  // We are removing the explicit SSL configuration from the code.
+  // The connection string in your Vercel environment variables
+  // (with '?sslmode=require' at the end) will now handle everything.
   const pool = new Pool({
     connectionString: process.env.POSTGRES_AUCTION_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
   });
 
-  const client = await pool.connect();
-
+  let client;
   try {
+    client = await pool.connect();
     const accessToken = await getBlizzardToken();
-    const realmId = 4728; // Example: Proudmoore US.
+    const realmId = 4728; // Proudmoore US
     const namespace = "dynamic-us";
     const locale = "en_US";
 
@@ -51,13 +46,10 @@ export async function GET(request) {
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(
-        `Failed to fetch auction data: ${res.statusText} - ${errorText}`
-      );
+      throw new Error(`Blizzard API Error: ${res.statusText} - ${errorText}`);
     }
 
     const { auctions } = await res.json();
-
     await client.query("BEGIN");
     await client.query("TRUNCATE TABLE auctions");
 
@@ -67,7 +59,7 @@ export async function GET(request) {
       const values = [];
       const queryParams = [];
 
-      batch.forEach((auction, index) => {
+      batch.forEach((auction) => {
         if (auction.buyout) {
           const valueIndex = values.length * 4;
           queryParams.push(
@@ -93,17 +85,16 @@ export async function GET(request) {
     }
 
     await client.query("COMMIT");
-
     return NextResponse.json({
       success: true,
-      message: `Successfully updated ${auctions.length} auctions.`,
+      message: `Updated ${auctions.length} auctions.`,
     });
   } catch (error) {
-    await client.query("ROLLBACK");
     console.error("Cron Job Error:", error);
+    if (client) await client.query("ROLLBACK");
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    client.release();
+    if (client) client.release();
     await pool.end();
   }
 }
