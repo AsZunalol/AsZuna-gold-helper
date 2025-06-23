@@ -190,36 +190,34 @@ export default function TransmogGuide({ guide }) {
       </div>
 
       {/* Footer Section */}
-      <footer className={styles.guideFooterRedesigned}>
-        <div className={styles.footerContent}>
-          <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
-          <div className={styles.authorInfoRedesigned}>
-            <Image
-              src={guide.author?.imageUrl || "/images/default-avatar.png"}
-              alt={guide.author?.username || "Author"}
-              width={50}
-              height={50}
-              className={styles.authorAvatarRedesigned}
-            />
-            <div className={styles.authorNameRedesigned}>
-              <span>By</span>
-              <strong>{guide.author?.username}</strong>
-            </div>
-          </div>
-          <div className={styles.guideMetaRedesigned}>
-            <div>
-              <strong>Category:</strong> {guide.category}
-            </div>
-            <div>
-              <strong>Expansion:</strong> {guide.expansion}
-            </div>
-            <div>
-              <strong>Updated:</strong>{" "}
-              {new Date(guide.updatedAt).toLocaleDateString()}
-            </div>
+      <div className={styles.footerContent}>
+        <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
+        <div className={styles.authorInfoRedesigned}>
+          <Image
+            src={guide.author?.imageUrl || "/images/default-avatar.png"}
+            alt={guide.author?.username || "Author"}
+            width={50}
+            height={50}
+            className={styles.authorAvatarRedesigned}
+          />
+          <div className={styles.authorNameRedesigned}>
+            <span>By</span>
+            <strong>{guide.author?.username}</strong>
           </div>
         </div>
-      </footer>
+        <div className={styles.guideMetaRedesigned}>
+          <div>
+            <strong>Category:</strong> {guide.category}
+          </div>
+          <div>
+            <strong>Expansion:</strong> {guide.expansion}
+          </div>
+          <div>
+            <strong>Updated:</strong>{" "}
+            {new Date(guide.updatedAt).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
 
       {tsmModalOpen && (
         <StringModal

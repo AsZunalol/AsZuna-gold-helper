@@ -17,6 +17,13 @@ const GuideHeader = ({ guide }) => {
     ? guide.tags.split(",").map((tag) => tag.trim())
     : [];
 
+  // Helper to format the GPH string
+  const formatGPH = (gphString) => {
+    if (!gphString) return "N/A";
+    const numericPart = parseInt(gphString.replace(/[^0-9]/g, ""), 10);
+    return isNaN(numericPart) ? "N/A" : `${numericPart.toLocaleString()} GPH`;
+  };
+
   return (
     <div className="relative mb-8 overflow-hidden rounded-lg">
       <Image
@@ -29,17 +36,20 @@ const GuideHeader = ({ guide }) => {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
       <div className="absolute top-4 left-4">
-        <span className="px-3 py-1 text-sm font-bold text-white bg-pink-600 rounded-full">
+        <span className="px-3 py-1 text-sm font-bold text-blue-200 bg-black/30 backdrop-blur-md border border-white/10 rounded-full">
           {guide.category}
         </span>
       </div>
-      <div className="absolute bottom-4 right-4">
-        <span className="px-3 py-1 text-sm font-bold text-black bg-yellow-400 rounded-full">
-          {guide.gold_pr_hour || "N/A"}
+      <div className="absolute top-4 right-4">
+        <span className="px-4 py-2 text-base font-bold text-yellow-400 bg-black/30 backdrop-blur-md border border-white/10 rounded-lg">
+          {formatGPH(guide.gold_pr_hour)}
         </span>
       </div>
-      <div className="absolute bottom-4 left-4 text-white">
-        <h1 className="text-4xl font-black tracking-tight">{guide.title}</h1>
+      {/* ADDED a container with glassy background effect */}
+      <div className="absolute bottom-4 left-4 p-4 bg-black/30 backdrop-blur-md rounded-lg border border-white/10">
+        <h1 className="text-4xl font-black tracking-tight text-white">
+          {guide.title}
+        </h1>
         {expansionInfo && (
           <p
             className="text-lg font-semibold"
@@ -52,7 +62,7 @@ const GuideHeader = ({ guide }) => {
           {allTags.map((tag) => (
             <span
               key={tag}
-              className="px-2 py-1 text-xs font-semibold bg-gray-700 rounded"
+              className="px-2 py-1 text-xs font-semibold text-white bg-gray-700/80 rounded"
             >
               {tag}
             </span>

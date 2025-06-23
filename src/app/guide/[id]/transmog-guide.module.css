@@ -2,7 +2,7 @@
 
 /* The main container with the background for the whole page */
 .guidePageWrapper {
-  background-color: #111827;
+  background-color: #1f2937; /* Changed to a slightly lighter slate-blue */
   padding: 2rem;
   border-radius: 1rem;
   width: 100%;
@@ -55,18 +55,21 @@
 .guideFooterRedesigned {
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--color-border);
 }
 
 /* --- Widget & Content Styling --- */
 .contentBgRedesigned,
 .sidebarWidgetRedesigned,
 .footerContent {
-  background-color: #1f2937;
+  background-color: #111827; /* Darker boxes to contrast with new background */
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.footerContent {
+  margin-top: 3rem;
 }
 
 .widgetTitleRedesigned {
