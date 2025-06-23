@@ -16,6 +16,6 @@ jobs:
       - name: Trigger Auction Update
         # This command makes a secure request to your API route
         run: |
-          curl --request GET \
-          --url '${{ secrets.PRODUCTION_URL }}/api/cron/update-auctions' \
-          --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'
+  curl --request GET --fail -L \
+  --url '${{ secrets.PRODUCTION_URL }}/api/cron/update-auctions' \
+  --header 'Authorization: Bearer ${{ secrets.CRON_SECRET }}'
