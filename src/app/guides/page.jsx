@@ -54,7 +54,8 @@ export default async function GuidesPage({ searchParams }) {
 
     const whereClause = {
       status: "PUBLISHED",
-      ...(type === "transmog" ? { is_transmog: true } : { is_transmog: false }),
+      ...(type === "transmog" ? { is_transmog: true } : {}),
+      ...(type === "gold" ? { is_transmog: false } : {}),
       ...(category ? { category } : {}),
       ...(expansion ? { expansion } : {}),
       ...(search && {
@@ -66,6 +67,8 @@ export default async function GuidesPage({ searchParams }) {
         ],
       }),
     };
+
+    console.log("🧠 WHERE CLAUSE:", JSON.stringify(whereClause));
 
     const guides = await prisma.guide.findMany({
       where: whereClause,
