@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAccessToken } from "@/lib/blizzard/token";
+import { getAccessToken } from "../../../../lib/blizzard/token";
 import { getRealmSlugFromProfile } from "@/lib/blizzard/realm";
 import retry from "@/lib/utils/retry";
 import db from "@/lib/db";
