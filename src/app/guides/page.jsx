@@ -1,5 +1,3 @@
-// src/app/guides/page.jsx
-
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
@@ -12,10 +10,12 @@ import ExpansionFilter from "./ExpansionFilter";
 import SearchFilter from "./SearchFilter";
 import CategoryFilter from "./CategoryFilter";
 import LoadMoreButton from "./LoadMoreButton";
-import { GUIDE_CATEGORIES } from "@/lib/constants"; // Import GUIDE_CATEGORIES directly
-import ClearFiltersButton from "./ClearFiltersButton"; // ADD THIS LINE: Import the ClearFiltersButton component
+import { GUIDE_CATEGORIES } from "@/lib/constants";
+import ClearFiltersButton from "./ClearFiltersButton";
 
-const GUIDES_PER_PAGE = 9; // Define how many guides to load per page
+export const dynamic = "force-dynamic"; // ensures live DB data
+
+const GUIDES_PER_PAGE = 9;
 
 export default async function GuidesPage({ searchParams }) {
   const { category, type, sort, expansion, search, page } = await searchParams;
@@ -23,7 +23,6 @@ export default async function GuidesPage({ searchParams }) {
   const currentPage = parseInt(page || "1", 10);
   const skip = (currentPage - 1) * GUIDES_PER_PAGE;
 
-  // Function to parse gold_pr_hour string into a comparable number
   const parseGoldPerHour = (gphString) => {
     if (!gphString) return 0;
     const numericPart = gphString.replace(/[^0-9.]/g, "");
@@ -44,19 +43,15 @@ export default async function GuidesPage({ searchParams }) {
     if (sort === "title") {
       orderBy = { title: "asc" };
     } else if (sort === "gph_desc") {
-      orderBy = {
-        gold_pr_hour: "desc",
-      };
+      orderBy = { gold_pr_hour: "desc" };
     } else if (sort === "gph_asc") {
-      orderBy = {
-        gold_pr_hour: "asc",
-      };
+      orderBy = { gold_pr_hour: "asc" };
     } else {
       orderBy = { createdAt: "desc" };
     }
 
     const whereClause = {
-      status: "published",
+      status: "PUBLISHED", // 🔧 Fix: must be the string "PUBLISHED"
       ...(type === "transmog" ? { is_transmog: true } : { is_transmog: false }),
       ...(category ? { category } : {}),
       ...(expansion ? { expansion } : {}),
@@ -73,13 +68,11 @@ export default async function GuidesPage({ searchParams }) {
     const guides = await prisma.guide.findMany({
       where: whereClause,
       orderBy,
-      take: take,
-      skip: skip,
+      take,
+      skip,
     });
 
-    const totalGuidesCount = await prisma.guide.count({
-      where: whereClause,
-    });
+    const totalGuidesCount = await prisma.guide.count({ where: whereClause });
 
     if (sort === "gph_desc") {
       guides.sort(
@@ -96,8 +89,6 @@ export default async function GuidesPage({ searchParams }) {
     return { guides, totalGuidesCount };
   }
 
-  // Directly use GUIDE_CATEGORIES from the imported constants
-  // The sorting logic is already handled in src/lib/constants.js
   const availableCategories = GUIDE_CATEGORIES;
 
   const [{ guides, totalGuidesCount }] = await Promise.all([
