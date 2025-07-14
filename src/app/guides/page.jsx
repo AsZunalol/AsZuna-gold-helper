@@ -1,3 +1,5 @@
+// src/app/guides/page.jsx
+
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
@@ -13,7 +15,7 @@ import LoadMoreButton from "./LoadMoreButton";
 import { GUIDE_CATEGORIES } from "@/lib/constants";
 import ClearFiltersButton from "./ClearFiltersButton";
 
-export const dynamic = "force-dynamic"; // ensures live DB data
+export const dynamic = "force-dynamic";
 
 const GUIDES_PER_PAGE = 9;
 
@@ -51,7 +53,7 @@ export default async function GuidesPage({ searchParams }) {
     }
 
     const whereClause = {
-      status: "PUBLISHED", // 🔧 Fix: must be the string "PUBLISHED"
+      status: "PUBLISHED",
       ...(type === "transmog" ? { is_transmog: true } : { is_transmog: false }),
       ...(category ? { category } : {}),
       ...(expansion ? { expansion } : {}),
@@ -72,7 +74,16 @@ export default async function GuidesPage({ searchParams }) {
       skip,
     });
 
-    const totalGuidesCount = await prisma.guide.count({ where: whereClause });
+    const totalGuidesCount = await prisma.guide.count({
+      where: whereClause,
+    });
+
+    console.log("📦 PUBLIC GUIDES PAGE fetched:", guides.length, "guides");
+    if (guides.length === 0) {
+      console.warn("⚠️ No published guides returned");
+    } else {
+      guides.forEach((g) => console.log(`→ ${g.title} [${g.status}]`));
+    }
 
     if (sort === "gph_desc") {
       guides.sort(
