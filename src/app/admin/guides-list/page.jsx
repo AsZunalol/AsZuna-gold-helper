@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma";
 import ClientGuidesList from "./ClientGuidesList";
 
+export const dynamic = "force-dynamic"; // disables caching
+
 async function getGuides() {
   try {
     const guides = await prisma.guide.findMany({
