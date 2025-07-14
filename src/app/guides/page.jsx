@@ -58,14 +58,15 @@ export default async function GuidesPage({ searchParams }) {
       ...(type === "gold" ? { is_transmog: false } : {}),
       ...(category ? { category } : {}),
       ...(expansion ? { expansion } : {}),
-      ...(search && {
-        OR: [
-          { title: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
-          { tags: { contains: search, mode: "insensitive" } },
-          { category: { contains: search, mode: "insensitive" } },
-        ],
-      }),
+      ...(search &&
+        search.trim() !== "" && {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { tags: { contains: search, mode: "insensitive" } },
+            { category: { contains: search, mode: "insensitive" } },
+          ],
+        }),
     };
 
     console.log("🧠 WHERE CLAUSE:", JSON.stringify(whereClause));
