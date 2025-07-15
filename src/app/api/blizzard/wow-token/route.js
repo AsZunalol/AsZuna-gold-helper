@@ -101,6 +101,23 @@ export async function GET() {
   try {
     // A single token is valid for all regions. We'll get a US token to use for all requests.
     const accessToken = await getAccessToken("us");
+    
+    // If no access token (missing credentials), return mock data
+    if (!accessToken) {
+      console.warn("[WoW Token] No access token available, returning mock data");
+      return NextResponse.json({
+        us: {
+          price: 0,
+          trend: "stable",
+          history: { avg: 0, high: 0, low: 0 }
+        },
+        eu: {
+          price: 0,
+          trend: "stable", 
+          history: { avg: 0, high: 0, low: 0 }
+        }
+      });
+    }
 
     const [usData, euData] = await Promise.all([
       getTokenDataForRegion("us", accessToken),

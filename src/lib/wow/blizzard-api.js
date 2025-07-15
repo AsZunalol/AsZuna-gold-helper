@@ -5,6 +5,11 @@ import { NextResponse } from "next/server";
 const CLIENT_ID = process.env.BLIZZARD_CLIENT_ID;
 const CLIENT_SECRET = process.env.BLIZZARD_CLIENT_SECRET;
 
+// Validate credentials are available
+if (!CLIENT_ID || !CLIENT_SECRET) {
+  console.warn("[Blizzard API] Missing credentials. Set BLIZZARD_CLIENT_ID and BLIZZARD_CLIENT_SECRET in .env.local");
+}
+
 const REGION_HOSTS = {
   us: "us.api.blizzard.com",
   eu: "eu.api.blizzard.com",
@@ -25,6 +30,12 @@ const BLIZZARD_LOCALE = "en_US";
 const cache = new Map();
 
 export async function getAccessToken(region = "us") {
+  // Return null if credentials are missing
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.warn("[Blizzard API] Cannot get access token: missing credentials");
+    return null;
+  }
+
   const cacheKey = `blizzard_access_token:${region}`;
   const cached = cache.get(cacheKey);
 

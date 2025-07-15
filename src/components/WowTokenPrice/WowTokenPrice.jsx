@@ -69,7 +69,12 @@ export default function WowTokenPrice() {
         const data = await response.json();
         setPrices(data);
       } catch (error) {
-        console.error(error);
+        console.warn("WoW Token prices unavailable:", error.message);
+        // Set fallback data instead of leaving prices null
+        setPrices({
+          us: { price: 0, trend: "stable", history: { avg: 0, high: 0, low: 0 } },
+          eu: { price: 0, trend: "stable", history: { avg: 0, high: 0, low: 0 } }
+        });
       } finally {
         setLoading(false);
       }
