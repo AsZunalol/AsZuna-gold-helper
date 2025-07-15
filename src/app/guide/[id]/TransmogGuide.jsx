@@ -4,7 +4,7 @@
 
 import Image from "next/image";
 import ItemPrices from "@/components/ItemPrices/ItemPrices";
-import { Suspense, useState, useRef, useEffect } from "react";
+import { Suspense, useState, useRef } from "react";
 import { useSession } from "next-auth/react"; // Import useSession hook
 import Spinner from "@/components/ui/spinner";
 import { ClipboardCopy, Check, Eye } from "lucide-react";
@@ -72,10 +72,9 @@ const StringModal = ({ title, stringValue, onClose }) => {
 };
 
 export default function TransmogGuide({ guide }) {
-  const { data: session } = useSession();
+  const { data: session } = useSession(); // Get the session data
   const [tsmModalOpen, setTsmModalOpen] = useState(false);
   const [macroModalOpen, setMacroModalOpen] = useState(false);
-  const [itemsWithPrices, setItemsWithPrices] = useState([]);
 
   const parseJsonField = (fieldValue, defaultValue = []) => {
     if (typeof fieldValue === "string") {
@@ -92,37 +91,10 @@ export default function TransmogGuide({ guide }) {
   const itemsOfNote = parseJsonField(guide.items_of_note);
   const recommendedAddons = parseJsonField(guide.recommended_addons);
 
-  useEffect(() => {
-    async function fetchPrices() {
-      const enriched = await Promise.all(
-        itemsOfNote.map(async (item) => {
-          try {
-            const res = await fetch(
-              `/api/blizzard/item-price?itemId=${item.id}&region=eu&realmSlug=${session?.user?.realm}`
-            );
-            const data = await res.json();
-            return {
-              ...item,
-              serverPrice: data.serverPrice || null,
-              regionalAveragePrice: data.regionalAveragePrice || null,
-            };
-          } catch (err) {
-            console.error("Failed to fetch item price:", item.id, err);
-            return item;
-          }
-        })
-      );
-      setItemsWithPrices(enriched);
-    }
-
-    if (itemsOfNote.length > 0 && session?.user?.realm) {
-      fetchPrices();
-    }
-  }, [itemsOfNote, session?.user?.realm]);
-
   return (
     <div className={styles.guidePageWrapper}>
       <div className={styles.guideLayoutGrid}>
+        {/* Main Content (Grid Item 1) */}
         <div className={styles.mainContentRedesigned}>
           <div className={styles.contentBgRedesigned}>
             <div
@@ -143,15 +115,19 @@ export default function TransmogGuide({ guide }) {
           )}
         </div>
 
+        {/* Sidebar (Grid Item 2) */}
         <div className={styles.sidebarRedesigned}>
-          {itemsWithPrices.length > 0 && (
+          {itemsOfNote && itemsOfNote.length > 0 && (
             <div className={styles.sidebarWidgetRedesigned}>
               <h2 className={styles.widgetTitleRedesigned}>Items of Note</h2>
-              <Suspense fallback={<Spinner />}>
-                <ItemPrices
-                  items={itemsWithPrices}
-                  realm={session?.user?.realm}
-                />
+              <Suspense
+                fallback={
+                  <div className="flex justify-center">
+                    <Spinner />
+                  </div>
+                }
+              >
+                <ItemPrices items={itemsOfNote} realm={session?.user?.realm} />
               </Suspense>
             </div>
           )}
@@ -216,6 +192,7 @@ export default function TransmogGuide({ guide }) {
         </div>
       </div>
 
+      {/* Footer Section */}
       <div className={styles.footerContent}>
         <h2 className={styles.widgetTitleRedesigned}>Guide Details</h2>
         <div className={styles.authorInfoRedesigned}>
