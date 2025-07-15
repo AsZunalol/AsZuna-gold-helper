@@ -1,6 +1,6 @@
 // src/app/api/auth/register/route.js
 import prisma from "@/lib/prisma"; // Use the shared prisma instance
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { PROFILE_IMAGES } from "@/lib/constants";
 
